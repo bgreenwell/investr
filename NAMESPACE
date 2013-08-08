@@ -19,6 +19,8 @@ S3method(invest, nls)
 S3method(plotFit, lm)    
 S3method(plotFit, nls) 
 
+S3method(print, calibrate)
+
 
 
 
