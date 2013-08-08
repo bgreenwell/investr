@@ -1,1 +1,24 @@
-exportPattern("^[[:alpha:]]+")
+
+export(
+  calibrate,
+  invest,
+  plotFit
+)    
+
+## Methods
+S3method(calibrate, default)    
+S3method(calibrate, matrix)    
+S3method(calibrate, data.frame)
+S3method(calibrate, list)
+S3method(calibrate, formula)
+S3method(calibrate, lm)    
+
+S3method(invest, lm)    
+S3method(invest, nls)    
+
+S3method(plotFit, lm)    
+S3method(plotFit, nls) 
+
+
+
+
