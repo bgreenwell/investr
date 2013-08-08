@@ -1,0 +1,11 @@
+Package: investr
+Type: Package
+Title: Inverse estimation for linear and nonlinear regression models in R.
+Suggests: boot, car, RColorBrewer
+Version: 1.0
+Date: 2013-08-07
+Author: Brandon M. Greenwell
+Maintainer: Brandon M. Greenwell <brandon.greenwell@afit.edu>
+Description: This package provides some functions for inverse estimation with linear and nonlinear regression models in R.
+License: GPL (>= 2)
+LazyLoad: yes

@@ -1,0 +1,10 @@
+bibentry("Manual",
+   title = "invest: Inverse Estimation in R",
+   author = person(c("Brandon", "M."), "Greenwell"),
+   year   = "2013",
+   note   = "R package version 1.3-4",
+   url    = "https://github.com/w108bmg/investr",
+   key = "investr-package",
+
+   mheader = "To cite invest in publications use:"
+)

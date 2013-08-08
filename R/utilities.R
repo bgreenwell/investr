@@ -1,0 +1,618 @@
+#' Predict method for (Single-Regressor) Linear and Nonlinear Model Fits
+#'
+#' Convenience function for use with \code{plotFit} only.
+#' 
+#' @rdname predict2
+#' @keywords internal
+predict2 <- function(x, ...) {
+  if (is.null(class(x))) class(x) <- data.class(x)
+  UseMethod("predict2")
+} 
+
+#' @rdname predict2
+#' @keywords internal
+predict2.lm <- function(object, newdata, 
+                        interval = c("none", "confidence", "prediction"), 
+                        level = 0.95, 
+                        adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, 
+                        ...) {
+  
+  ## Extract data, variables, etc.
+  if (missing(newdata)) {
+    d <- eval(object$call$data, sys.frame())
+    if (!is.null(object$call$subset)) {
+      dsub <- with(d, eval(object$call$subset))
+      d <- d[dsub, ]
+    }
+  } else {
+    d <- as.data.frame(newdata) 
+  }
+  yvar <- all.vars(formula(object)[[2]])
+  xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  xx <- list(d[[ xvar ]])
+  names(xx) <- xvar
+  alpha <- 1 - level
+  n <- length(resid(object))
+  p <- length(coef(object))
+  alpha <- 1 - level
+  
+  ## FIXME: Why does this throw a warning?
+  pred <- suppressWarnings(predict(object, newdata = xx, se.fit = TRUE))
+
+  ## Compute results
+  interval <- match.arg(interval)
+  if (interval == "none") {
+    
+    ## Store results in a list
+    res <- pred
+  
+  } else { 
+    
+    # Adjustment for simultaneous inference
+    adjust <- match.arg(adjust)
+    w <- if (adjust == "Bonferroni") {
+           qt(1 - alpha/(2*k), pred$df)
+         } else if (adjust == "Scheffe") {
+           sqrt(k*qf(1 - alpha, k, pred$df))      
+         } else if (adjust == "W-H") {      
+           sqrt(2*qf(1 - alpha, 2, pred$df))      
+         } else {      
+           qt(1 - alpha/2, pred$df)      
+         }
+    
+    ## Confidence interval for mean response
+    if (interval == "confidence") {
+
+        lwr <- pred$fit - w * pred$se.fit
+        upr <- pred$fit + w * pred$se.fit
+    
+    ## Prediction interval for individual response
+    } else {
+      
+      lwr <- pred$fit - w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+      upr <- pred$fit + w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+
+    }
+    
+    ## Store results in a list
+    res <- list(fit = as.numeric(pred$fit), 
+                lwr = as.numeric(lwr), 
+                upr = as.numeric(upr))
+  }
+    
+  ## Return list of results
+  return(res)
+  
+}
+
+#' @rdname predict2
+#' @keywords internal
+predict2.nls <- function(object, newdata, 
+                         interval = c("none", "confidence", "prediction"), 
+                         level = 0.95, 
+                         adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, 
+                         ...) {
+  
+  ## Extract data, variables, etc.
+  if (missing(newdata)) {
+    d <- eval(object$call$data, sys.frame())
+    if (!is.null(object$call$subset)) {
+      dsub <- with(d, eval(object$call$subset))
+      d <- d[dsub, ]
+    }
+  } else {
+    d <- as.data.frame(newdata) 
+  }
+  yvar <- all.vars(formula(object)[[2]])
+  xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  xx <- d[[xvar]]
+  alpha <- 1 - level
+  n <- length(resid(object))
+  p <- length(coef(object))
+  alpha <- 1 - level
+  
+  ## Stop if object$call$algorithm == "plinear"
+  if (object$call$algorithm == "plinear") {
+    stop(paste("predict2.nls not yet implemented for 'nls' objects fit with the 
+                plinear algorithm"))
+  }
+  
+  ## Compute gradient
+  param.names <- names(coef(object)) 
+  for (i in 1:length(param.names)) { 
+    assign(param.names[i], coef(object)[i]) 
+  }
+  assign(xvar, d[, xvar])
+  form <- object$m$formula()
+  rhs <- eval(form[[3]])
+  if (is.null(attr(rhs, "gradient"))) {
+    f0 <- attr(numericDeriv(form[[3]], param.names), "gradient")
+  } else {
+    f0 <- attr(rhs, "gradient")
+  }
+  
+  ## Compute standard error of fitted values
+  R1 <- object$m$Rmat()
+  v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
+  se.fit <- sqrt(summary(object)$sigma^2 * v0)
+  pred <- list(fit = object$m$predict(d), 
+               se.fit = se.fit)  
+
+  ## Compute results
+  interval <- match.arg(interval)
+  if (interval == "none") {
+    
+    ## Store results in a list
+    res <- pred
+                
+  } else { 
+    
+    # Adjustment for simultaneous inference
+    adjust <- match.arg(adjust)
+    w <- if (adjust == "Bonferroni") {
+      qt(1 - alpha/(2*k), df.residual(object))
+    } else if (adjust == "Scheffe") {
+      sqrt(k * qf(1 - alpha, k, df.residual(object)))      
+    } else if (adjust == "W-H") {      
+      sqrt(p * qf(1 - alpha, p, df.residual(object)))      
+    } else {      
+      qt(1 - alpha/2, df.residual(object))      
+    }
+    
+    ## Confidence interval for mean response
+    if (interval == "confidence") {
+      
+      lwr <- pred$fit - w * pred$se.fit
+      upr <- pred$fit + w * pred$se.fit
+      
+      ## Prediction interval for individual response
+    } else {
+      
+      lwr <- pred$fit - w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+      upr <- pred$fit + w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+      
+    }
+    
+    ## Store results in a list
+    res <- list(fit = as.numeric(pred$fit), 
+                lwr = as.numeric(lwr), 
+                upr = as.numeric(upr),
+                se.fit = as.numeric(se.fit))
+  }
+  
+  ## Return list of results
+  return(res)
+  
+}
+
+#' Plotting Confidence/Prediction Bands
+#' 
+#' Plots fitted model (with confidence and/or prediction bands) for object of 
+#' class \code{lm} or \code{nls}.
+#'
+#' @param object An object that inherits from class \code{lm}.
+#' @param newdata A named list or data frame in which to look for variables with 
+#'   which to plot the inference band at. If \code{newdata} is missing the 
+#'   inference band is plotted over the original data points. At present this
+#'   argument is ignored.
+#' @param interval A character string indicating if a prediction brand, 
+#'   confidence band, or both should be plotted.
+#' @param level A numeric scalar between 0 and 1 giving the confidence level for 
+#'   the bands to be plotted.
+#' @param shade A logical value indicating if the band should be shaded.
+#' @param col.conf Shade color for confidence band.
+#' @param col.pred Shade color for prediction band.
+#' @param col.fit The color to use for the fitted line. The default, 
+#'   \code{NULL}, means to use \code{\link{par}("fg")}
+#' @param border.conf The color to use for the confidence band border. The 
+#'   default, \code{NULL}, means to use \code{\link{par}("fg")}. Use 
+#'   \code{border = NA} to omit borders.
+#' @param border.pred The color to use for the prediction band border. The 
+#'   default, \code{NULL}, means to use \code{\link{par}("fg")}. Use 
+#'   \code{border = NA} to omit borders.
+#' @param lty.conf Line type to use for confidence band border.
+#' @param lty.pred Line type to use for prediction band border.
+#' @param lwd.conf Line width to use for confidence band border.
+#' @param lwd.pred Line width to use for prediction band border.
+#' @param n The number of predictor values at which to compute the inference 
+#'   band(s).
+#' @param xlab A title for the x axis: see \link{title}.
+#' @param ylab A title for the y axis: see \link{title}.
+#' @param xlim The x limits (x1, x2) of the plot. Note that x1 > x2 is allowed 
+#'   and leads to a ‘reversed axis’.
+#' @param hide A logical value indicating if the inference band should be 
+#'   plotted on top of (FALSE) or behind (TRUE) the points. Default is TRUE.
+#' @param ... Additional optional arguments.
+#' @rdname plotFit
+#' @export
+#' @examples
+#' \donttest{
+#' ## A linear regression example
+#' data(cars, package = "datasets")
+#' library(splines)
+#' cars.lm1 <- lm(dist ~ speed, data = cars)
+#' cars.lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
+#' cars.lm3 <- lm(dist ~ speed + I(speed^2) + I(speed^3), data = cars)
+#' cars.lm4 <- lm(dist ~ ns(speed, df = 3), data = cars)
+#' par(mfrow = c(2, 2))
+#' plotFit(cars.lm1, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+#'         main = "linear")
+#' plotFit(cars.lm2, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+#'         main = "quadratic")
+#' plotFit(cars.lm3, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+#'         main = "cubic")
+#' plotFit(cars.lm4, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+#'         main = "cubic spline")
+#'   
+#' ## A nonlinear regression example
+#' par(mfrow = c(1, 1))
+#' library(RColorBrewer)
+#' blues <- brewer.pal(9, "Blues")
+#' data(Puromycin, package = "datasets")
+#' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
+#' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
+#'                 start = c(Vm = 200, K = 0.05))
+#' plotFit(Puro.nls, interval = "both", pch = 19, col.conf = blues[4], 
+#'         col.pred = blues[2])
+#' }     
+plotFit <- function(x, ...) {
+  if (is.null(class(x))) class(x) <- data.class(x)
+  UseMethod("plotFit")
+} 
+
+#' @rdname plotFit
+#' @export
+#' @method plotFit lm
+plotFit.lm <- function(object,  
+  interval = c("none", "both", "confidence", "prediction"), level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, ...,
+  shade = FALSE, extend.range = FALSE, hide = TRUE,
+  col.conf = if (shade) grey(0.7) else "black", 
+  col.pred = if (shade) grey(0.9) else "black",  
+  border.conf = col.conf, border.pred = col.pred, col.fit = "black", 
+  lty.conf = if (shade) 1 else 2, lty.pred = if (shade) 1 else 3, lty.fit = 1, 
+  lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim = NULL)
+{
+
+  ## Extract data, variable names, etc.
+  d <- eval(object$call$data, sys.frame())
+  yvar <- all.vars(formula(object)[[2]])
+  xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  if (length(xvar) != 1) {
+    stop("only a single predictor is allowed")
+  }
+  if (missing(xlim)) {
+    xlim <- c(min(d[, xvar]), max(d[, xvar]))
+  }
+  xx <- if (extend.range) {
+    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+             length = n))
+  } else {
+    list(seq(from = xlim[1], to = xlim[2], length = n))
+  }
+  names(xx) <- xvar
+  if (missing(xlab)) xlab <- xvar
+  if (missing(ylab)) ylab <- yvar
+  interval = match.arg(interval)
+  adjust <- match.arg(adjust)
+  alpha <- 1 - level
+  
+  ## Confidence interval for mean response
+  if (interval == "confidence" || interval == "both") {
+    conf <- predict2(object, newdata = xx, interval = "confidence", 
+                     adjust = adjust, k = k)
+    conf.lwr <- conf$lwr
+    conf.upr <- conf$upr
+    conf.ymin <- min(conf.lwr)
+    conf.ymax <- max(conf.upr)
+  }
+  
+  ## Prediction interval for individual response
+  if (interval == "prediction" || interval == "both") {
+    pred <- predict2(object, newdata = xx, interval = "prediction", 
+                     adjust = adjust, k = k)
+    pred.lwr <- pred$lwr
+    pred.upr <- pred$upr
+    pred.ymin <- min(pred.lwr)
+    pred.ymax <- max(pred.upr)
+  }
+  
+  ## Automatic limits for y-axis
+  ylim <- if(interval == "prediction" || interval == "both") {
+            c(min(c(pred.ymin, d[, yvar])), max(c(pred.ymax, d[, yvar])))
+          } else if (interval == "confidence") {
+            c(min(c(conf.ymin, d[, yvar])), max(c(conf.ymax, d[, yvar])))
+          } else ylim
+  
+  ## Plot data, fit, etc.
+  if (hide) { ## Draw band behind points
+    
+    plot(d[, c(xvar, yvar)], xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+         
+      panel.first = {
+        
+        if (shade) {
+          
+          ## Draw (hidden) shaded prediction band
+          if (interval == "prediction" || interval == "both") {
+            polygon(c(xx[[1]], rev(xx[[1]])), c(pred.lwr, rev(pred.upr)), 
+                    col = col.pred, border = border.pred, lty = lty.pred, 
+                    lwd = lwd.pred)
+          }
+          
+          ## Draw (hidden) shaded confidence band
+          if (interval == "confidence" || interval == "both") {
+            polygon(c(xx[[1]], rev(xx[[1]])), c(conf.lwr, rev(conf.upr)), 
+                    col = col.conf, border = border.conf, lty = lty.conf, 
+                    lwd = lwd.conf)
+          }
+          
+        } else {
+          
+          ## Draw (hidden) unshaded prediction band
+          if (interval == "prediction" || interval == "both") {
+            lines(xx[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+                  lwd = lwd.pred)
+            lines(xx[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+                  lwd = lwd.pred)
+          }
+          
+          ## Draw (hidden) unshaded confidence band
+          if (interval == "confidence" || interval == "both") {
+            lines(xx[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+                  lwd = lwd.conf)
+            lines(xx[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+                  lwd = lwd.conf)
+          }
+          
+        }
+        
+        ## Draw (hidden) fitted response curve
+        lines(xx[[1]], suppressWarnings(predict(object, newdata = xx)), 
+              lty = lty.fit, lwd = lwd.fit, col = col.fit)
+        
+        }, ...)
+    
+  } else { ## Draw band on top of points
+    
+    plot(d[, c(xvar, yvar)], xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+         
+      panel.last = {
+        
+        if (shade) {
+          
+          ## Draw shaded prediction band
+          if (interval == "prediction" || interval == "both") {
+            polygon(c(xx[[1]], rev(xx[[1]])), c(pred.lwr, rev(pred.upr)), 
+                    col = col.pred, border = border.pred, 
+                    lty = lty.pred, lwd = lwd.pred)
+          }
+          
+          ## Draw shaded confidence band
+          if (interval == "confidence" || interval == "both") {
+            polygon(c(xx[[1]], rev(xx[[1]])), c(conf.lwr, rev(conf.upr)), 
+                    col = col.conf, border = border.conf, 
+                    lty = lty.conf, lwd = lwd.conf)
+          }
+          
+        } else {
+          
+          ## Draw unshaded prediction band
+          if (interval == "prediction" || interval == "both") {
+            lines(xx[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+                  lwd = lwd.pred)
+            lines(xx[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+                 lwd = lwd.pred)
+          }
+          
+          ## Draw unshaded confidence band
+          if (interval == "confidence" || interval == "both") {
+            lines(xx[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+                  lwd = lwd.conf)
+            lines(xx[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+                  lwd = lwd.conf)
+          }
+          
+        }
+        
+        ## Draw fitted response curve
+        lines(xx[[1]], suppressWarnings(predict(object, newdata = xx)), 
+              lty = lty.fit, lwd = lwd.fit, col = col.fit)
+        
+      }, ...)
+    
+  }
+  
+}
+
+#' @rdname plotFit
+#' @export
+#' @method plotFit nls
+plotFit.nls <- function(object, 
+  interval = c("none", "both", "confidence", "prediction"), level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, ..., 
+  shade = FALSE, extend.range = FALSE, hide = TRUE,
+  col.conf = if (shade) grey(0.7) else "black", 
+  col.pred = if (shade) grey(0.9) else "black",  
+  border.conf = col.conf, border.pred = col.pred, col.fit = "black", 
+  lty.conf = if (shade) 1 else 2, lty.pred = if (shade) 1 else 3, lty.fit = 1, 
+  lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim = NULL)
+{
+  
+  ## Extract data, variable names, etc.
+  d <- eval(object$call$data, sys.frame())
+  yvar <- all.vars(formula(object)[[2]])
+  xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  if (length(xvar) != 1) {
+    stop("only a single predictor is allowed")
+  }
+  if (missing(xlim)) {
+    xlim <- c(min(d[, xvar]), max(d[, xvar]))
+  }
+  xx <- if (extend.range) {
+    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+             length = n))
+  } else {
+    list(seq(from = xlim[1], to = xlim[2], length = n))
+  }
+  names(xx) <- xvar
+  if (missing(xlab)) xlab <- xvar
+  if (missing(ylab)) ylab <- yvar
+  interval = match.arg(interval)
+  adjust <- match.arg(adjust)
+  alpha <- 1 - level
+
+  ## Confidence interval for mean response
+  if (interval == "confidence" || interval == "both") {
+    conf <- predict2(object, newdata = xx, interval = "confidence", 
+                     adjust = adjust, k = k)
+    conf.lwr <- conf$lwr
+    conf.upr <- conf$upr
+    conf.ymin <- min(conf.lwr)
+    conf.ymax <- max(conf.upr)
+  }
+
+  ## Prediction interval for individual response
+  if (interval == "prediction" || interval == "both") {
+    pred <- predict2(object, newdata = xx, interval = "prediction", 
+                     adjust = adjust, k = k)
+    pred.lwr <- pred$lwr
+    pred.upr <- pred$upr
+    pred.ymin <- min(pred.lwr)
+    pred.ymax <- max(pred.upr)
+  }
+  
+  ## Automatic limits for y-axis
+  ylim <- if(interval == "prediction" || interval == "both") {
+    c(min(c(pred.ymin, d[, yvar])), max(c(pred.ymax, d[, yvar])))
+  } else if (interval == "confidence") {
+    c(min(c(conf.ymin, d[, yvar])), max(c(conf.ymax, d[, yvar])))
+  } else ylim
+
+  ## Plot data, fit, etc.
+  if (hide) { ## Draw band behind points
+    
+    plot(d[, c(xvar, yvar)], xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+         
+         panel.first = {
+           
+           if (shade) {
+             
+             ## Draw (hidden) shaded prediction band
+             if (interval == "prediction" || interval == "both") {
+               polygon(c(xx[[1]], rev(xx[[1]])), c(pred.lwr, rev(pred.upr)), 
+                       col = col.pred, border = border.pred, lty = lty.pred, 
+                       lwd = lwd.pred)
+             }
+             
+             ## Draw (hidden) shaded confidence band
+             if (interval == "confidence" || interval == "both") {
+               polygon(c(xx[[1]], rev(xx[[1]])), c(conf.lwr, rev(conf.upr)), 
+                       col = col.conf, border = border.conf, lty = lty.conf, 
+                       lwd = lwd.conf)
+             }
+             
+           } else {
+             
+             ## Draw (hidden) unshaded prediction band
+             if (interval == "prediction" || interval == "both") {
+               lines(xx[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+                     lwd = lwd.pred)
+               lines(xx[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+                     lwd = lwd.pred)
+             }
+             
+             ## Draw (hidden) unshaded confidence band
+             if (interval == "confidence" || interval == "both") {
+               lines(xx[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+                     lwd = lwd.conf)
+               lines(xx[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+                     lwd = lwd.conf)
+             }
+             
+           }
+           
+           ## Draw (hidden) fitted response curve
+           lines(xx[[1]], suppressWarnings(predict(object, newdata = xx)), 
+                 lty = lty.fit, lwd = lwd.fit, col = col.fit)
+           
+         }, ...)
+    
+  } else { ## Draw band on top of points
+    
+    plot(d[, c(xvar, yvar)], xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+         
+         panel.last = {
+           
+           if (shade) {
+             
+             ## Draw shaded prediction band
+             if (interval == "prediction" || interval == "both") {
+               polygon(c(xx[[1]], rev(xx[[1]])), c(pred.lwr, rev(pred.upr)), 
+                       col = col.pred, border = border.pred, 
+                       lty = lty.pred, lwd = lwd.pred)
+             }
+             
+             ## Draw shaded confidence band
+             if (interval == "confidence" || interval == "both") {
+               polygon(c(xx[[1]], rev(xx[[1]])), c(conf.lwr, rev(conf.upr)), 
+                       col = col.conf, border = border.conf, 
+                       lty = lty.conf, lwd = lwd.conf)
+             }
+             
+           } else {
+             
+             ## Draw unshaded prediction band
+             if (interval == "prediction" || interval == "both") {
+               lines(xx[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+                     lwd = lwd.pred)
+               lines(xx[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+                     lwd = lwd.pred)
+             }
+             
+             ## Draw unshaded confidence band
+             if (interval == "confidence" || interval == "both") {
+               lines(xx[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+                     lwd = lwd.conf)
+               lines(xx[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+                     lwd = lwd.conf)
+             }
+             
+           }
+           
+           ## Draw fitted response curve
+           lines(xx[[1]], suppressWarnings(predict(object, newdata = xx)), 
+                 lty = lty.fit, lwd = lwd.fit, col = col.fit)
+           
+         }, ...)
+    
+  }
+
+}
+
+#' @title Crystal weight data.
+#' @description The data give the growing time and final weight of crystals.
+#' \itemize{
+#'   \item time time taken to grow (hours)  
+#'   \item weight final weight of the crystal (grams) 
+#' }
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 14 rows and 2 variables
+#' @name crystal  
+#' @references \url{http://www.stat.colostate.edu/~hari/regression_book/index.html}                       
+NULL
+
+#' @title Concentrations of arsenic in water samples.
+#' @description The data give the actual and measures concentration of arsenic
+#'   present in water samples.
+#' \itemize{
+#'   \item actual True amount of arsenic present
+#'   \item measured Measured amount of arsenic present 
+#' }
+#' @docType data
+#' @keywords datasets
+#' @format A data frame with 32 rows and 2 variables
+#' @name arsenic  
+#' @references \url{http://www.stat.colostate.edu/~hari/regression_book/index.html}
+NULL 
