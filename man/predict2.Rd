@@ -19,7 +19,8 @@
     ...)
 }
 \description{
-  Convenience function for use with \code{plotFit} only.
+  Convenience function to be called by \code{plotFit}. It
+  is not for routine use.
 }
 \keyword{internal}
 

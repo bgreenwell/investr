@@ -2,7 +2,7 @@
 \alias{invest}
 \alias{invest.lm}
 \alias{invest.nls}
-\title{Calibration for linear and nonlinear regression.}
+\title{Calibration for Linear and Nonlinear Regression Models.}
 \usage{
   invest(x, ...)
 
@@ -19,8 +19,8 @@
     adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
 }
 \arguments{
-  \item{object}{An appropriate object of class \code{lm} or
-  \code{nls}.}
+  \item{object}{An object that inherits from class
+  \code{lm} or \code{nls}.}
 
   \item{y0}{The value of the observed response(s) or
   specified value of the mean response.}
@@ -56,21 +56,25 @@
   used for computing a confidence interval. Only needed
   when \code{adjust = TRUE}.}
 
-  \item{...}{Additional optional arguments. At present no
+  \item{...}{Additional optional arguments. At present, no
   optional arguments are used.}
 }
 \value{
   An object of class \code{calibrate} containing the
-  following components: \item{estimate}{The estimate of
-  x0.} \item{lwr}{The lower confidence bound on x0.}
-  \item{upr}{The upper confidence bound on x0.}
+  following components: \itemize{ \item{estimate}{The
+  estimate of x0.} \item{lwr}{The lower confidence bound on
+  x0.} \item{upr}{The upper confidence bound on x0.}
   \item{se}{An estimate of the standard error (Wald
   interval only).} \item{interval}{The method used for
-  calculating \code{lower} and \code{upper}.}
+  calculating \code{lower} and \code{upper}.} }
 }
 \description{
-  A general function for calibration with linear and
-  nonlinear regression models in R.
+  The function \code{invest} computes the inverse estimate
+  and a condfidence interval for the unknown predictor
+  value that corresponds to an observed value of the
+  response (or vector thereof) or specified value of the
+  mean response. See the references listed below for more
+  details.
 }
 \examples{
 data(Puromycin, package = "datasets")
@@ -82,11 +86,13 @@ invest(Puro2.nls, y0 = 100, interval = "inversion")
 invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
 }
 \references{
-  Huet et. al. (20??). ????
-}
-\seealso{
-  The function \code{\link{calibrate}} for simple linear
-  regression models and the function \code{\link{dose.p}}
-  in the \code{MASS} package for calibrating bioassays.
+  Graybill, F. A., and Iyer, H. K. Regression analysis:
+  Concepts and Applications. Belmont, Calif: Duxbury Press,
+  1994.
+
+  Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.
+  Statistical Tools for Nonlinear Regression: A Practical
+  Guide with S-PLUS and R Examples. New York: Springer,
+  2004.
 }
 

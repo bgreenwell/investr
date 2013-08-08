@@ -1,6 +1,7 @@
 #' Predict method for (Single-Regressor) Linear and Nonlinear Model Fits
 #'
-#' Convenience function for use with \code{plotFit} only.
+#' Convenience function to be called by \code{plotFit}. It is not for routine 
+#' use.
 #' 
 #' @rdname predict2
 #' @keywords internal
@@ -187,42 +188,43 @@ predict2.nls <- function(object, newdata,
 
 #' Plotting Confidence/Prediction Bands
 #' 
-#' Plots fitted model (with confidence and/or prediction bands) for object of 
-#' class \code{lm} or \code{nls}.
+#' Plots fitted model for an object of class \code{lm} or \code{nls}vwith the 
+#' option of adding a confidence and/or prediction band. 
 #'
-#' @param object An object that inherits from class \code{lm}.
-#' @param newdata A named list or data frame in which to look for variables with 
-#'   which to plot the inference band at. If \code{newdata} is missing the 
-#'   inference band is plotted over the original data points. At present this
-#'   argument is ignored.
-#' @param interval A character string indicating if a prediction brand, 
-#'   confidence band, or both should be plotted.
-#' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'   the bands to be plotted.
+#' @param object An object that inherits from class \code{lm} or \code{nls}.
+#' @param interval A character string indicating if a prediction band, 
+#'   confidence band, both, or none should be plotted.
+#' @param level The desired confidence level.
+#' @param adjust A character string indicating the type of adjustment (if any) 
+#' to make to the confidence/prediction bands.
+#' @param k An integer to be used in computing the critical value for the 
+#' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
+#' \code{adjust = "Scheffe"}.
 #' @param shade A logical value indicating if the band should be shaded.
+#' @param extend.range A logical value indicating if the fitted regression line
+#' and bands (if any) should extend to the edges of the plot. Default is 
+#' \code{FALSE}.
 #' @param col.conf Shade color for confidence band.
 #' @param col.pred Shade color for prediction band.
-#' @param col.fit The color to use for the fitted line. The default, 
-#'   \code{NULL}, means to use \code{\link{par}("fg")}
-#' @param border.conf The color to use for the confidence band border. The 
-#'   default, \code{NULL}, means to use \code{\link{par}("fg")}. Use 
-#'   \code{border = NA} to omit borders.
-#' @param border.pred The color to use for the prediction band border. The 
-#'   default, \code{NULL}, means to use \code{\link{par}("fg")}. Use 
-#'   \code{border = NA} to omit borders.
+#' @param col.fit The color to use for the fitted line.
+#' @param border.conf The color to use for the confidence band border.
+#' @param border.pred The color to use for the prediction band border. 
 #' @param lty.conf Line type to use for confidence band border.
 #' @param lty.pred Line type to use for prediction band border.
+#' @param lty.fit Line type to use for the fitted regression line.
 #' @param lwd.conf Line width to use for confidence band border.
 #' @param lwd.pred Line width to use for prediction band border.
-#' @param n The number of predictor values at which to compute the inference 
-#'   band(s).
-#' @param xlab A title for the x axis: see \link{title}.
-#' @param ylab A title for the y axis: see \link{title}.
-#' @param xlim The x limits (x1, x2) of the plot. Note that x1 > x2 is allowed 
-#'   and leads to a ‘reversed axis’.
-#' @param hide A logical value indicating if the inference band should be 
-#'   plotted on top of (FALSE) or behind (TRUE) the points. Default is TRUE.
-#' @param ... Additional optional arguments.
+#' @param lwd.fit Line width to use for the fitted regression line.
+#' @param n The number of predictor values at which to evaluate the fitted model
+#' (larger implies a smoother plot).
+#' @param xlab A title for the x axis.
+#' @param ylab A title for the y axis.
+#' @param xlim The x limits (x1, x2) of the plot.
+#' @param ylim The y limits (y1, y2) of the plot. 
+#' @param hide A logical value indicating if the fitted model should be 
+#' plotted on top of the points (FALSE) or behind them (TRUE). Default is 
+#' TRUE.
+#' @param ... Additional optional arguments passed on to \code{plot}.
 #' @rdname plotFit
 #' @export
 #' @examples
@@ -246,7 +248,7 @@ predict2.nls <- function(object, newdata,
 #'   
 #' ## A nonlinear regression example
 #' par(mfrow = c(1, 1))
-#' library(RColorBrewer)
+#' library(RColorBrewer) # requires that RColorBrewer be installed
 #' blues <- brewer.pal(9, "Blues")
 #' data(Puromycin, package = "datasets")
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
@@ -297,6 +299,13 @@ plotFit.lm <- function(object,
   adjust <- match.arg(adjust)
   alpha <- 1 - level
   
+  ## Maximum and minimum of fitted values
+  if (interval == "none") {
+    fitvals <- predict2(object, newdata = xx)$fit
+    fit.ymin <- min(fitvals)
+    fit.ymax <- max(fitvals)
+  }
+  
   ## Confidence interval for mean response
   if (interval == "confidence" || interval == "both") {
     conf <- predict2(object, newdata = xx, interval = "confidence", 
@@ -322,7 +331,11 @@ plotFit.lm <- function(object,
             c(min(c(pred.ymin, d[, yvar])), max(c(pred.ymax, d[, yvar])))
           } else if (interval == "confidence") {
             c(min(c(conf.ymin, d[, yvar])), max(c(conf.ymax, d[, yvar])))
-          } else ylim
+          } else if (interval == "none") {
+            c(min(c(fit.ymin, d[, yvar])), max(c(fit.ymax, d[, yvar])))
+          } else {
+            ylim
+          }
   
   ## Plot data, fit, etc.
   if (hide) { ## Draw band behind points
@@ -590,8 +603,10 @@ plotFit.nls <- function(object,
 
 }
 
-#' @title Crystal weight data.
-#' @description The data give the growing time and final weight of crystals.
+#' Crystal weight data
+#' 
+#' The data give the growing time and final weight of crystals.
+#' 
 #' \itemize{
 #'   \item time time taken to grow (hours)  
 #'   \item weight final weight of the crystal (grams) 
@@ -600,12 +615,16 @@ plotFit.nls <- function(object,
 #' @keywords datasets
 #' @format A data frame with 14 rows and 2 variables
 #' @name crystal  
-#' @references \url{http://www.stat.colostate.edu/~hari/regression_book/index.html}                       
+#' @references
+#' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
+#' Applications. Belmont, Calif: Duxbury Press, 1994.                      
 NULL
 
-#' @title Concentrations of arsenic in water samples.
-#' @description The data give the actual and measures concentration of arsenic
-#'   present in water samples.
+#' Concentrations of arsenic in water samples
+#' 
+#' The data give the actual and measures concentration of arsenic present in 
+#' water samples.
+#' 
 #' \itemize{
 #'   \item actual True amount of arsenic present
 #'   \item measured Measured amount of arsenic present 
@@ -614,5 +633,7 @@ NULL
 #' @keywords datasets
 #' @format A data frame with 32 rows and 2 variables
 #' @name arsenic  
-#' @references \url{http://www.stat.colostate.edu/~hari/regression_book/index.html}
+#' @references 
+#' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
+#' Applications. Belmont, Calif: Duxbury Press, 1994.
 NULL 

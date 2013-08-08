@@ -1,12 +1,14 @@
-#' Calibration for linear and nonlinear regression.
+#' Calibration for Linear and Nonlinear Regression Models.
 #' 
-#' A general function for calibration with linear
-#' and nonlinear regression models in R. 
+#' The function \code{invest} computes the inverse estimate and a condfidence 
+#' interval for the unknown predictor value that corresponds to an observed 
+#' value of the response (or vector thereof) or specified value of the mean 
+#' response. See the references listed below for more details. 
 #' 
 #' @rdname invest
 #' @export
 #' 
-#' @param object An appropriate object of class \code{lm} or \code{nls}.
+#' @param object An object that inherits from class \code{lm} or \code{nls}.
 #' @param y0 The value of the observed response(s) or specified value of the 
 #'           mean response.
 #' @param interval The type of interval required.
@@ -27,20 +29,25 @@
 #'               multiple, say k, times.
 #' @param k The number times the calibration curve is to be used for computing a 
 #'          confidence interval. Only needed when \code{adjust = TRUE}.
-#' @param ... Additional optional arguments. At present no optional arguments 
+#' @param ... Additional optional arguments. At present, no optional arguments 
 #'            are used.
 #' @return An object of class \code{calibrate} containing the following 
 #'         components:
+#' \itemize{
 #'   \item{estimate}{The estimate of x0.}
 #'   \item{lwr}{The lower confidence bound on x0.}
 #'   \item{upr}{The upper confidence bound on x0.}
 #'   \item{se}{An estimate of the standard error (Wald interval only).}
 #'   \item{interval}{The method used for calculating \code{lower} and 
 #'                   \code{upper}.}
-#' @seealso The function \code{\link{calibrate}} for simple linear regression 
-#'          models and the function \code{\link{dose.p}} in the \code{MASS} 
-#'          package for calibrating bioassays.
-#' @references Huet et. al. (20??). ????
+#' }
+#' @references
+#' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
+#' Applications. Belmont, Calif: Duxbury Press, 1994. 
+#'
+#' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
+#' Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
+#' Springer, 2004. 
 #' @examples
 #' data(Puromycin, package = "datasets")
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]

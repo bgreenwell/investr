@@ -1,12 +1,15 @@
-#' Calibration for simple linear regression.
+#' Calibration for the simple linear regression model.
 #' 
-#' Calibration for simple linear regression models in R.
-#' 
+#' The function \code{calibrate} computes the maximum likelihood estimate and a
+#' condfidence interval for the unknown predictor value that corresponds to an 
+#' observed value of the response (or vector thereof) or specified value of the 
+#' mean response. See the reference listed below for more details.
+#'  
 #' @param x A vector of predictor values.
 #' @param y A vector of response values.
 #' @param z A matrix , data frame, or list containing the data.
 #' @param formula A formula of the form \code{y ~ x}. 
-#' @param object An R object of class \code{lm}.
+#' @param object An object that inherits from class \code{lm}.
 #' @param data an optional data frame, list or environment (or object coercible 
 #' by \code{as.data.frame} to a data frame) containing the variables in the 
 #' model. If not found in data, the variables are taken from 
@@ -15,10 +18,7 @@
 #' @param subset An optional vector specifying a subset of observations to be 
 #' used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data 
-#' contain \code{NA}s. The default is set by the \code{na.action} setting of 
-#' options, and is \code{na.fail} if that is unset. The ‘factory-fresh’ default 
-#' is \code{na.omit}. Another possible value is \code{NULL}, no action. Value 
-#' \code{na.exclude} can be useful.
+#' contain \code{NA}s. 
 #' @param y0 The value of the observed response(s) or specified value of the
 #'           mean response.
 #' @param interval The method to use for forming a confidence interval.
@@ -33,22 +33,28 @@
 #'               multiple, say k, times.
 #' @param k The number times the calibration curve is to be used for computing a 
 #'          confidence interval. Only needed when \code{adjust = TRUE}.
-#' @param ... Additional optional arguments. At present no optional arguments 
+#' @param ... Additional optional arguments. At present, no optional arguments 
 #'            are used.
 #' @return An object of class \code{calibrate} containing the following 
 #'         components:
+#' \itemize{
 #'   \item{estimate}{The maximum likelihood estimate of x0.}
 #'   \item{lwr}{The lower confidence bound on x0.}
 #'   \item{upr}{The upper confidence bound on x0.}
 #'   \item{se}{An estimate of the standard error (Wald interval only).}
 #'   \item{interval}{The method used for calculating \code{lower} and 
 #'                   \code{upper}.}
+#' }
 #' @references 
 #' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
 #' Applications. Belmont, Calif: Duxbury Press, 1994.
 #' @rdname calibrate
 #' @aliases print.calibrate
 #' @export
+#' @note The function \code{invest} is more general, but based on numerical
+#' techniques to find the solution. When the underlying model is that of the 
+#' simple linear regression model with normal errors, closed-form expressions
+#' exist which are utilized by the function \code{calibrate}.
 #' @examples
 #' \donttest{
 #' ## Inverting a prediction interval for an individual response
@@ -174,7 +180,7 @@ calibrate.matrix <- function(z, ...) {
 #' @export
 #' @method calibrate data.frame
 calibrate.data.frame <- function(z, ...) {
-  regulate(data.matrix(z), ...)
+  calibrate(data.matrix(z), ...)
 } 
 
 #' @rdname calibrate

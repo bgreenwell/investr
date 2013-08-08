@@ -1,6 +1,6 @@
 Package: investr
 Type: Package
-Title: Inverse estimation for linear and nonlinear regression models in R.
+Title: Inverse estimation in R.
 Suggests: boot, car, RColorBrewer
 Version: 1.0
 Date: 2013-08-07

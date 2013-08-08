@@ -34,41 +34,41 @@
 }
 \arguments{
   \item{object}{An object that inherits from class
-  \code{lm}.}
-
-  \item{newdata}{A named list or data frame in which to
-  look for variables with which to plot the inference band
-  at. If \code{newdata} is missing the inference band is
-  plotted over the original data points. At present this
-  argument is ignored.}
+  \code{lm} or \code{nls}.}
 
   \item{interval}{A character string indicating if a
-  prediction brand, confidence band, or both should be
+  prediction band, confidence band, both, or none should be
   plotted.}
 
-  \item{level}{A numeric scalar between 0 and 1 giving the
-  confidence level for the bands to be plotted.}
+  \item{level}{The desired confidence level.}
+
+  \item{adjust}{A character string indicating the type of
+  adjustment (if any) to make to the confidence/prediction
+  bands.}
+
+  \item{k}{An integer to be used in computing the critical
+  value for the confidence/prediction bands. Only needed
+  when \code{adjust = "Bonferroni"} or \code{adjust =
+  "Scheffe"}.}
 
   \item{shade}{A logical value indicating if the band
   should be shaded.}
+
+  \item{extend.range}{A logical value indicating if the
+  fitted regression line and bands (if any) should extend
+  to the edges of the plot. Default is \code{FALSE}.}
 
   \item{col.conf}{Shade color for confidence band.}
 
   \item{col.pred}{Shade color for prediction band.}
 
-  \item{col.fit}{The color to use for the fitted line. The
-  default, \code{NULL}, means to use
-  \code{\link{par}("fg")}}
+  \item{col.fit}{The color to use for the fitted line.}
 
   \item{border.conf}{The color to use for the confidence
-  band border. The default, \code{NULL}, means to use
-  \code{\link{par}("fg")}. Use \code{border = NA} to omit
-  borders.}
+  band border.}
 
   \item{border.pred}{The color to use for the prediction
-  band border. The default, \code{NULL}, means to use
-  \code{\link{par}("fg")}. Use \code{border = NA} to omit
-  borders.}
+  band border.}
 
   \item{lty.conf}{Line type to use for confidence band
   border.}
@@ -76,31 +76,41 @@
   \item{lty.pred}{Line type to use for prediction band
   border.}
 
+  \item{lty.fit}{Line type to use for the fitted regression
+  line.}
+
   \item{lwd.conf}{Line width to use for confidence band
   border.}
 
   \item{lwd.pred}{Line width to use for prediction band
   border.}
 
+  \item{lwd.fit}{Line width to use for the fitted
+  regression line.}
+
   \item{n}{The number of predictor values at which to
-  compute the inference band(s).}
+  evaluate the fitted model (larger implies a smoother
+  plot).}
 
-  \item{xlab}{A title for the x axis: see \link{title}.}
+  \item{xlab}{A title for the x axis.}
 
-  \item{ylab}{A title for the y axis: see \link{title}.}
+  \item{ylab}{A title for the y axis.}
 
-  \item{xlim}{The x limits (x1, x2) of the plot. Note that
-  x1 > x2 is allowed and leads to a ‘reversed axis’.}
+  \item{xlim}{The x limits (x1, x2) of the plot.}
 
-  \item{hide}{A logical value indicating if the inference
-  band should be plotted on top of (FALSE) or behind (TRUE)
-  the points. Default is TRUE.}
+  \item{ylim}{The y limits (y1, y2) of the plot.}
 
-  \item{...}{Additional optional arguments.}
+  \item{hide}{A logical value indicating if the fitted
+  model should be plotted on top of the points (FALSE) or
+  behind them (TRUE). Default is TRUE.}
+
+  \item{...}{Additional optional arguments passed on to
+  \code{plot}.}
 }
 \description{
-  Plots fitted model (with confidence and/or prediction
-  bands) for object of class \code{lm} or \code{nls}.
+  Plots fitted model for an object of class \code{lm} or
+  \code{nls}vwith the option of adding a confidence and/or
+  prediction band.
 }
 \examples{
 \donttest{
@@ -123,7 +133,7 @@ plotFit(cars.lm4, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150),
 
 ## A nonlinear regression example
 par(mfrow = c(1, 1))
-library(RColorBrewer)
+library(RColorBrewer) # requires that RColorBrewer be installed
 blues <- brewer.pal(9, "Blues")
 data(Puromycin, package = "datasets")
 Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
