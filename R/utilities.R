@@ -287,6 +287,10 @@ plotFit.lm <- function(object,
 
   ## Extract data, variable names, etc.
   d <- eval(object$call$data, sys.frame())
+  if (!is.null(object$call$subset)) {
+    dsub <- with(d, eval(object$call$subset))
+    d <- d[dsub, ]
+  }
   yvar <- all.vars(formula(object)[[2]])
   xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (length(xvar) != 1) {
@@ -463,6 +467,10 @@ plotFit.nls <- function(object,
   
   ## Extract data, variable names, etc.
   d <- eval(object$call$data, sys.frame())
+  if (!is.null(object$call$subset)) {
+    dsub <- with(d, eval(object$call$subset))
+    d <- d[dsub, ]
+  }
   yvar <- all.vars(formula(object)[[2]])
   xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (length(xvar) != 1) {

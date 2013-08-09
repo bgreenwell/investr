@@ -31,6 +31,19 @@ nonlinear regression models. To install:
 ```{r}
 ## Install from CRAN
 install.packages("investr", dependencies = TRUE)
+
+## Try it out
+library(investr)
+
+## Crystal growth data from Graybill & Iyer (1994)
+fit <- lm(weight ~ time, data = crystal) 
+plotFit(fit, interval = "both", shade = T, pch = 19)
+
+## Treatment group for Puromycin data frame
+Puro.trt <- subset(Puromycin, state == "treated")
+fit <- nls(rate ~ Vm * conc/(K + conc), data = Puro.trt, 
+           start = c(Vm = 200, K = 0.05))
+plotFit(fit, interval = "both", shade = T, pch = 19)
 ```
 
 Alternatively, the development version can be installed using ```install_github()```
