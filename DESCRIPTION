@@ -1,11 +1,19 @@
 Package: investr
 Type: Package
-Title: Inverse estimation in R.
+Title: Calibration/Inverse Estimation with Linear and Nonlinear Regression 
+       Models in R.
 Suggests: boot, car, RColorBrewer
 Version: 1.0
 Date: 2013-08-07
 Author: Brandon M. Greenwell
-Maintainer: Brandon M. Greenwell <brandon.greenwell@afit.edu>
-Description: This package provides some functions for inverse estimation with linear and nonlinear regression models in R.
+Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>
+Description: This package provides some functions, data sets, and examples for
+        performing statistical calibration, more generally known as inverse
+        estimation, with linear and nonlinear regression models. Furthermore,
+        a generic function is provided for plotting fitted regression models 
+        with or without confidence/prediction bands that may be of use to the 
+        general user.
 License: GPL (>= 2)
-LazyLoad: yes
+URL: https://github.com/w108bmg/investr
+LazyLoad: true
+LazyData: true

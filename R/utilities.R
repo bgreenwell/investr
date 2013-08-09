@@ -5,8 +5,7 @@
 #' 
 #' @rdname predict2
 #' @keywords internal
-predict2 <- function(x, ...) {
-  if (is.null(class(x))) class(x) <- data.class(x)
+predict2 <- function(object, ...) {
   UseMethod("predict2")
 } 
 
@@ -227,6 +226,17 @@ predict2.nls <- function(object, newdata,
 #' @param ... Additional optional arguments passed on to \code{plot}.
 #' @rdname plotFit
 #' @export
+#' @note
+#' Confidence/prediction bands for nonlinear regression (i.e., objects of class
+#' \code{nls}) are based on a linear approximation as described in Bates & Watts 
+#' (2007). The source code was inpired by the \code{plotfit} function in the 
+#' \code{nlstools} package.
+#' @references
+#' Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
+#' Applications. New York: Wiley, 2007.
+#' 
+#' F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools for Nonlinear 
+#' Regression Diagnostics.
 #' @examples
 #' \donttest{
 #' ## A linear regression example
@@ -254,11 +264,10 @@ predict2.nls <- function(object, newdata,
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 #' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
 #'                 start = c(Vm = 200, K = 0.05))
-#' plotFit(Puro.nls, interval = "both", pch = 19, col.conf = blues[4], 
-#'         col.pred = blues[2])
+#' plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE, 
+#'         col.conf = blues[4], col.pred = blues[2])
 #' }     
-plotFit <- function(x, ...) {
-  if (is.null(class(x))) class(x) <- data.class(x)
+plotFit <- function(object, ...) {
   UseMethod("plotFit")
 } 
 

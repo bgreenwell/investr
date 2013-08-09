@@ -26,9 +26,19 @@ Maintainer: Brandon M. Greenwell <brandon.greenwell@afit.edu>
 
 }
 \references{
+Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
+Applications. New York: Wiley, 2007. 
+
 Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and Applications. Belmont, Calif: Duxbury Press, 1994. 
 
-Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: Springer, 2004. 
+Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
+Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
+Springer, 2004. 
+
+Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley, 1989.
+
+F. Baty and M. L. Delignette-Muller (2012), nlstools: tools for nonlinear 
+regression.
 }
 
 

@@ -48,6 +48,9 @@
 #' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
 #' Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
 #' Springer, 2004. 
+#' 
+#' Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley, 
+#' 1989.
 #' @examples
 #' data(Puromycin, package = "datasets")
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
@@ -56,14 +59,7 @@
 #' plotFit(Puro2.nls, interval = "both")
 #' invest(Puro2.nls, y0 = 100, interval = "inversion")
 #' invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
-invest <- function(x, ...) {
-  ## TODO:
-  ##   (1) Both invest.lm and invest.nls rely on the built-in function 
-  ##       numericDeriv when interval = "Wald". Is this accurate? For example, 
-  ##       their is a small discrepency between the standard error produced
-  ##       using this function and that produced by the car:::deltaMethod
-  ##       function which relies on the built-in function D.
-  if (is.null(class(x))) class(x) <- data.class(x)
+invest <- function(object, ...) {
   UseMethod("invest")
 } 
 

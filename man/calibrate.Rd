@@ -1,46 +1,28 @@
 \name{calibrate}
 \alias{calibrate}
-\alias{calibrate.data.frame}
 \alias{calibrate.default}
 \alias{calibrate.formula}
-\alias{calibrate.list}
 \alias{calibrate.lm}
-\alias{calibrate.matrix}
 \alias{print.calibrate}
 \title{Calibration for the simple linear regression model.}
 \usage{
-  calibrate(x, ...)
+  calibrate(object, ...)
 
-  \method{calibrate}{default} (x, y, y0,
+  \method{calibrate}{default} (object, y0,
     interval = c("inversion", "Wald"), level = 0.95,
     mean.response = FALSE,
     adjust = c("none", "bonferroni", "scheffe"), k, ...)
-
-  \method{calibrate}{matrix} (z, ...)
-
-  \method{calibrate}{data.frame} (z, ...)
-
-  \method{calibrate}{list} (z, ...)
 
   \method{calibrate}{formula} (formula, data = NULL, ...,
     subset, na.action = na.fail)
 
   \method{calibrate}{lm} (object, ...)
-
-  \method{print}{calibrate} (x, digits = 4, ...)
 }
 \arguments{
-  \item{x}{A vector of predictor values.}
-
-  \item{y}{A vector of response values.}
-
-  \item{z}{A matrix , data frame, or list containing the
-  data.}
+  \item{object}{An object that inherits from class
+  \code{lm}, a matrix, a list, or a data frame.}
 
   \item{formula}{A formula of the form \code{y ~ x}.}
-
-  \item{object}{An object that inherits from class
-  \code{lm}.}
 
   \item{data}{an optional data frame, list or environment
   (or object coercible by \code{as.data.frame} to a data

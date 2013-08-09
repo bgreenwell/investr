@@ -5,11 +5,9 @@
 #' observed value of the response (or vector thereof) or specified value of the 
 #' mean response. See the reference listed below for more details.
 #'  
-#' @param x A vector of predictor values.
-#' @param y A vector of response values.
-#' @param z A matrix , data frame, or list containing the data.
-#' @param formula A formula of the form \code{y ~ x}. 
-#' @param object An object that inherits from class \code{lm}.
+#' @param object An object that inherits from class \code{lm}, a matrix, a list, 
+#' or a data frame.
+#' @param formula A formula of the form \code{y ~ x}.
 #' @param data an optional data frame, list or environment (or object coercible 
 #' by \code{as.data.frame} to a data frame) containing the variables in the 
 #' model. If not found in data, the variables are taken from 
@@ -78,22 +76,42 @@
 #' library(car)
 #' deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 #' }
-calibrate <- function(x, ...) {
-  ## TODO:
-  ##   (1) Add option for maximum modulus intervals; adjust = "maximum".
-  if (is.null(class(x))) class(x) <- data.class(x)
+# calibrate <- function(z, ...) {
+#   ## TODO:
+#   ##   (1) Add option for maximum modulus intervals; adjust = "maximum".
+#   if (is.null(class(z))) class(z) <- data.class(z)
+#   UseMethod("calibrate")
+# } 
+
+calibrate <- function(object, ...) {
   UseMethod("calibrate")
-} 
+}
 
 #' @rdname calibrate
 #' @export
 #' @method calibrate default
-calibrate.default <- function(x, y, y0, interval = c("inversion", "Wald"), 
+calibrate.default <- function(object, y0, interval = c("inversion", "Wald"), 
                               level = 0.95, mean.response = FALSE, 
                               adjust = c("none", "bonferroni", "scheffe"), k, 
                               ...) {
 
   ## Extract needed components from fitted model
+  if (inherits(object, "matrix")) {
+    x <- object[, 1]
+    y <- object[, 2]
+  } else if (inherits(object, "data.frame")) {
+    object <- data.matrix(object)
+    x <- object[, 1]
+    y <- object[, 2]
+  } else if (inherits(object, "list")) {
+    x <- object[[1]]
+    y <- object[[2]]
+    if (length(x) != length(y)) {
+      stop("list components not of same length")
+    }
+  } else {
+    stop("'object' is not a valid matrix, list, or data frame")
+  }
   eta <- mean(y0)             # mean of new observations
   m <- length(y0)             # number of new observations
   z <- lm(y ~ x, data = data.frame(x, y)) # fit simple linear regression model
@@ -171,27 +189,6 @@ calibrate.default <- function(x, y, y0, interval = c("inversion", "Wald"),
 
 #' @rdname calibrate
 #' @export
-#' @method calibrate matrix
-calibrate.matrix <- function(z, ...) {
-  calibrate(z[,1], z[,2], ...)
-} 
-
-#' @rdname calibrate
-#' @export
-#' @method calibrate data.frame
-calibrate.data.frame <- function(z, ...) {
-  calibrate(data.matrix(z), ...)
-} 
-
-#' @rdname calibrate
-#' @export
-#' @method calibrate list
-calibrate.list <- function(z, ...) {
-  calibrate(z[[1]], z[[2]], ...)
-} 
-
-#' @rdname calibrate
-#' @export
 #' @method calibrate formula
 calibrate.formula <- function(formula, data = NULL, ..., subset, 
                               na.action = na.fail) {
@@ -206,12 +203,9 @@ calibrate.formula <- function(formula, data = NULL, ..., subset,
   attr(Terms, "intercept") <- 0
   y <- model.extract(m, "response")
   mm <- model.matrix(Terms, m)
-  if (ncol(mm) > 1) stop("only one predictor variable aloud")
+  if (ncol(mm) > 1) stop("only works for the simple linear regression model")
   x <- as.numeric(mm)
-  res <- calibrate(x, y, ...)
-  res$terms <- Terms
-  res$call <- match.call()
-  res
+  calibrate(cbind(x, y), ...)
 } 
 
 #' @rdname calibrate
@@ -222,9 +216,7 @@ calibrate.lm <- function(object, ...) {
   calibrate(formula(object), data = d, ...)
 } 
 
-#' @rdname calibrate
-#' @export
-#' @method print calibrate
+#' @keywords internal
 print.calibrate <- function(x, digits = 4, ...) {
   if (x$interval == "inversion") print(round(unlist(x[1:3]), digits))
   if (x$interval == "Wald") print(round(unlist(x[1:4]), digits))

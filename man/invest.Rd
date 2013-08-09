@@ -4,7 +4,7 @@
 \alias{invest.nls}
 \title{Calibration for Linear and Nonlinear Regression Models.}
 \usage{
-  invest(x, ...)
+  invest(object, ...)
 
   \method{invest}{lm} (object, y0,
     interval = c("inversion", "Wald"), level = 0.95,
@@ -94,5 +94,8 @@ invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
   Statistical Tools for Nonlinear Regression: A Practical
   Guide with S-PLUS and R Examples. New York: Springer,
   2004.
+
+  Seber, G. A. F., and Wild, C. J.. Nonlinear regression.
+  New York: Wiley, 1989.
 }
 

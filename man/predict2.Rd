@@ -4,7 +4,7 @@
 \alias{predict2.nls}
 \title{Predict method for (Single-Regressor) Linear and Nonlinear Model Fits}
 \usage{
-  predict2(x, ...)
+  predict2(object, ...)
 
   predict2.lm(object, newdata,
     interval = c("none", "confidence", "prediction"),

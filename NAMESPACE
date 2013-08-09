@@ -7,9 +7,9 @@ export(
 
 ## Methods
 S3method(calibrate, default)    
-S3method(calibrate, matrix)    
-S3method(calibrate, data.frame)
-S3method(calibrate, list)
+#S3method(calibrate, matrix)    
+#S3method(calibrate, data.frame)
+#S3method(calibrate, list)
 S3method(calibrate, formula)
 S3method(calibrate, lm)    
 
