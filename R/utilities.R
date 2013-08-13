@@ -14,7 +14,7 @@ predict2 <- function(object, ...) {
 predict2.lm <- function(object, newdata, 
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
-                        adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, 
+                        adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
   ## Extract data, variables, etc.
@@ -48,14 +48,16 @@ predict2.lm <- function(object, newdata,
   
   } else { 
     
-    # Adjustment for simultaneous inference
+    ## Adjustment for simultaneous inference.
     adjust <- match.arg(adjust)
     w <- if (adjust == "Bonferroni") {
            qt(1 - alpha/(2*k), pred$df)
          } else if (adjust == "Scheffe") {
-           sqrt(k*qf(1 - alpha, k, pred$df))      
-         } else if (adjust == "W-H") {      
-           sqrt(2*qf(1 - alpha, 2, pred$df))      
+           if (interval == "confidence") {
+             sqrt(p*qf(1 - alpha, p, pred$df)) # Working-Hotelling band
+           } else {
+             sqrt(k*qf(1 - alpha, k, pred$df)) # need k for prediction
+           }     
          } else {      
            qt(1 - alpha/2, pred$df)      
          }
@@ -90,7 +92,7 @@ predict2.lm <- function(object, newdata,
 predict2.nls <- function(object, newdata, 
                          interval = c("none", "confidence", "prediction"), 
                          level = 0.95, 
-                         adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, 
+                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                          ...) {
   
   ## Extract data, variables, etc.
@@ -150,14 +152,16 @@ predict2.nls <- function(object, newdata,
     # Adjustment for simultaneous inference
     adjust <- match.arg(adjust)
     w <- if (adjust == "Bonferroni") {
-      qt(1 - alpha/(2*k), df.residual(object))
-    } else if (adjust == "Scheffe") {
-      sqrt(k * qf(1 - alpha, k, df.residual(object)))      
-    } else if (adjust == "W-H") {      
-      sqrt(p * qf(1 - alpha, p, df.residual(object)))      
-    } else {      
-      qt(1 - alpha/2, df.residual(object))      
-    }
+           qt(1 - alpha/(2*k), df.residual(object))
+         } else if (adjust == "Scheffe") {
+           if (interval == "confidence") {
+             sqrt(p * qf(1 - alpha, p, df.residual(object))) 
+           } else {
+             sqrt(k * qf(1 - alpha, k, df.residual(object))) 
+           }     
+         } else {      
+           qt(1 - alpha/2, df.residual(object))      
+         }
     
     ## Confidence interval for mean response
     if (interval == "confidence") {
@@ -276,7 +280,7 @@ plotFit <- function(object, ...) {
 #' @method plotFit lm
 plotFit.lm <- function(object,  
   interval = c("none", "both", "confidence", "prediction"), level = 0.95,
-  adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, ...,
+  adjust = c("none", "Bonferroni", "Scheffe"), k, ...,
   shade = FALSE, extend.range = FALSE, hide = TRUE,
   col.conf = if (shade) grey(0.7) else "black", 
   col.pred = if (shade) grey(0.9) else "black",  
@@ -456,7 +460,7 @@ plotFit.lm <- function(object,
 #' @method plotFit nls
 plotFit.nls <- function(object, 
   interval = c("none", "both", "confidence", "prediction"), level = 0.95,
-  adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k, ..., 
+  adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 
   shade = FALSE, extend.range = FALSE, hide = TRUE,
   col.conf = if (shade) grey(0.7) else "black", 
   col.pred = if (shade) grey(0.9) else "black",  
