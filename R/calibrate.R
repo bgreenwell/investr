@@ -92,7 +92,7 @@ calibrate <- function(object, ...) {
 #' @method calibrate default
 calibrate.default <- function(object, y0, interval = c("inversion", "Wald"), 
                               level = 0.95, mean.response = FALSE, 
-                              adjust = c("none", "bonferroni", "scheffe"), k, 
+                              adjust = c("none", "Bonferroni", "Scheffe"), k, 
                               ...) {
 
   ## Extract needed components from fitted model

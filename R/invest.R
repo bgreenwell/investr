@@ -28,7 +28,7 @@
 #'               This is useful for when the calibration curve is to be used 
 #'               multiple, say k, times.
 #' @param k The number times the calibration curve is to be used for computing a 
-#'          confidence interval. Only needed when \code{adjust = TRUE}.
+#'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'            are used.
 #' @return An object of class \code{calibrate} containing the following 
@@ -69,7 +69,7 @@ invest <- function(object, ...) {
 invest.lm <- function(object, y0, interval = c("inversion", "Wald"), 
                       level = 0.95, mean.response = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000,  
-                      adjust = c("none", "bonferroni"), k,  ...) {
+                      adjust = c("none", "Bonferroni"), k,  ...) {
   
   ## Extract data, variables, etc.
   d <- eval(object$call$data, sys.frame())
@@ -108,11 +108,11 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
   
   # Adjustment for simultaneous intervals
   adjust <- match.arg(adjust)
-  w <- if (adjust == "bonferroni" && m == 1) {
-    qt(1 - alpha/(2 * k), n+m-p-1)
-  } else {
-    qt(1 - alpha/2, n+m-p-1)
-  }
+  w <- if (adjust == "Bonferroni" && m == 1) {
+         qt(1 - alpha/(2 * k), n+m-p-1)
+       } else {
+         qt(1 - alpha/2, n+m-p-1)
+       }
   
   ## Compute point estimate by "inverting" the fitted model at y = eta
   invFun.est <- function(x) {
@@ -223,7 +223,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
 invest.nls <- function(object, y0, interval = c("inversion", "Wald"),  
                        level = 0.95, mean.response = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
-                       adjust = c("none", "Bonferroni", "Scheffe"), k, ...) 
+                       adjust = c("none", "Bonferroni"), k, ...) 
 {
   
   ## Extract data, variables, etc.
@@ -256,11 +256,11 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
   
   # Adjustment for simultaneous intervals
   adjust <- match.arg(adjust)
-  w <- if (adjust == "bonferroni" && m == 1) {
-    qt(1 - alpha/(2 * k), n+m-p-1)
-  } else {
-    qt(1 - alpha/2, n+m-p-1)
-  }
+  w <- if (adjust == "Bonferroni" && m == 1) {
+         qt(1 - alpha/(2 * k), n+m-p-1)
+       } else {
+         qt(1 - alpha/2, n+m-p-1)
+       }
   
   ## Compute point estimate by "inverting" the fitted model at y = eta
   invFun.est <- function(x) {

@@ -202,7 +202,7 @@ predict2.nls <- function(object, newdata,
 #' to make to the confidence/prediction bands.
 #' @param k An integer to be used in computing the critical value for the 
 #' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
-#' \code{adjust = "Scheffe"}.
+#' when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
 #' @param shade A logical value indicating if the band should be shaded.
 #' @param extend.range A logical value indicating if the fitted regression line
 #' and bands (if any) should extend to the edges of the plot. Default is 
@@ -231,9 +231,20 @@ predict2.nls <- function(object, newdata,
 #' @rdname plotFit
 #' @export
 #' @note
+#' By default, the plotted intervals are pointwise intervals. For simultaneous 
+#' intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
+#' the Bonferroni adjustment, you must specify value for \code{k}, the number
+#' of intervals for which the coverage is to hold simultaneously. For the 
+#' Scheffe adjustment, specifying a value for \code{k} is only required when
+#' \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
+#' is set equal to \eqn{p}, the number of regression parameters. For example,
+#' if \code{object} is a simple linear regression model, then calling 
+#' \code{plotFit} with \code{interval = "confidence"} and 
+#' \code{adjust = "Scheffe"} will plot the Working-Hotelling band.
+#' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
 #' \code{nls}) are based on a linear approximation as described in Bates & Watts 
-#' (2007). The source code was inpired by the \code{plotfit} function in the 
+#' (2007). This funtion was inpired by the \code{plotfit} function in the 
 #' \code{nlstools} package.
 #' @references
 #' Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
