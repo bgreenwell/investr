@@ -28,16 +28,17 @@ package `investr` was designed to estimate and make inferences on the unknown
 value of the explanatory variable for both calibration- and regulation-type problems in both linear and nonlinear regression models. 
 
 Installation
-================================================================================
-To install:
+--------------------------------------------------------------------------------
 
 ```{r}
 ## Install from CRAN
 install.packages("investr", dependencies = TRUE)
+```
 
 Usage
-================================================================================
+--------------------------------------------------------------------------------
 
+```{r}
 ## Load package
 library(investr)
 
