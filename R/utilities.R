@@ -325,7 +325,6 @@ plotFit.lm <- function(object,
   if (missing(ylab)) ylab <- yvar
   interval = match.arg(interval)
   adjust <- match.arg(adjust)
-  alpha <- 1 - level
   
   ## Maximum and minimum of fitted values
   if (interval == "none") {
@@ -337,7 +336,7 @@ plotFit.lm <- function(object,
   ## Confidence interval for mean response
   if (interval == "confidence" || interval == "both") {
     conf <- predict2(object, newdata = xx, interval = "confidence", 
-                     adjust = adjust, k = k)
+                     level = level, adjust = adjust, k = k)
     conf.lwr <- conf$lwr
     conf.upr <- conf$upr
     conf.ymin <- min(conf.lwr)
@@ -347,7 +346,7 @@ plotFit.lm <- function(object,
   ## Prediction interval for individual response
   if (interval == "prediction" || interval == "both") {
     pred <- predict2(object, newdata = xx, interval = "prediction", 
-                     adjust = adjust, k = k)
+                     level = level, adjust = adjust, k = k)
     pred.lwr <- pred$lwr
     pred.upr <- pred$upr
     pred.ymin <- min(pred.lwr)
@@ -505,12 +504,11 @@ plotFit.nls <- function(object,
   if (missing(ylab)) ylab <- yvar
   interval = match.arg(interval)
   adjust <- match.arg(adjust)
-  alpha <- 1 - level
 
   ## Confidence interval for mean response
   if (interval == "confidence" || interval == "both") {
     conf <- predict2(object, newdata = xx, interval = "confidence", 
-                     adjust = adjust, k = k)
+                     level = level, adjust = adjust, k = k)
     conf.lwr <- conf$lwr
     conf.upr <- conf$upr
     conf.ymin <- min(conf.lwr)
@@ -520,7 +518,7 @@ plotFit.nls <- function(object,
   ## Prediction interval for individual response
   if (interval == "prediction" || interval == "both") {
     pred <- predict2(object, newdata = xx, interval = "prediction", 
-                     adjust = adjust, k = k)
+                     level = level, adjust = adjust, k = k)
     pred.lwr <- pred$lwr
     pred.upr <- pred$upr
     pred.ymin <- min(pred.lwr)
