@@ -49,7 +49,7 @@ plotFit(fit, interval = "confidence", shade = T, col.conf = "lightblue",
 (res <- calibrate(fit, y0 = 8, interval = "inversion", mean.response = T))
 abline(h = 8, v = c(res$lower, res$estimate, res$upper), lty = 2)
 
-## Treatment group for Puromycin data frame
+## Treatment group from Puromycin data frame
 Puro.trt <- subset(Puromycin, state == "treated")
 fit <- nls(rate ~ Vm * conc/(K + conc), data = Puro.trt, 
            start = c(Vm = 200, K = 0.05))
