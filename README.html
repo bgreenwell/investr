@@ -182,7 +182,7 @@ hljs.initHighlightingOnLoad();
 
 <p>This page is still a work in progress&hellip;</p>
 
-<p>investr is an acronym for <strong>inv</strong>erse <strong>est</strong>imation in <strong>R</strong>. Inverse 
+<p>investr stands for <strong>inv</strong>erse <strong>est</strong>imation in <strong>R</strong>. Inverse 
 estimation, also referred to as the calibration problem, is in a sense the 
 reverse of the prediction problem. More generally, consider two common uses
 of a fitted regression model:</p>
@@ -206,24 +206,33 @@ mean response (<em>regulation</em>).</p></li>
 <p>Calibration is a classical problem that has been thoroughly discussed in 
 statistical literature, regulation, a related problem, is less well-known. The R
 package <code>investr</code> was designed to estimate and make inferences on the unknown
-predictor for both calibration- and regulation-type problems in both linear and
-nonlinear regression models. To install:</p>
+value of the explanatory variable for both calibration- and regulation-type problems in both linear and nonlinear regression models. </p>
+
+<h1>Installation</h1>
+
+<p>To install:</p>
 
 <pre><code class="r">## Install from CRAN
 install.packages(&quot;investr&quot;, dependencies = TRUE)
 
-## Try it out
+Usage
+================================================================================
+
+## Load package
 library(investr)
 
 ## Crystal growth data from Graybill &amp; Iyer (1994)
 fit &lt;- lm(weight ~ time, data = crystal) 
 plotFit(fit, interval = &quot;both&quot;, shade = T, pch = 19)
+calibrate(fit, y0 = 8, interval = &quot;inversion&quot;, mean.response = T)
 
 ## Treatment group for Puromycin data frame
 Puro.trt &lt;- subset(Puromycin, state == &quot;treated&quot;)
 fit &lt;- nls(rate ~ Vm * conc/(K + conc), data = Puro.trt, 
            start = c(Vm = 200, K = 0.05))
 plotFit(fit, interval = &quot;both&quot;, shade = T, pch = 19)
+(res &lt;- invest(fit, y0 = 150, interval = &quot;inversion&quot;))
+abline(h = 150, v = c(res$lower, res$upper))
 </code></pre>
 
 <p>Alternatively, the development version can be installed using <code>install_github()</code>

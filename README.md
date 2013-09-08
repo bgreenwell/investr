@@ -3,7 +3,7 @@ investr
 
 This page is still a work in progress...
 
-investr is an acronym for **inv**erse **est**imation in **R**. Inverse 
+investr stands for **inv**erse **est**imation in **R**. Inverse 
 estimation, also referred to as the calibration problem, is in a sense the 
 reverse of the prediction problem. More generally, consider two common uses
 of a fitted regression model:
@@ -25,28 +25,35 @@ words, in regression, there is often a need to:
 Calibration is a classical problem that has been thoroughly discussed in 
 statistical literature, regulation, a related problem, is less well-known. The R
 package `investr` was designed to estimate and make inferences on the unknown
-predictor for both calibration- and regulation-type problems in both linear and
-nonlinear regression models. To install:
+value of the explanatory variable for both calibration- and regulation-type problems in both linear and nonlinear regression models. 
+
+Installation
+================================================================================
+To install:
 
 ```{r}
 ## Install from CRAN
 install.packages("investr", dependencies = TRUE)
 
-## Try it out
+Usage
+================================================================================
+
+## Load package
 library(investr)
 
 ## Crystal growth data from Graybill & Iyer (1994)
 fit <- lm(weight ~ time, data = crystal) 
-plotFit(fit, interval = "both", shade = T, pch = 19)
+plotFit(fit, interval = "confidence", shade = T, col.conf = "lightblue", 
+        pch = 19)
+(res <- calibrate(fit, y0 = 8, interval = "inversion", mean.response = T))
+abline(h = 8, v = c(res$lower, res$estimate, res$upper), lty = 2)
 
 ## Treatment group for Puromycin data frame
 Puro.trt <- subset(Puromycin, state == "treated")
 fit <- nls(rate ~ Vm * conc/(K + conc), data = Puro.trt, 
            start = c(Vm = 200, K = 0.05))
-plotFit(fit, interval = "both", shade = T, pch = 19)
+plotFit(fit, interval = "prediction", shade = T, pch = 19)
+(res <- invest(fit, y0 = 150, interval = "inversion"))
+abline(h = 150, v = c(res$lower, res$estimate, res$upper))
 ```
-
-Alternatively, the development version can be installed using ```install_github()```
-from the ```devtools``` package, but it may be easier to download the *.zip 
-file copy the source code directly.
 
