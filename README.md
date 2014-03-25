@@ -3,7 +3,7 @@ investr
 
 This page is still a work in progress...
 
-investr stands for **inv**erse **est**imation in **R**. Inverse 
+`investr` stands for **inverse estimation in R**. Inverse 
 estimation, also referred to as the calibration problem, is in a sense the 
 reverse of the prediction problem. More generally, consider two common uses
 of a fitted regression model:
