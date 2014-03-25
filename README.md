@@ -30,7 +30,7 @@ value of the explanatory variable for both calibration- and regulation-type prob
 Installation
 --------------------------------------------------------------------------------
 
-```r
+```{r}
 ## Install from CRAN
 install.packages("investr", dependencies = TRUE)
 ```
