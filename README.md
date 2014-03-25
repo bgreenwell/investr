@@ -38,7 +38,7 @@ install.packages("investr", dependencies = TRUE)
 Usage
 --------------------------------------------------------------------------------
 
-```{r}
+```S
 ## Load package
 library(investr)
 
