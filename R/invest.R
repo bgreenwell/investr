@@ -181,7 +181,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
             
             ## Function of parameters whose gradient is required
             dmFun <- function(params) {
-              object$coefficients <- params  
+              object$coefficients <- params ## FIXME: params[1:length(params)-1]
               invFun <- function(x) {
                 z <- list(x)
                 names(z) <- xvar 
@@ -365,3 +365,146 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
   
 }
 
+#' @rdname invest
+#' @export
+#' @method invest lme
+invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),  
+                       level = 0.95, mean.response = FALSE, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
+{
+  
+  ## Extract data, variables, etc.
+  d <- eval(object$call$data, sys.frame())
+  yvar <- all.vars(formula(object)[[2]])
+  xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  if (missing(lower)) {
+    lower <- min(d[, xvar])
+  }
+  if (missing(upper)) {
+    upper <- max(d[, xvar])
+  }
+  interval <- match.arg(interval)
+  alpha <- 1 - level
+  eta <- mean(y0)
+  m <- length(y0)
+  n <- length(resid(object)) 
+  p <- length(fixef(object))
+  
+  ## Calculate variance
+  u <- summary(object)$sigma^2 # residual variance
+  
+  ## Try to catch errors
+  if (length(xvar) != 1) {
+    stop("only one independent variable allowed")
+  }
+  if(mean.response && m > 1) {
+    stop("only one value of the mean response is allowed")
+  }
+  
+  # Critical value
+  w <- qnorm(1 - alpha/2)
+  
+  ## Compute point estimate by "inverting" the fitted model at y = eta
+  invFun.est <- function(x) {
+    z <- list(x)
+    names(z) <- xvar
+    predict(object, newdata = z, level = 0) - eta
+  }
+  x0.est <- uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
+                    maxiter = maxiter)$root
+  
+  x0.est
+  
+#   ## Compute interval estimate
+#   if (interval == "inversion") { # inversion interval
+#     
+#     ## "Invert" confidence/prediction band at y = eta
+#     if (mean.response) { # "Invert" confidence band (regulation)
+#       invFun <- function(x) {
+#         z <- list(x); names(z) <- xvar
+#         pred <- predict2(object, newdata = z)
+#         (eta - pred$fit)^2/(pred$se.fit^2) - w^2
+#       }
+#     } else { # calibration
+#       invFun <- function(x) { # "Invert" prediction band (calibration)
+#         z <- list(x); names(z) <- xvar
+#         pred <- predict2(object, newdata = z)
+#         (eta - pred$fit)^2/(u/m + pred$se.fit^2) - w^2
+#       }
+#     }
+#     
+#     ## Compute lower and upper endpoints of confidence interval
+#     lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+#                    maxiter = maxiter)$root
+#     upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+#                    maxiter = maxiter)$root
+#     
+#     ## Store results in a list
+#     res <- list("estimate" = x0.est, 
+#                 "lower" = lwr, 
+#                 "upper" = upr, 
+#                 "interval" = interval)
+#   } else { # Wald interval
+#     
+#     ## Calculate standard error based on the delta method 
+#     object.copy <- object
+#     se <- if (mean.response) { # regulation
+#       
+#       ## Function of parameters whose gradient is required
+#       dmFun <- function(params) {
+#         object.copy$m$setPars(params)
+#         invFun <- function(x) {
+#           z <- list(x)
+#           names(z) <- xvar
+#           predict2(object.copy, z)$fit - eta
+#         }
+#         uniroot(invFun, interval = c(lower, upper), tol = tol, 
+#                 maxiter = maxiter)$root
+#       }
+#       
+#       ## Assign parameter names, calculate gradient, and return standard 
+#       ## error
+#       params <- coef(object)
+#       gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
+#       #gv <- t(grad(dmFun, params))
+#       as.numeric(sqrt(gv %*% vcov(object) %*% t(gv)))
+#       
+#     } else { # calibration
+#       
+#       ## Function of parameters whose gradient is required
+#       dmFun <- function(params) {
+#         object.copy$m$setPars(params)
+#         invFun <- function(x) {
+#           z <- list(x)
+#           names(z) <- xvar
+#           predict2(object.copy, z)$fit - params[length(params)]
+#         }
+#         uniroot(invFun, interval = c(lower, upper), tol = tol, 
+#                 maxiter = maxiter)$root
+#       }
+#       
+#       ## Assign parameter names, calculate gradient, and return standard 
+#       ## error
+#       params <- c(coef(object), eta)
+#       covmat <- diag(p + 1)
+#       covmat[p + 1, p + 1] <- u/m
+#       covmat[1:p, 1:p] <- vcov(object)
+#       gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
+#       #gv <- t(grad(dmFun, params))
+#       as.numeric(sqrt(gv %*% covmat %*% t(gv)))
+#       
+#     }
+#     
+#     ## Store results in a list
+#     res <- list("estimate" = x0.est, 
+#                 "lower" = x0.est - w * se, 
+#                 "upper" = x0.est + w * se, 
+#                 "se" = se,
+#                 "interval" = interval)
+#   }
+#   
+#   ## Assign class label and return results
+#   class(res) <- "calibrate"
+#   res
+  
+}
