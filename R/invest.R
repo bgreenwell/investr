@@ -413,7 +413,19 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
   x0.est <- uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
                     maxiter = maxiter)$root
   
-  x0.est
+  
+  ## TODO: write code to estimate the variance of a new observation Y0 given by
+  ##       Var(Y0) = Z*Var(a)*Z' + sigma^2
+  var.y0 <- function(object, x0) {
+    z <- list(x)
+    names(z) <- xvar
+    Z <- unname(model.matrix(formula(object$modelStruct$reStr)[[1]], data = z))
+    G <- unname(getVarCov(object))
+    Z %*% G %*% t(Z) + u
+  }
+  
+  return(x0.est)
+  
   
 #   ## Compute interval estimate
 #   if (interval == "inversion") { # inversion interval

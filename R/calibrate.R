@@ -147,6 +147,12 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
 
   ## Calculate inversion interval
   if (interval == "inversion") { 
+    
+    ## FIXME: is there a better way to extract p-value?
+#     if (summary(z)$coefficients[2, 4] > alpha) {
+#       warning("calibration line is not well determined")
+#     }
+    
     c1 <- b[2L]^2 - (sigma^2 * w^2)/ssx
     c2 <- if (mean.response) {
       c1/n + (eta - mean(y))^2/ssx
@@ -155,8 +161,21 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     }
     c3 <- b[2L] * (eta - mean(y))
     c4 <- w * sigma
-    lwr <- mean(x) + (c3 - c4*sqrt(c2))/c1
-    upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
+    
+    ## FIXME: catch errors and throw an appropriate warning
+    if (c1 < 0 && c2 <= 0) {
+      warning("calibration line is not well determined")
+      lwr <- -Inf
+      upr <- Inf
+    } else {
+      lwr <- mean(x) + (c3 - c4*sqrt(c2))/c1
+      upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
+      if (c1 < 0 && c2 > 0) {
+        warning("calibration line is not well determined")
+        stop(paste("returning two semi-infinite intervals\n(", -Inf, ",", 
+                   round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"))
+      }
+    }
     res <- list("estimate" = x0.mle,
                 "lower" = lwr,
                 "upper" = upr,
