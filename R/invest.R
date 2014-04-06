@@ -416,107 +416,58 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
   
   ## TODO: write code to estimate the variance of a new observation Y0 given by
   ##       Var(Y0) = Z*Var(a)*Z' + sigma^2
-  var.y0 <- function(object, x0) {
-    z <- list(x)
+  var0Fun <- function(object, x0) {
+    z <- list(x0)
     names(z) <- xvar
     Z <- unname(model.matrix(formula(object$modelStruct$reStr)[[1]], data = z))
     G <- unname(getVarCov(object))
     Z %*% G %*% t(Z) + u
   }
+  var.y0 <- var0Fun(object, x0.est)
   
-  return(x0.est)
-  
-  
-#   ## Compute interval estimate
-#   if (interval == "inversion") { # inversion interval
-#     
-#     ## "Invert" confidence/prediction band at y = eta
-#     if (mean.response) { # "Invert" confidence band (regulation)
-#       invFun <- function(x) {
-#         z <- list(x); names(z) <- xvar
-#         pred <- predict2(object, newdata = z)
-#         (eta - pred$fit)^2/(pred$se.fit^2) - w^2
-#       }
-#     } else { # calibration
-#       invFun <- function(x) { # "Invert" prediction band (calibration)
-#         z <- list(x); names(z) <- xvar
-#         pred <- predict2(object, newdata = z)
-#         (eta - pred$fit)^2/(u/m + pred$se.fit^2) - w^2
-#       }
-#     }
-#     
-#     ## Compute lower and upper endpoints of confidence interval
-#     lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
-#                    maxiter = maxiter)$root
-#     upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
-#                    maxiter = maxiter)$root
-#     
-#     ## Store results in a list
-#     res <- list("estimate" = x0.est, 
-#                 "lower" = lwr, 
-#                 "upper" = upr, 
-#                 "interval" = interval)
-#   } else { # Wald interval
-#     
-#     ## Calculate standard error based on the delta method 
-#     object.copy <- object
-#     se <- if (mean.response) { # regulation
-#       
-#       ## Function of parameters whose gradient is required
-#       dmFun <- function(params) {
-#         object.copy$m$setPars(params)
-#         invFun <- function(x) {
-#           z <- list(x)
-#           names(z) <- xvar
-#           predict2(object.copy, z)$fit - eta
-#         }
-#         uniroot(invFun, interval = c(lower, upper), tol = tol, 
-#                 maxiter = maxiter)$root
-#       }
-#       
-#       ## Assign parameter names, calculate gradient, and return standard 
-#       ## error
-#       params <- coef(object)
-#       gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
-#       #gv <- t(grad(dmFun, params))
-#       as.numeric(sqrt(gv %*% vcov(object) %*% t(gv)))
-#       
-#     } else { # calibration
-#       
-#       ## Function of parameters whose gradient is required
-#       dmFun <- function(params) {
-#         object.copy$m$setPars(params)
-#         invFun <- function(x) {
-#           z <- list(x)
-#           names(z) <- xvar
-#           predict2(object.copy, z)$fit - params[length(params)]
-#         }
-#         uniroot(invFun, interval = c(lower, upper), tol = tol, 
-#                 maxiter = maxiter)$root
-#       }
-#       
-#       ## Assign parameter names, calculate gradient, and return standard 
-#       ## error
-#       params <- c(coef(object), eta)
-#       covmat <- diag(p + 1)
-#       covmat[p + 1, p + 1] <- u/m
-#       covmat[1:p, 1:p] <- vcov(object)
-#       gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
-#       #gv <- t(grad(dmFun, params))
-#       as.numeric(sqrt(gv %*% covmat %*% t(gv)))
-#       
-#     }
-#     
-#     ## Store results in a list
-#     res <- list("estimate" = x0.est, 
-#                 "lower" = x0.est - w * se, 
-#                 "upper" = x0.est + w * se, 
-#                 "se" = se,
-#                 "interval" = interval)
-#   }
-#   
-#   ## Assign class label and return results
-#   class(res) <- "calibrate"
-#   res
+  ## Compute interval estimate
+  if (interval == "inversion") { # inversion interval
+    
+    ## Prediction function that also returns standard error
+    predFun <- function(x) {
+      z <- list(x)
+      names(z) <- xvar
+      fit <- predict(object, newdata = z, level = 0)
+      ## FIXME: Is this the best way to extract the fixed-effects design matrix?
+      X <- model.matrix(eval(object$call$fixed)[-2], data = z)
+      se.fit <- sqrt(diag(X %*% object$varFix %*% t(X)))
+      list(fit = fit, se.fit = se.fit)
+    }
+
+    ## "Invert" confidence/prediction band at y = eta
+    if (mean.response) { # "Invert" confidence band (regulation)
+      invFun <- function(x) {
+        pred <- predFun(x)
+        (eta - pred$fit)^2/(pred$se.fit^2) - w^2
+      }
+    } else { # calibration
+      invFun <- function(x) {
+        pred <- predFun(x)
+        (eta - pred$fit)^2/(var.y0 + pred$se.fit^2) - w^2
+      }
+    }
+    
+    ## Compute lower and upper endpoints of confidence interval
+    lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+                   maxiter = maxiter)$root
+    upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+                   maxiter = maxiter)$root
+    
+    ## Store results in a list
+    res <- list("estimate" = x0.est, 
+                "lower" = lwr, 
+                "upper" = upr, 
+                "interval" = interval)
+    
+  } 
+     
+  ## Assign class label and return results
+  class(res) <- "calibrate"
+  res
   
 }
