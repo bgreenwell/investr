@@ -414,8 +414,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
                     maxiter = maxiter)$root
   
   
-  ## TODO: write code to estimate the variance of a new observation Y0 given by
-  ##       Var(Y0) = Z*Var(a)*Z' + sigma^2
+  ## Function to estimate Var(Y0) = Z*Var(a)*Z' + sigma^2
   var0Fun <- function(object, x0) {
     z <- list(x0)
     names(z) <- xvar
@@ -428,7 +427,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
   ## Compute interval estimate
   if (interval == "inversion") { # inversion interval
     
-    ## Prediction function that also returns standard error
+    ## Prediction function that also returns standard error of fitted values
     predFun <- function(x) {
       z <- list(x)
       names(z) <- xvar
@@ -439,15 +438,12 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
       list(fit = fit, se.fit = se.fit)
     }
 
-    ## "Invert" confidence/prediction band at y = eta
-    if (mean.response) { # "Invert" confidence band (regulation)
-      invFun <- function(x) {
-        pred <- predFun(x)
+    ## Invert confidence/prediction interval at y = eta
+    invFun <- function(x) {
+      pred <- predFun(x)
+      if (mean.response) {
         (eta - pred$fit)^2/(pred$se.fit^2) - w^2
-      }
-    } else { # calibration
-      invFun <- function(x) {
-        pred <- predFun(x)
+      } else {
         (eta - pred$fit)^2/(var.y0 + pred$se.fit^2) - w^2
       }
     }
@@ -462,6 +458,35 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
     res <- list("estimate" = x0.est, 
                 "lower" = lwr, 
                 "upper" = upr, 
+                "interval" = interval)
+     
+  } else { ## Wald interval
+    
+    ## Function of parameters whose gradient is required
+    dmFun <- function(pars) {
+      fun <- function(x) {
+        z <- list(x)
+        names(z) <- xvar
+        X <- model.matrix(eval(object$call$fixed)[-2], data = z)
+        (X %*% pars[-length(pars)]) - pars[length(pars)]
+      }
+      uniroot(fun, lower = lower, upper = upper, tol = tol, 
+              maxiter = maxiter)$root
+    }
+    
+    ## Assign parameter names, calculate gradient, and return standard error
+    covmat <- diag(p+1)
+    covmat[1:p, 1:p] <- object$varFix
+    covmat[p+1, p+1] <- var.y0
+    pars <- c(fixef(object), y0)
+    gv <- attr(numericDeriv(quote(dmFun(pars)), "pars"), "gradient")
+    se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
+    
+    ## Store results in a list
+    res <- list("estimate" = x0.est, 
+                "lower" = x0.est - w*se, 
+                "upper" = x0.est + w*se,
+                "se" = se,
                 "interval" = interval)
     
   } 
