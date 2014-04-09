@@ -368,13 +368,13 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
 #' @rdname invest
 #' @export
 #' @method invest lme
-invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),  
+invest.lme <- function(object, y0, interval = c("inversion", "Wald"),  
                        level = 0.95, mean.response = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
   ## Extract data, variables, etc.
-  d <- eval(object$call$data, sys.frame())
+  d <- getData(object) #eval(object$call$data, sys.frame())
   yvar <- all.vars(formula(object)[[2]])
   xvar <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (missing(lower)) {
@@ -387,6 +387,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "pboot"),
   alpha <- 1 - level
   eta <- mean(y0)
   m <- length(y0)
+  if (m != 1) stop('only a single unknown allowed for objects of class "lme"')
   n <- length(resid(object)) 
   p <- length(fixef(object))
   
