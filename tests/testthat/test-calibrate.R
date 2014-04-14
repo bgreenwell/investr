@@ -3,11 +3,11 @@ context("Simple linear calibration")
 test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
     
   ## Thermostat example from Graybill and Iyer (1996, p. 431)
-  read <- c(95.71, 98.16, 99.52, 102.09, 103.79, 106.18, 108.14, 110.21)
-  thermom <- data.frame(read, temp = seq(from = 96, to = 110, by = 2))
-  thermom.lm <- lm(read ~ temp, data = thermom)
-  thermom.cal1 <- calibrate(thermom.lm, y0 = 104)
-  thermom.cal2 <- calibrate(thermom.lm, y0 = 100, level = 0.9)
+  thermom <- data.frame(temp = seq(from = 96, to = 110, by = 2), 
+                        read = c(95.71, 98.16, 99.52, 102.09, 103.79, 106.18, 
+                                 108.14, 110.21))
+  thermom.cal1 <- calibrate(thermom, y0 = 104)
+  thermom.cal2 <- calibrate(thermom, y0 = 100, level = 0.9)
   expect_that(round(thermom.cal1$estimate, 3), equals(103.995))
   expect_that(round(thermom.cal1$lower, 1), equals(103.4))
   expect_that(round(thermom.cal1$upper, 1), equals(104.6))
@@ -16,11 +16,10 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
   expect_that(round(thermom.cal2$upper, 2), equals(100.59))
   
   ## Reaction chamber example from Graybill and Iyer (1996, p. 433)
-  dial <- seq(from = 0, to = 100, by = 10)
-  temp <- c(206.36, 225.52, 252.18, 289.33, 318.11, 349.49, 383.03, 410.70, 
-            444.40, 469.14, 501.16)
-  chamber <- data.frame(dial, temp)
-  chamber.reg <- calibrate(chamber.lm, y0 = 400, mean.response = TRUE, 
+  chamber <- data.frame(dial = seq(from = 0, to = 100, by = 10), 
+                        temp = c(206.36, 225.52, 252.18, 289.33, 318.11, 349.49, 
+                                 383.03, 410.70, 444.40, 469.14, 501.16))
+  chamber.reg <- calibrate(chamber, y0 = 400, mean.response = TRUE, 
                            level = 0.99)
   expect_that(round(chamber.reg$estimate, 1), equals(66.5))
   expect_that(round(chamber.reg$lower, 2), equals(65.07))
@@ -44,7 +43,7 @@ test_that("standard error matches the one from car::deltaMethod", {
   crystal.reg <- calibrate(crystal.lm, y0 = 5, interval = "Wald", 
                            mean.response = TRUE)
   
-  ## Calculate and compare standard error using packages investr and car
+  ## Calculate and compare standard error using invest and car::deltaMethod
   covmat.cal <- diag(3)
   covmat.cal[1:2, 1:2] <- vcov(crystal.lm)
   covmat.cal[3, 3] <- summary(crystal.lm)$sigma^2
