@@ -2,6 +2,7 @@
 \alias{invest}
 \alias{invest.lm}
 \alias{invest.nls}
+\alias{invest.lme}
 \title{Calibration for Linear and Nonlinear Regression Models.}
 \usage{
   invest(object, ...)
@@ -18,14 +19,14 @@
     tol = .Machine$double.eps^0.25, maxiter = 1000,
     adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
     
-  \method{invest}{nls} (object, y0,
+  \method{invest}{lme} (object, y0,
     interval = c("inversion", "Wald"), level = 0.95,
     mean.response = FALSE, lower, upper,
     tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
   \item{object}{An object that inherits from class
-  \code{lm} or \code{nls}.}
+  \code{lm}, \code{nls}, or \code{lme} (experimental).}
 
   \item{y0}{The value of the observed response(s) or
   specified value of the mean response.}
