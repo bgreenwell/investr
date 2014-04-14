@@ -1,4 +1,6 @@
-context("Simple linear calibration")
+## Tests for calibrate.R
+
+context("Linear calibration/regulation - inversion interval")
 
 test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
     
@@ -35,6 +37,28 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
   
 })
 
+test_that("errors are handled appropriately", {
+  
+  ## Simulated data
+  set.seed(101)
+  x <- rep(seq(from = 0, to = 10, length = 10), 2)
+  y <-  3 + 0.01*x + rnorm(length(x), sd = 0.5)
+  d1 <- data.frame(x, y)
+  d2 <- list(x = 1:11, y = 1:10 + rnorm(10, sd = 1))
+  #   fit <- lm(y ~ x, data = d)
+  #   plotFit(fit, interval = "both", xlim = c(-10, 25))
+  #   abline(h = c(2, 3), col = "red")
+  expect_that(calibrate(d1, y0 = 3), gives_warning())
+  expect_that(calibrate(d1, y0 = 3, mean.response = TRUE), gives_warning())
+  expect_that(calibrate(d1, y0 = 2), throws_error())
+  expect_that(calibrate(d1, y0 = 2.5, mean.response = TRUE), throws_error())
+  expect_that(calibrate(d2, y0 = 2.5), throws_error())
+  expect_that(calibrate(y ~ x + I(x^2), y0 = 2.5), throws_error())
+  
+})
+
+context("Linear calibration/regulation - Wald interval")
+
 test_that("standard error matches the one from car::deltaMethod", {
   
   ## Crystal weight example from Graybill and Iyer (1996, p. 434)
@@ -57,22 +81,4 @@ test_that("standard error matches the one from car::deltaMethod", {
   
 })
 
-test_that("errors are handled appropriately", {
-  
-  ## Simulated data
-  set.seed(101)
-  x <- rep(seq(from = 0, to = 10, length = 10), 2)
-  y <-  3 + 0.01*x + rnorm(length(x), sd = 0.5)
-  d1 <- data.frame(x, y)
-  d2 <- list(x = 1:11, y = 1:10 + rnorm(10, sd = 1))
-#   fit <- lm(y ~ x, data = d)
-#   plotFit(fit, interval = "both", xlim = c(-10, 25))
-#   abline(h = c(2, 3), col = "red")
-  expect_that(calibrate(d1, y0 = 3), gives_warning())
-  expect_that(calibrate(d1, y0 = 3, mean.response = TRUE), gives_warning())
-  expect_that(calibrate(d1, y0 = 2), throws_error())
-  expect_that(calibrate(d1, y0 = 2.5, mean.response = TRUE), throws_error())
-  expect_that(calibrate(d2, y0 = 2.5), throws_error())
-  expect_that(calibrate(y ~ x + I(x^2), y0 = 2.5), throws_error())
 
-})
