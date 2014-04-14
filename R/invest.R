@@ -20,7 +20,8 @@
 #'        (\code{TRUE}).
 #' @param lower The lower endpoint of the interval to be searched.
 #' @param upper The upper endpoint of the interval to be searched.
-#' @param tol The desired accuracy passed on to \code{uniroot}.
+#' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
+#'            minimum of 1e-10.
 #' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
 #' (\code{TRUE}).
 #' @param adjust A logical value indicating if an adjustment should be made to
@@ -100,10 +101,10 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
   
   ## Try to catch errors
   if (length(xvar) != 1) {
-    stop("only one independent variable allowed")
+    stop("Only one independent variable allowed.")
   }
   if (mean.response && m > 1) {
-    stop("only one mean response value allowed")
+    stop("Only one mean response value allowed.")
   }
   
   # Adjustment for simultaneous intervals
@@ -120,8 +121,14 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
     names(z) <- xvar
     predict(object, newdata = z) - eta
   }
-  x0.est <- uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
-                    maxiter = maxiter)$root
+  x0.est <- try(uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
+                    maxiter = maxiter)$root, silent = TRUE)
+  if (inherits(x0.est, "try-error")) {
+    stop(paste("Point estimate not found in the default interval (", lower, 
+               ", ", upper, 
+               "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
 
   ## Compute interval estimate
   if (interval == "inversion") { ## inversion interval
@@ -142,10 +149,22 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
     }
     
     ## Compute lower and upper endpoints of confidence interval
-    lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
-                   maxiter = maxiter)$root
-    upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
-                   maxiter = maxiter)$root
+    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    if (inherits(lwr, "try-error")) {
+      stop(paste("Lower confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
+    if (inherits(upr, "try-error")) {
+      stop(paste("Upper confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 
@@ -154,8 +173,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
                 "interval" = interval)
   } else { ## Wald interval
     
-    ## Delta method based on a modification of deltaMethod function from the car
-    ## package
+    ## Calculate stanard error based on first-order Taylor series approximation
     se <- if (mean.response) { ## regulation
       
             ## Function of parameters whose gradient is required
@@ -166,6 +184,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
                 names(z) <- xvar
                 predict(object, z) - eta
               }
+              ## FIXME: How should we use the try function here?
               uniroot(invFun, interval = c(lower, upper), tol = tol, 
                       maxiter = maxiter)$root
             }
@@ -174,7 +193,6 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
             ## error
             params <- coef(object)
             gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
-            #gv <- t(grad(dmFun, params))
             as.numeric(sqrt(gv %*% vcov(object) %*% t(gv)))
 
             } else { ## calibration
@@ -198,7 +216,6 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald"),
             covmat[p + 1, p + 1] <- u/m
             covmat[1:p, 1:p] <- vcov(object)
             gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
-            #gv <- t(grad(dmFun, params))
             as.numeric(sqrt(gv %*% covmat %*% t(gv)))
             
           }
@@ -248,10 +265,10 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
   
   ## Try to catch errors
   if (length(xvar) != 1) {
-    stop("only one independent variable allowed")
+    stop("Only one independent variable allowed.")
   }
   if(mean.response && m > 1) {
-    stop("only one value of the mean response is allowed")
+    stop("Only one value of the mean response is allowed.")
   }
   
   # Adjustment for simultaneous intervals
@@ -262,14 +279,19 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
          qt(1 - alpha/2, n+m-p-1)
        }
   
-  ## Compute point estimate by "inverting" the fitted model at y = eta
+  ## Compute point estimate by inverting the fitted model at y = eta
   invFun.est <- function(x) {
-    z <- list(x)
-    names(z) <- xvar
+    z <- list(x); names(z) <- xvar
     predict(object, newdata = z) - eta
   }
-  x0.est <- uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
-                    maxiter = maxiter)$root
+  x0.est <- try(uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
+                        maxiter = maxiter)$root, silent = TRUE)
+  if (inherits(x0.est, "try-error")) {
+    stop(paste("Point estimate not found in the default interval (", lower, 
+               ", ", upper, 
+               "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
   
   ## Compute interval estimate
   if (interval == "inversion") { # inversion interval
@@ -290,10 +312,23 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald"),
     }
     
     ## Compute lower and upper endpoints of confidence interval
-    lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
-                   maxiter = maxiter)$root
-    upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
-                   maxiter = maxiter)$root
+    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    
+    if (inherits(lwr, "try-error")) {
+      stop(paste("Lower confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
+    if (inherits(upr, "try-error")) {
+      stop(paste("Upper confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 
@@ -373,6 +408,11 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald"),
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
+  ## Print warning
+  warning(paste("This function is experimental for objects of class 'lme'.", 
+                "The variability of the estimated variance components is ignored.",
+                "Proceed with caution!"))
+  
   ## Extract data, variables, etc.
   d <- getData(object) #eval(object$call$data, sys.frame())
   yvar <- all.vars(formula(object)[[2]])
@@ -396,10 +436,10 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald"),
   
   ## Try to catch errors
   if (length(xvar) != 1) {
-    stop("only one independent variable allowed")
+    stop("Only one independent variable allowed.")
   }
   if(mean.response && m > 1) {
-    stop("only one value of the mean response is allowed")
+    stop("Only one value of the mean response is allowed.")
   }
   
   # Critical value
@@ -411,9 +451,14 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald"),
     names(z) <- xvar
     predict(object, newdata = z, level = 0) - eta
   }
-  x0.est <- uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
-                    maxiter = maxiter)$root
-  
+  x0.est <- try(uniroot(invFun.est, interval = c(lower, upper), tol = tol, 
+                        maxiter = maxiter)$root, silent = TRUE)
+  if (inherits(x0.est, "try-error")) {
+    stop(paste("Point estimate not found in the default interval (", lower, 
+               ", ", upper, 
+               "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
   
   ## Function to estimate Var(Y0) = Z*Var(a)*Z' + sigma^2
   var0Fun <- function(object, x0) {
@@ -450,10 +495,23 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald"),
     }
     
     ## Compute lower and upper endpoints of confidence interval
-    lwr <- uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
-                   maxiter = maxiter)$root
-    upr <- uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
-                   maxiter = maxiter)$root
+    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    
+    if (inherits(lwr, "try-error")) {
+      stop(paste("Lower confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
+    if (inherits(upr, "try-error")) {
+      stop(paste("Upper confidence limit not found in the default interval (", 
+                 lower, ", ", upper, 
+                 "). Try tweaking the values of lower and upper. Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 

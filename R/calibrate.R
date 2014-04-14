@@ -107,10 +107,12 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     x <- object[[1]]
     y <- object[[2]]
     if (length(x) != length(y)) {
-      stop("list components not of same length")
+      stop(paste("Components of '", deparse(substitute(object)), 
+                 "' not of same length.", sep = ""))
     }
   } else {
-    stop("'object' is not a valid matrix, list, or data frame")
+    stop(paste("The object '", deparse(substitute(object)), 
+               "' is not a valid matrix, list, or data frame.", sep = ""))
   }
   eta <- mean(y0)             # mean of new observations
   m <- length(y0)             # number of new observations
@@ -132,7 +134,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
   
   ## Try to catch errors
   if (mean.response && m > 1) {
-    stop("only one mean response value allowed")
+    stop("Only one mean response value allowed.")
   }
   
   # Adjustment for simultaneous intervals
@@ -147,12 +149,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
 
   ## Calculate inversion interval
   if (interval == "inversion") { 
-    
-    ## FIXME: is there a better way to extract p-value?
-#     if (summary(z)$coefficients[2, 4] > alpha) {
-#       warning("calibration line is not well determined")
-#     }
-    
+
     c1 <- b[2L]^2 - (sigma^2 * w^2)/ssx
     c2 <- if (mean.response) {
       c1/n + (eta - mean(y))^2/ssx
@@ -164,17 +161,23 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     
     ## FIXME: catch errors and throw an appropriate warning
     if (c1 < 0 && c2 <= 0) {
-      warning("calibration line is not well determined")
+      
+      warning("The calibration line is not well determined.", call. = FALSE)
       lwr <- -Inf
       upr <- Inf
+      
     } else {
+      
       lwr <- mean(x) + (c3 - c4*sqrt(c2))/c1
       upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
       if (c1 < 0 && c2 > 0) {
-        warning("calibration line is not well determined")
-        stop(paste("returning two semi-infinite intervals\n(", -Inf, ",", 
-                   round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"))
+        
+        stop(paste("The calibration line is not well determined.\nReturning two semi-infinite intervals:\n(", -Inf, ",", 
+                   round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"), 
+             call. = FALSE)
+        
       }
+      
     }
     res <- list("estimate" = x0.mle,
                 "lower" = lwr,
@@ -190,7 +193,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     } else {
       abs((sigma/b[2]))*sqrt((1/m + 1/n + (x0.mle - mean(x))^2/ssx))
     }
-    
+
     ## Store results in a list
     res <- list("estimate" = x0.mle,
                 "lower" = x0.mle - w*se,
@@ -222,7 +225,7 @@ calibrate.formula <- function(formula, data = NULL, ..., subset,
   attr(Terms, "intercept") <- 0
   y <- model.extract(m, "response")
   mm <- model.matrix(Terms, m)
-  if (ncol(mm) > 1) stop("only works for the simple linear regression model")
+  if (ncol(mm) > 1) stop("This function only works for the simple linear regression model (i.e., y ~ x).")
   x <- as.numeric(mm)
   calibrate(cbind(x, y), ...)
 } 

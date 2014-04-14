@@ -1,4 +1,3 @@
 library(testthat)
-library(investr)
-
+# library(investr)
 test_package("investr")
