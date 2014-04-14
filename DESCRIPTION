@@ -3,7 +3,7 @@ Type: Package
 Title: Calibration/Inverse Estimation with Linear and Nonlinear Regression 
        Models in R.
 Suggests: boot, car, RColorBrewer
-Version: 1.0
+Version: 1.5
 Date: 2013-08-07
 Author: Brandon M. Greenwell
 Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>

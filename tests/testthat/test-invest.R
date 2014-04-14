@@ -1,10 +1,11 @@
 context("Inverse estimation")
 
-test_that("output matches answers from calibrate", {
+test_that("output from invest matches answers from calibrate", {
   
   ## Thermostat example from Graybill and Iyer (1996, p. 431)
-  read <- c(95.71, 98.16, 99.52, 102.09, 103.79, 106.18, 108.14, 110.21)
-  thermom <- data.frame(read, temp = seq(from = 96, to = 110, by = 2))
+  thermom <- data.frame(temp = seq(from = 96, to = 110, by = 2), 
+                        read = c(95.71, 98.16, 99.52, 102.09, 103.79, 106.18, 
+                                 108.14, 110.21))
   thermom.lm <- lm(read ~ temp, data = thermom)
   thermom.cal1 <- calibrate(thermom.lm, y0 = 104)
   thermom.cal2 <- calibrate(thermom.lm, y0 = 100, level = 0.9)
@@ -18,10 +19,10 @@ test_that("output matches answers from calibrate", {
   expect_that(thermom.cal4$upper, equals(thermom.cal2$upper))
   
   ## Reaction chamber example from Graybill and Iyer (1996, p. 433)
-  dial <- seq(from = 0, to = 100, by = 10)
-  temp <- c(206.36, 225.52, 252.18, 289.33, 318.11, 349.49, 383.03, 410.70, 
-            444.40, 469.14, 501.16)
-  chamber <- data.frame(dial, temp)
+  chamber <- data.frame(dial = seq(from = 0, to = 100, by = 10), 
+                        temp = c(206.36, 225.52, 252.18, 289.33, 318.11, 349.49, 
+                                 383.03, 410.70, 444.40, 469.14, 501.16))
+  chamber.lm <- lm(temp ~ dial, data = chamber)
   chamber.reg <- calibrate(chamber.lm, y0 = 400, mean.response = TRUE, 
                            level = 0.99)
   chamber.reg2 <- invest(chamber.lm, y0 = 400, mean.response = TRUE, 
@@ -43,7 +44,7 @@ test_that("output matches answers from calibrate", {
   
 })
 
-test_that("standard error matches the one from calibrate", {
+test_that("standard error from invest matches the one from calibrate", {
   
   ## Crystal weight example from Graybill and Iyer (1996, p. 434)
   crystal.lm <- lm(weight ~ time, data = crystal)
@@ -58,7 +59,7 @@ test_that("standard error matches the one from calibrate", {
   
 })
 
-test_that("standard error matches the one from car::deltaMethod", {
+test_that("standard error from invest matches car::deltaMethod", {
   
   ## Nasturtium data from drc package
   weight <- c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 854, 851, 850, 870,
