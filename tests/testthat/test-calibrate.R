@@ -59,7 +59,7 @@ test_that("errors are handled appropriately", {
 
 context("Linear calibration/regulation - Wald interval")
 
-test_that("standard error matches the one from car::deltaMethod", {
+test_that("approximate standard error is correct", {
   
   ## Crystal weight example from Graybill and Iyer (1996, p. 434)
   crystal.lm <- lm(weight ~ time, data = crystal)
@@ -80,5 +80,3 @@ test_that("standard error matches the one from car::deltaMethod", {
   expect_that(crystal.reg$se, equals(se.reg))
   
 })
-
-
