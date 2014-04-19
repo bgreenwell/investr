@@ -49,6 +49,8 @@
 #' @rdname calibrate
 #' @aliases print.calibrate
 #' @export
+#' @section Warning:
+#'   You must not call this function unless ...
 #' @note The function \code{invest} is more general, but based on numerical
 #' techniques to find the solution. When the underlying model is that of the 
 #' simple linear regression model with normal errors, closed-form expressions

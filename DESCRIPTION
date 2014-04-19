@@ -1,7 +1,7 @@
 Package: investr
 Type: Package
-Title: Functions to Facilitate Calibration/Inverse Estimation with Linear and Nonlinear Regression 
-       Models.
+Title: Functions for Calibration/Inverse Estimation with Linear and 
+       Nonlinear Regression Models.
 Version: 1.0.1
 Author: Brandon M. Greenwell
 Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>

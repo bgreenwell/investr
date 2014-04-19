@@ -4,33 +4,25 @@
 \alias{plotFit.nls}
 \title{Plotting Confidence/Prediction Bands}
 \usage{
-  plotFit(object, ...)
+plotFit(object, ...)
 
-  \method{plotFit}{lm} (object,
-    interval = c("none", "both", "confidence", "prediction"),
-    level = 0.95,
-    adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k,
-    ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
-    col.conf = if (shade) grey(0.7) else "black",
-    col.pred = if (shade) grey(0.9) else "black",
-    border.conf = col.conf, border.pred = col.pred,
-    col.fit = "black", lty.conf = if (shade) 1 else 2,
-    lty.pred = if (shade) 1 else 3, lty.fit = 1,
-    lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, xlab,
-    ylab, xlim, ylim = NULL)
+\method{plotFit}{lm}(object, interval = c("none", "both", "confidence",
+  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
+  k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  col.conf = if (shade) grey(0.7) else "black", col.pred = if (shade)
+  grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
+  col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
+  1 else 3, lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1,
+  n = 500, xlab, ylab, xlim, ylim = NULL)
 
-  \method{plotFit}{nls} (object,
-    interval = c("none", "both", "confidence", "prediction"),
-    level = 0.95,
-    adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k,
-    ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
-    col.conf = if (shade) grey(0.7) else "black",
-    col.pred = if (shade) grey(0.9) else "black",
-    border.conf = col.conf, border.pred = col.pred,
-    col.fit = "black", lty.conf = if (shade) 1 else 2,
-    lty.pred = if (shade) 1 else 3, lty.fit = 1,
-    lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, xlab,
-    ylab, xlim, ylim = NULL)
+\method{plotFit}{nls}(object, interval = c("none", "both", "confidence",
+  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
+  k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  col.conf = if (shade) grey(0.7) else "black", col.pred = if (shade)
+  grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
+  col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
+  1 else 3, lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1,
+  n = 500, xlab, ylab, xlim, ylim = NULL)
 }
 \arguments{
   \item{object}{An object that inherits from class
@@ -48,8 +40,8 @@
 
   \item{k}{An integer to be used in computing the critical
   value for the confidence/prediction bands. Only needed
-  when \code{adjust = "Bonferroni"} or \code{adjust =
-  "Scheffe"}.}
+  when \code{adjust = "Bonferroni"} or when \code{adjust =
+  "Scheffe"} and \code{interval = "prediction"}.}
 
   \item{shade}{A logical value indicating if the band
   should be shaded.}
@@ -108,16 +100,30 @@
   \code{plot}.}
 }
 \description{
-  Plots fitted model for an object of class \code{lm} or
-  \code{nls}vwith the option of adding a confidence and/or
-  prediction band.
+Plots fitted model for an object of class \code{lm} or
+\code{nls}vwith the option of adding a confidence and/or
+prediction band.
 }
 \note{
-  Confidence/prediction bands for nonlinear regression
-  (i.e., objects of class \code{nls}) are based on a linear
-  approximation as described in Bates & Watts (2007). The
-  source code was inpired by the \code{plotfit} function in
-  the \code{nlstools} package.
+By default, the plotted intervals are pointwise intervals.
+For simultaneous intervals use \code{adjust = "Bonferroni"}
+or \code{adjust = "Scheffe"}. For the Bonferroni
+adjustment, you must specify value for \code{k}, the number
+of intervals for which the coverage is to hold
+simultaneously. For the Scheffe adjustment, specifying a
+value for \code{k} is only required when \code{interval =
+"prediction"}; if \code{interval = "confidence"}, \code{k}
+is set equal to \eqn{p}, the number of regression
+parameters. For example, if \code{object} is a simple
+linear regression model, then calling \code{plotFit} with
+\code{interval = "confidence"} and \code{adjust =
+"Scheffe"} will plot the Working-Hotelling band.
+
+Confidence/prediction bands for nonlinear regression (i.e.,
+objects of class \code{nls}) are based on a linear
+approximation as described in Bates & Watts (2007). This
+funtion was inpired by the \code{plotfit} function in the
+\code{nlstools} package.
 }
 \examples{
 \donttest{
@@ -151,10 +157,10 @@ plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE,
 }
 }
 \references{
-  Bates, D. M., and Watts, D. G. Nonlinear Regression
-  Analysis and its Applications. New York: Wiley, 2007.
+Bates, D. M., and Watts, D. G. Nonlinear Regression
+Analysis and its Applications. New York: Wiley, 2007.
 
-  F. Baty and M. L. Delignette-Muller (2012), nlstools:
-  Tools for Nonlinear Regression Diagnostics.
+F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools
+for Nonlinear Regression Diagnostics.
 }
 

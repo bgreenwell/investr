@@ -1,31 +1,24 @@
 investr
 ================================================================================
 
-This page is still a work in progress...
-
 `investr` stands for **inverse estimation in R**. Inverse 
 estimation, also referred to as the calibration problem, is in a sense the 
-reverse of the prediction problem. More generally, consider two common uses
-of a fitted regression model:
+reverse of the prediction problem. Inverse estimation is a classical and well-known problem in regression. In simple terms, it involves the use of an observed value of the response to make inference on the corresponding unknown value of the explanatory variable. To our knowledge, however, statistical software is somewhat lacking the capabilities for analyzing these types of problems. 
 
-   * predict an individual response for a given value of the predictor
-   (the prediction problem);
+The `investr` package currently has three main functions:
+  * `calibrate`;
+  * `invest`;
+  * `plotFit`.
+  
+`calibrate` operates on objects of class `lm` and can only be used for the simple linear regression model. For more complicated models (e.g., polynomial and nonlinear regression), use the `invest` function, which then calls `uniroot` from the `stats` package to do the computations numerically. The function `plotFit` produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). It can be used with single-predictor objects of class `lm` or `nls`; however, for objects of class `nls`, confidence/prediction bands are based on the linear approximation and can be misleading (Bates and Watts, 1988, pg. 65). The development version of `investr` can be found on GitHub at https://github.com/w108bmg/investr and can easily be installed using the the `devtools` package (Wickham and Chang, 2013):
 
-   * estimate the mean response for a given value of the predictor.
+```S
+  ## Install development version from GitHub
+  library(devtools)
+  install_github(repo = "w108bmg/investr")
+```
 
-Loosely speaking, inverse estimation refers to the reverse of these. In other 
-words, in regression, there is often a need to:
-
-   * estimate the predictor value corresponding to an observed value of the 
-   response (*calibration*);
-
-   * estimate the predictor value corresponding to a specified value of the 
-   mean response (*regulation*).
-
-Calibration is a classical problem that has been thoroughly discussed in 
-statistical literature, regulation, a related problem, is less well-known. The R
-package `investr` was designed to estimate and make inferences on the unknown
-value of the explanatory variable for both calibration- and regulation-type problems in both linear and nonlinear regression models. 
+To report bugs or issues, contact the main author directly or submit them to https://github.com/w108bmg/investr/issues.
 
 Installation
 --------------------------------------------------------------------------------

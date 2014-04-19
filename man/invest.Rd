@@ -2,31 +2,23 @@
 \alias{invest}
 \alias{invest.lm}
 \alias{invest.nls}
-\alias{invest.lme}
 \title{Calibration for Linear and Nonlinear Regression Models.}
 \usage{
-  invest(object, ...)
+invest(object, ...)
 
-  \method{invest}{lm} (object, y0,
-    interval = c("inversion", "Wald"), level = 0.95,
-    mean.response = FALSE, lower, upper,
-    tol = .Machine$double.eps^0.25, maxiter = 1000,
-    adjust = c("none", "bonferroni"), k, ...)
+\method{invest}{lm}(object, y0, interval = c("inversion", "Wald"),
+  level = 0.95, mean.response = FALSE, lower, upper,
+  tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
+  "Bonferroni"), k, ...)
 
-  \method{invest}{nls} (object, y0,
-    interval = c("inversion", "Wald"), level = 0.95,
-    mean.response = FALSE, lower, upper,
-    tol = .Machine$double.eps^0.25, maxiter = 1000,
-    adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
-    
-  \method{invest}{lme} (object, y0,
-    interval = c("inversion", "Wald"), level = 0.95,
-    mean.response = FALSE, lower, upper,
-    tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
+\method{invest}{nls}(object, y0, interval = c("inversion", "Wald"),
+  level = 0.95, mean.response = FALSE, lower, upper,
+  tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
+  "Bonferroni"), k, ...)
 }
 \arguments{
   \item{object}{An object that inherits from class
-  \code{lm}, \code{nls}, or \code{lme} (experimental).}
+  \code{lm} or \code{nls}.}
 
   \item{y0}{The value of the observed response(s) or
   specified value of the mean response.}
@@ -48,7 +40,7 @@
   searched.}
 
   \item{tol}{The desired accuracy passed on to
-  \code{uniroot}.}
+  \code{uniroot}. Recommend a minimum of 1e-10.}
 
   \item{maxiter}{The maximum number of iterations passed on
   to \code{uniroot}. (\code{TRUE}).}
@@ -60,27 +52,26 @@
 
   \item{k}{The number times the calibration curve is to be
   used for computing a confidence interval. Only needed
-  when \code{adjust = TRUE}.}
+  when \code{adjust = "Bonferroni"}.}
 
   \item{...}{Additional optional arguments. At present, no
   optional arguments are used.}
 }
 \value{
-  An object of class \code{calibrate} containing the
-  following components: \itemize{ \item{estimate}{The
-  estimate of x0.} \item{lwr}{The lower confidence bound on
-  x0.} \item{upr}{The upper confidence bound on x0.}
-  \item{se}{An estimate of the standard error (Wald
-  interval only).} \item{interval}{The method used for
-  calculating \code{lower} and \code{upper}.} }
+An object of class \code{calibrate} containing the
+following components: \itemize{ \item{estimate}{The
+estimate of x0.} \item{lwr}{The lower confidence bound on
+x0.} \item{upr}{The upper confidence bound on x0.}
+\item{se}{An estimate of the standard error (Wald interval
+only).} \item{interval}{The method used for calculating
+\code{lower} and \code{upper}.} }
 }
 \description{
-  The function \code{invest} computes the inverse estimate
-  and a condfidence interval for the unknown predictor
-  value that corresponds to an observed value of the
-  response (or vector thereof) or specified value of the
-  mean response. See the references listed below for more
-  details.
+The function \code{invest} computes the inverse estimate
+and a condfidence interval for the unknown predictor value
+that corresponds to an observed value of the response (or
+vector thereof) or specified value of the mean response.
+See the references listed below for more details.
 }
 \examples{
 data(Puromycin, package = "datasets")
@@ -92,16 +83,15 @@ invest(Puro2.nls, y0 = 100, interval = "inversion")
 invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
 }
 \references{
-  Graybill, F. A., and Iyer, H. K. Regression analysis:
-  Concepts and Applications. Belmont, Calif: Duxbury Press,
-  1994.
+Graybill, F. A., and Iyer, H. K. Regression analysis:
+Concepts and Applications. Belmont, Calif: Duxbury Press,
+1994.
 
-  Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.
-  Statistical Tools for Nonlinear Regression: A Practical
-  Guide with S-PLUS and R Examples. New York: Springer,
-  2004.
+Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.
+Statistical Tools for Nonlinear Regression: A Practical
+Guide with S-PLUS and R Examples. New York: Springer, 2004.
 
-  Seber, G. A. F., and Wild, C. J.. Nonlinear regression.
-  New York: Wiley, 1989.
+Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New
+York: Wiley, 1989.
 }
 

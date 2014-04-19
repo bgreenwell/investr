@@ -4,23 +4,19 @@
 \alias{predict2.nls}
 \title{Predict method for (Single-Regressor) Linear and Nonlinear Model Fits}
 \usage{
-  predict2(object, ...)
+predict2(object, ...)
 
-  predict2.lm(object, newdata,
-    interval = c("none", "confidence", "prediction"),
-    level = 0.95,
-    adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k,
-    ...)
+\method{predict2}{lm}(object, newdata, interval = c("none", "confidence",
+  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
+  k, ...)
 
-  predict2.nls(object, newdata,
-    interval = c("none", "confidence", "prediction"),
-    level = 0.95,
-    adjust = c("none", "Bonferroni", "Scheffe", "W-H"), k,
-    ...)
+\method{predict2}{nls}(object, newdata, interval = c("none", "confidence",
+  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
+  k, ...)
 }
 \description{
-  Convenience function to be called by \code{plotFit}. It
-  is not for routine use.
+Convenience function to be called by \code{plotFit}. It is
+not for routine use.
 }
 \keyword{internal}
 

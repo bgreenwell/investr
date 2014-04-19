@@ -3,18 +3,17 @@
 \alias{investr}
 \docType{package}
 \title{
-Inverse Estimation in R
+Functions for Calibration/Inverse Estimation
 }
 \description{
-This package provides functions for inverse estimation with linear and nonlinear 
-regression models in R.
+This package provides functions to facilitate calibration/inverse estimation with linear and nonlinear regression models in R.
 }
 \details{
 \tabular{ll}{
 Package: \tab investr\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-08-07\cr
+Version: \tab 1.0.1\cr
+Date: \tab 2014-08-07\cr
 License: \tab GPL (>= 2)\cr
 }
 

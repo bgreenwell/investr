@@ -1,9 +1,8 @@
 bibentry("Manual",
-   title = "investr: Inverse Estimation with Linear and Nonlinear Regression 
-            Models in R.",
+   title = "investr: Functions for Inverse Estimation with Linear and Nonlinear Regression Models in R.",
    author = as.person("Brandon M. Greenwell"),
    year   = "2013",
-   note   = "R package version 1.0",
+   note   = "R package version 1.0.1",
    url    = "https://github.com/w108bmg/investr",
    key = "investr-package",
 

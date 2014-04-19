@@ -6,17 +6,16 @@
 \alias{print.calibrate}
 \title{Calibration for the simple linear regression model.}
 \usage{
-  calibrate(object, ...)
+calibrate(object, ...)
 
-  \method{calibrate}{default} (object, y0,
-    interval = c("inversion", "Wald"), level = 0.95,
-    mean.response = FALSE,
-    adjust = c("none", "bonferroni", "scheffe"), k, ...)
+\method{calibrate}{default}(object, y0, interval = c("inversion", "Wald"),
+  level = 0.95, mean.response = FALSE, adjust = c("none", "Bonferroni",
+  "Scheffe"), k, ...)
 
-  \method{calibrate}{formula} (formula, data = NULL, ...,
-    subset, na.action = na.fail)
+\method{calibrate}{formula}(formula, data = NULL, ..., subset,
+  na.action = na.fail)
 
-  \method{calibrate}{lm} (object, ...)
+\method{calibrate}{lm}(object, ...)
 }
 \arguments{
   \item{object}{An object that inherits from class
@@ -64,28 +63,28 @@
   optional arguments are used.}
 }
 \value{
-  An object of class \code{calibrate} containing the
-  following components: \itemize{ \item{estimate}{The
-  maximum likelihood estimate of x0.} \item{lwr}{The lower
-  confidence bound on x0.} \item{upr}{The upper confidence
-  bound on x0.} \item{se}{An estimate of the standard error
-  (Wald interval only).} \item{interval}{The method used
-  for calculating \code{lower} and \code{upper}.} }
+An object of class \code{calibrate} containing the
+following components: \itemize{ \item{estimate}{The maximum
+likelihood estimate of x0.} \item{lwr}{The lower confidence
+bound on x0.} \item{upr}{The upper confidence bound on x0.}
+\item{se}{An estimate of the standard error (Wald interval
+only).} \item{interval}{The method used for calculating
+\code{lower} and \code{upper}.} }
 }
 \description{
-  The function \code{calibrate} computes the maximum
-  likelihood estimate and a condfidence interval for the
-  unknown predictor value that corresponds to an observed
-  value of the response (or vector thereof) or specified
-  value of the mean response. See the reference listed
-  below for more details.
+The function \code{calibrate} computes the maximum
+likelihood estimate and a condfidence interval for the
+unknown predictor value that corresponds to an observed
+value of the response (or vector thereof) or specified
+value of the mean response. See the reference listed below
+for more details.
 }
 \note{
-  The function \code{invest} is more general, but based on
-  numerical techniques to find the solution. When the
-  underlying model is that of the simple linear regression
-  model with normal errors, closed-form expressions exist
-  which are utilized by the function \code{calibrate}.
+The function \code{invest} is more general, but based on
+numerical techniques to find the solution. When the
+underlying model is that of the simple linear regression
+model with normal errors, closed-form expressions exist
+which are utilized by the function \code{calibrate}.
 }
 \examples{
 \donttest{
@@ -112,8 +111,8 @@ deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 }
 }
 \references{
-  Graybill, F. A., and Iyer, H. K. Regression analysis:
-  Concepts and Applications. Belmont, Calif: Duxbury Press,
-  1994.
+Graybill, F. A., and Iyer, H. K. Regression analysis:
+Concepts and Applications. Belmont, Calif: Duxbury Press,
+1994.
 }
 
