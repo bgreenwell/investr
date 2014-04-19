@@ -8,7 +8,7 @@ reverse of the prediction problem. Inverse estimation is a classical and well-kn
   ## Install from CRAN
   install.packages("investr", dep = TRUE)
 ```
-The package is also currently listed in the ChemPhys task view, which lists a number of other R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package:
+The package is also currently listed in the ChemPhys task view (http://cran.r-project.org/web/views/ChemPhys.html), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```S
   ## Install the ChemPhys task view
   install.packages("ctv")
@@ -31,7 +31,7 @@ There are currently three main funtions in the `investr` package:
 
 `plotFit`
 --------------------------------------------------------------------------------
-The function `plotFit` produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). It can be used with single-predictor objects of class `lm` or `nls`; however, for objects of class `nls`, confidence/prediction bands are based on the linear approximation and can be misleading (Bates and Watts, 1988, pg. 65).
+The function `plotFit` produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). Currently, it can only be used with single-predictor objects of class `lm` or `nls`; however, for objects of class `nls`, the confidence/prediction bands are based on the linear approximation and can be misleading (Bates and Watts, 1988, pg. 65).
 
 ### Usage
 ```S
@@ -68,7 +68,7 @@ plotFit(Puro.nls, interval = "prediction", pch = 19, shade = T,
 
 `calibrate`
 --------------------------------------------------------------------------------
-`calibrate` operates on objects of class `lm` and can only be used with the simple linear regression model.
+`calibrate` only operates on objects of class `lm` and can only be used with the simple linear regression model.
 
 ### Usage
 ```S
@@ -82,7 +82,7 @@ abline(h = 8, v = c(res$lower, res$estimate, res$upper), lty = 2)
 
 `invest`
 --------------------------------------------------------------------------------
-For more complicated models (e.g., polynomial and nonlinear regression), closed-form expressions are usually not available and iterative techniques will be required. This is the purpose of the function `invest`, which carries out the computations numericall by calling the function `uniroot` from the `stats` package.
+For more complicated models (e.g., polynomial and nonlinear regression), use the more genaral `invest` function which carries out the computations numerically.
 
 ### Usage
 ```S
