@@ -15,8 +15,7 @@ predict2(object, ...)
   k, ...)
 }
 \description{
-Convenience function to be called by \code{plotFit}. It is
-not for routine use.
+use.
 }
 \keyword{internal}
 

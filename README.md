@@ -43,7 +43,7 @@ data(cars, package = "datasets")
 library(splines)
 cars.lm1 <- lm(dist ~ speed, data = cars)
 cars.lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
-cars.lm3 <- lm(dist ~ speed + I(speed^2) + I(speed^3), data = cars)
+cars.lm3 <- lm(dist ~ poly(speed, degree = 3), data = cars)
 cars.lm4 <- lm(dist ~ ns(speed, df = 3), data = cars)
 par(mfrow = c(2, 2))
 plotFit(cars.lm1, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 

@@ -1,10 +1,18 @@
 NEWS for investr package
 
-Changes for 1.0
+Changes for version 1.0
 ====================
 * Added functions
 * Fixed roxygen documentation
 
-Changes for 1.0.1
+Changes for version 1.0.1
 ====================
 * A few minor bug fixes
+* Slightly better documentation
+
+TODO:
+--------------------
+* Add bootstrap option to calibrate and invest
+* Add method for objects of class 'lme' (i.e., calibration with random coefficient models)
+* Add method for objects of class 'mlm' (i.e., multivariate calibration)
+* Heteroscedastic errors?

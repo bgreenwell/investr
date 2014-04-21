@@ -64,12 +64,13 @@ calibrate(object, ...)
 }
 \value{
 An object of class \code{calibrate} containing the
-following components: \itemize{ \item{estimate}{The maximum
-likelihood estimate of x0.} \item{lwr}{The lower confidence
-bound on x0.} \item{upr}{The upper confidence bound on x0.}
-\item{se}{An estimate of the standard error (Wald interval
-only).} \item{interval}{The method used for calculating
-\code{lower} and \code{upper}.} }
+following components: \describe{ \item{\code{estimate}}{The
+estimate of x0.} \item{\code{lwr}}{The lower confidence
+limit for x0.} \item{\code{upr}}{The upper confidence limit
+for x0.} \item{\code{se}}{An estimate of the standard error
+(Wald interval only).} \item{\code{interval}}{The method
+used for calculating \code{lower} and \code{upper} (only
+used by \code{print} method).} }
 }
 \description{
 The function \code{calibrate} computes the maximum
@@ -85,6 +86,9 @@ numerical techniques to find the solution. When the
 underlying model is that of the simple linear regression
 model with normal errors, closed-form expressions exist
 which are utilized by the function \code{calibrate}.
+}
+\section{Warning}{
+  You must not call this function unless ...
 }
 \examples{
 \donttest{

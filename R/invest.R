@@ -34,13 +34,13 @@
 #'            are used.
 #' @return An object of class \code{calibrate} containing the following 
 #'         components:
-#' \itemize{
-#'   \item{estimate}{The estimate of x0.}
-#'   \item{lwr}{The lower confidence bound on x0.}
-#'   \item{upr}{The upper confidence bound on x0.}
-#'   \item{se}{An estimate of the standard error (Wald interval only).}
-#'   \item{interval}{The method used for calculating \code{lower} and 
-#'                   \code{upper}.}
+#' \describe{
+#'   \item{\code{estimate}}{The estimate of x0.}
+#'   \item{\code{lwr}}{The lower confidence limit for x0.}
+#'   \item{\code{upr}}{The upper confidence limit for x0.}
+#'   \item{\code{se}}{An estimate of the standard error (Wald interval only).}
+#'   \item{\code{interval}}{The method used for calculating \code{lower} and 
+#'                   \code{upper} (only used by \code{print} method).}
 #' }
 #' @references
 #' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
