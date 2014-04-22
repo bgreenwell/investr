@@ -1,3 +1,63 @@
+## Function to make new data frame for a given x
+makeData <- function(object, x) {
+  d <- eval(object$call$data, sys.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
+  if (length(xname) != 1) stop("Only a single predictor variable is allowed")
+  newdata <- data.frame(x)
+  names(newdata) <- xname
+  newdata
+}
+
+##' Standard deviation function
+##'
+##' Function to extract the estimated error standard deviation
+##' 
+##' @rdname sigma
+##' @keyword internal
+sigma <- function(object, ...) {
+  UseMethod("sigma")
+} 
+sigma.lm <- function(object, ...) summary(object)$sigma
+sigma.nls <- function(object, ...) summary(object)$sigma
+sigma.lme <- function(object, ...) object$sigma
+
+##' Construct design matrix for random effects
+##'
+##' \code{makeZ} creates a new design matrix for the random effects based on the
+##'   data in \code{newdata}.
+##' 
+##' @rdname makeZ
+##' @keyword internal
+makeZ <- function(object, newdata) {
+  Q <- object$dims$Q
+  mCall <- object$call
+  fixed <- eval(eval(mCall$fixed)[-2])
+  reSt <- object$modelStruct$reStruct
+  mfArgs <- list(formula = asOneFormula(formula(reSt), fixed),
+                 data = newdata, na.action = na.fail,
+                 drop.unused.levels = TRUE)
+  dataMix <- do.call("model.frame", mfArgs)
+  model.matrix(reSt, dataMix)
+}
+
+##' Construct design matrix for fixed effects
+##'
+##' \code{makeZ} creates a new design matrix for the fixed effects based on the
+##'   data in \code{newdata}.
+##' 
+##' @rdname makeZ
+##' @keyword internal
+makeX <- function(object, newdata) {
+  model.matrix(eval(object$call$fixed)[-2], data = newdata)
+}
+
+## Function to evaluate var(Y) = ZGZ' + sigma^2
+varY <- function(object, newdata) {
+  Z <- makeZ(object, newdata)
+  G <- getVarCov(object)
+  as.numeric(Z %*% G %*% t(Z) + sigma(object)^2)
+}
+
 #' Predict method for (Single-Regressor) Linear and Nonlinear Model Fits
 #'
 #' use.
@@ -186,6 +246,20 @@ predict2.nls <- function(object, newdata,
   ## Return list of results
   return(res)
   
+}
+
+
+##' @rdname predict2
+##' @keywords internal
+predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
+  ## FIXME: Should a warning about the variance components be added here?
+  if (missing(newdata)) newdata <- object$data
+  fit <- predict(object, newdata = newdata, level = 0)
+  if (se.fit) {
+    X <- makeX(object, makeData(object, newdata))
+    se.fit <- sqrt(diag(X %*% vcov(object) %*% t(X)))
+    list(fit = fit, se.fit = se.fit)
+  } else fit
 }
 
 #' Crystal weight data
