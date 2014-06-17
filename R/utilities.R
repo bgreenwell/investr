@@ -1,11 +1,18 @@
 ## Function to make new data frame for a given x
 makeData <- function(object, x) {
-  d <- eval(object$call$data, sys.frame())
+  
+  ## FIXME: What if object$call$data is NULL?
+  d <- if (inherits(object, "lme")) {
+    getData(object) # object$data
+  } else {
+    eval(object$call$data, sys.frame())
+  }
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (length(xname) != 1) stop("Only a single predictor variable is allowed")
   newdata <- data.frame(x)
   names(newdata) <- xname
   newdata
+  
 }
 
 ##' Standard deviation function
@@ -75,6 +82,9 @@ predict2.lm <- function(object, newdata,
                         level = 0.95, 
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
+  
+  ## TODO:
+  ##   (1) How should missing values be handled?
   
   ## Extract data, variables, etc.
   if (missing(newdata)) {
@@ -154,6 +164,11 @@ predict2.nls <- function(object, newdata,
                          adjust = c("none", "Bonferroni", "Scheffe"), k, 
                          ...) {
   
+  ## TODO:
+  ##   (1) Add option se.fit
+  ##   (2) Check output from se.fit = TRUE against SAS
+  ##   (3) How should missing values be handled?
+  
   ## Extract data, variables, etc.
   if (missing(newdata)) {
     d <- eval(object$call$data, sys.frame())
@@ -170,7 +185,6 @@ predict2.nls <- function(object, newdata,
   alpha <- 1 - level
   n <- length(resid(object))
   p <- length(coef(object))
-  alpha <- 1 - level
   
   ## Stop if object$call$algorithm == "plinear"
   if (object$call$algorithm == "plinear") {
@@ -196,8 +210,7 @@ predict2.nls <- function(object, newdata,
   R1 <- object$m$Rmat()
   v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
   se.fit <- sqrt(summary(object)$sigma^2 * v0)
-  pred <- list(fit = object$m$predict(d), 
-               se.fit = se.fit)  
+  pred <- list(fit = object$m$predict(d), se.fit = se.fit)  
 
   ## Compute results
   interval <- match.arg(interval)
@@ -252,14 +265,19 @@ predict2.nls <- function(object, newdata,
 ##' @rdname predict2
 ##' @keywords internal
 predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
-  ## FIXME: Should a warning about the variance components be added here?
+  
+  ## TODO:
+  ##   (1) Check output from se.fit = TRUE against SAS
+  
   if (missing(newdata)) newdata <- object$data
   fit <- predict(object, newdata = newdata, level = 0)
   if (se.fit) {
+#     warning("se.fit ignores the variability of the estimated variance components!")
     X <- makeX(object, makeData(object, newdata))
     se.fit <- sqrt(diag(X %*% vcov(object) %*% t(X)))
     list(fit = fit, se.fit = se.fit)
   } else fit
+  
 }
 
 #' Crystal weight data

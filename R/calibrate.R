@@ -113,7 +113,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
                  "' not of same length.", sep = ""))
     }
   } else {
-    stop(paste("The object '", deparse(substitute(object)), 
+    stop(paste(deparse(substitute(object)), 
                "' is not a valid matrix, list, or data frame.", sep = ""))
   }
   eta <- mean(y0)             # mean of new observations
@@ -149,7 +149,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
          qt(1 - alpha/2, n+m-3)
        }
 
-  ## Calculate inversion interval
+  ## Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
 
     c1 <- b[2L]^2 - (sigma^2 * w^2)/ssx
@@ -185,9 +185,11 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
                 "lower" = lwr,
                 "upper" = upr,
                 "interval" = interval)
+  
+  }
     
-  ## Calculate Wald interval  
-  } else if (interval == "Wald") { 
+  ## Wald interval  
+  if (interval == "Wald") { 
     
     ## Compute standard error for Wald interval
     se <- if (mean.response) {
