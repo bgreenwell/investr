@@ -408,8 +408,8 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   }
   
   # Critical value
-#   w <- qnorm(1 - alpha/2)
-  w <- qt(1-alpha/2, n-1) # suggested by Oman (1998. pg. 445)
+  w <- qnorm(1 - alpha/2)
+#   w <- qt(1-alpha/2, n-1) # suggested by Oman (1998. pg. 445)
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {

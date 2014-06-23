@@ -174,8 +174,11 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
       upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
       if (c1 < 0 && c2 > 0) {
         
-        stop(paste("The calibration line is not well determined.\nReturning two semi-infinite intervals:\n(", -Inf, ",", 
-                   round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"), 
+#         stop(paste("The calibration line is not well determined.\nReturning two semi-infinite intervals:\n(", -Inf, ",", 
+#                    round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"), 
+#              call. = FALSE)
+        stop(paste("The calibration line is not well determined. The resulting \nconfidence region is the union of two semi-infinite intervals:\n(", -Inf, ",", 
+                   round(upr, 4), ") U (", round(lwr, 4), ",", Inf, ")"), 
              call. = FALSE)
         
       }

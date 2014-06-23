@@ -27,6 +27,7 @@ sigma <- function(object, ...) {
 sigma.lm <- function(object, ...) summary(object)$sigma
 sigma.nls <- function(object, ...) summary(object)$sigma
 sigma.lme <- function(object, ...) object$sigma
+sigma.merMod <- function(object, ...) getME(object, "sigma")
 
 ##' Construct design matrix for random effects
 ##'
