@@ -167,25 +167,23 @@ predict2.nls <- function(object, newdata,
   
   ## TODO:
   ##   (1) Add option se.fit
-  ##   (2) Check output from se.fit = TRUE against SAS
-  ##   (3) How should missing values be handled?
+  ##   (2) How should missing values be handled?
   
   ## Extract data, variables, etc.
   if (missing(newdata)) {
-    d <- eval(object$call$data, sys.frame())
+    .data <- eval(object$call$data, sys.frame())
     if (!is.null(object$call$subset)) {
-      dsub <- with(d, eval(object$call$subset))
-      d <- d[dsub, ]
+      .data <- .data[with(.data, eval(object$call$subset)), ] # subset data
     }
   } else {
-    d <- as.data.frame(newdata) 
+    .data <- as.data.frame(newdata) 
   }
   yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
-  xx <- d[[xname]]
-  alpha <- 1 - level
-  n <- length(resid(object))
-  p <- length(coef(object))
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data))
+  xx <- .data[[xname]]       # predictor values
+  alpha <- 1 - level         # alpha level
+  n <- length(resid(object)) # sample size
+  p <- length(coef(object))  # number of regression parameters
   
   ## Stop if object$call$algorithm == "plinear"
   if (object$call$algorithm == "plinear") {
@@ -198,7 +196,7 @@ predict2.nls <- function(object, newdata,
   for (i in 1:length(param.names)) { 
     assign(param.names[i], coef(object)[i]) 
   }
-  assign(xname, d[, xname])
+  assign(xname, .data[, xname])
   form <- object$m$formula()
   rhs <- eval(form[[3]])
   if (is.null(attr(rhs, "gradient"))) {
@@ -211,7 +209,7 @@ predict2.nls <- function(object, newdata,
   R1 <- object$m$Rmat()
   v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
   se.fit <- sqrt(summary(object)$sigma^2 * v0)
-  pred <- list(fit = object$m$predict(d), se.fit = se.fit)  
+  pred <- list(fit = object$m$predict(.data), se.fit = se.fit)  
 
   ## Compute results
   interval <- match.arg(interval)
