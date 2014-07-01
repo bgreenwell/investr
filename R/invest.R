@@ -375,6 +375,8 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
 #' @method invest lme
 invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),  
                        level = 0.95, mean.response = FALSE, lower, upper, 
+                       q1, q2,
+#                        q1 = qnorm(1-(1+level)/2), q2 = qnorm((1+level)/2),
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
@@ -409,6 +411,10 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   # Critical value
   w <- qnorm(1 - alpha/2)
+  if (missing(q1) && missing(q2)) {
+    q2 <- w
+    q1 <- -1*w
+  }
 #   w <- qt(1-alpha/2, n-1) # suggested by Oman (1998. pg. 445)
   
   ## Calculate point estimate by inverting fitted model
@@ -436,18 +442,35 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (interval == "inversion") { 
     
     ## Inversion function
-    invFun <- function(x) {
+#     invFun <- function(x) {
+#       pred <- predict2(object, makeData(object, x), se.fit = TRUE)
+#       denom <- if (mean.response) pred$se.fit^2 else (var.y0 + pred$se.fit^2)
+#       (eta - pred$fit)^2/denom - w^2
+#     }
+#     
+#     ## Compute lower and upper confidence limits (i.e., the roots of the 
+#     ## inversion function)
+#     lwr <- try(uniroot(invFun, interval = c(lower, x0.est), 
+#                        tol = tol, maxiter = maxiter)$root, silent = TRUE)
+#     upr <- try(uniroot(invFun, interval = c(x0.est, upper), 
+#                        tol = tol, maxiter = maxiter)$root, silent = TRUE)
+    invFun <- function(x, bound = c("lower", "upper")) {
+      bound <- match.arg(bound)
       pred <- predict2(object, makeData(object, x), se.fit = TRUE)
-      denom <- if (mean.response) pred$se.fit^2 else (var.y0 + pred$se.fit^2)
-      (eta - pred$fit)^2/denom - w^2
+      denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
+      if (bound == "upper") {
+        (eta - pred$fit)/denom - q1
+      } else {
+        (eta - pred$fit)/denom - q2
+      }
     }
     
     ## Compute lower and upper confidence limits (i.e., the roots of the 
     ## inversion function)
-    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
-                       maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
-                       maxiter = maxiter)$root, silent = TRUE)
+    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), bound = "lower",
+                       tol = tol, maxiter = maxiter)$root, silent = TRUE)
+    upr <- try(uniroot(invFun, interval = c(x0.est, upper), bound = "upper",
+                       tol = tol, maxiter = maxiter)$root, silent = TRUE)
     
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
