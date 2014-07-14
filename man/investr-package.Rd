@@ -7,7 +7,7 @@ Inverse estimation/calibration functions
 }
 \description{
 This package provides functions to facilitate inverse estimation/calibration 
-with linear and  nonlinear regression models.
+with linear, nonlinear, and (linear) mixed models.
 }
 \details{
 \tabular{ll}{
