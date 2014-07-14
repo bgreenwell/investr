@@ -1,3 +1,16 @@
+##' Extract residual standard error
+##' 
+##' Extract residual standard error from a fitted model. (For internal use 
+##' only.)
+##' 
+##' @keywords internal
+Sigma <- function(object, ...) {
+  UseMethod("Sigma")
+} 
+Sigma.lm <- function(object, ...) summary(object)$sigma
+Sigma.nls <- function(object, ...) summary(object)$sigma
+Sigma.lme <- function(object, ...) object$sigma
+
 ##' Make new data frame
 ##' 
 ##' Create a new data frame from a specified x value that has the same structure 
@@ -26,7 +39,7 @@ makeData <- function(object, x) {
 ##' model.
 ##' 
 ##' @rdname makeZ
-##' @keyword internal
+##' @keywords internal
 makeZ <- function(object, newdata) {
   Q <- object$dims$Q
   mCall <- object$call
@@ -44,7 +57,7 @@ makeZ <- function(object, newdata) {
 ##' Create a fixed effects design matrix from \code{newdata} based on a fitted 
 ##' model. (For internal use only.)
 ##' 
-##' @keyword internal
+##' @keywords internal
 makeX <- function(object, newdata) {
   model.matrix(eval(object$call$fixed)[-2], data = newdata)
 }
@@ -54,11 +67,11 @@ makeX <- function(object, newdata) {
 ##' Evaluate response variance at a given value of the predictor variable. (For 
 ##' internal use only.)
 ##' 
-##' @keyword internal
+##' @keywords internal
 varY <- function(object, newdata) {
   Z <- makeZ(object, newdata)  # random effects design matrix
   G <- getVarCov(object)  # random effects variance covariance matrix
-  as.numeric(Z %*% G %*% t(Z) + object$sigma^2)  # ZGZ' + (sigma^2)I
+  as.numeric(Z %*% G %*% t(Z) + Sigma(object)^2)  # ZGZ' + (sigma^2)I
 }
 
 ##' Predict method for (Single-Regressor) Linear, Nonlinear, and (Linear) Mixed
@@ -84,7 +97,7 @@ predict2.lm <- function(object, newdata,
   
   ## Extract data, variables, etc.
   if (missing(newdata)) {
-    d <- eval(object$call$data, env = parent.frame())
+    d <- eval(object$call$data, envir = parent.frame())
     if (!is.null(object$call$subset)) {
       dsub <- with(d, eval(object$call$subset))
       d <- d[dsub, ]
@@ -136,8 +149,8 @@ predict2.lm <- function(object, newdata,
     ## Prediction interval for individual response
     } else {
       
-      lwr <- pred$fit - w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
-      upr <- pred$fit + w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+      lwr <- pred$fit - w * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      upr <- pred$fit + w * sqrt(Sigma(object)^2 + pred$se.fit^2)
 
     }
     
@@ -166,7 +179,7 @@ predict2.nls <- function(object, newdata,
   ## Extract data, variables, etc.
   if (missing(newdata)) {
     .data <- eval(if("data" %in% names(object)) object$data else object$call$data,
-                  env = parent.frame())
+                  envir = parent.frame())
     if (!is.null(object$call$subset)) {
       .data <- .data[with(.data, eval(object$call$subset)), ]  # subset data
     }
@@ -203,7 +216,7 @@ predict2.nls <- function(object, newdata,
   ## Compute standard error of fitted values
   R1 <- object$m$Rmat()
   v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
-  se.fit <- sqrt(summary(object)$sigma^2 * v0)
+  se.fit <- sqrt(Sigma(object)^2 * v0)
   pred <- list(fit = object$m$predict(.data), se.fit = se.fit)  
 
   ## Compute results
@@ -238,8 +251,8 @@ predict2.nls <- function(object, newdata,
       ## Prediction interval for individual response
     } else {
       
-      lwr <- pred$fit - w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
-      upr <- pred$fit + w * sqrt(summary(object)$sigma^2 + pred$se.fit^2)
+      lwr <- pred$fit - w * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      upr <- pred$fit + w * sqrt(Sigma(object)^2 + pred$se.fit^2)
       
     }
     

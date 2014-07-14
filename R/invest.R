@@ -20,10 +20,15 @@
 ##'        (\code{TRUE}).
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
+##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
+##'           Only used when object inherits from class \code{lme}. Defaults to
+##'           \code{qnorm((1+level)/2)}.
+##' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
+##'           Only used when object inherits from class \code{lme}. Defaults to
+##'           \code{qnorm((1-level)/2)}.
 ##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
 ##'            minimum of 1e-10.
 ##' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
-##' (\code{TRUE}).
 ##' @param adjust A logical value indicating if an adjustment should be made to
 ##'               the critical value used in calculating the confidence interval.
 ##'               This is useful for when the calibration curve is to be used 
@@ -74,7 +79,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Extract data, variables, etc.
 #   d <- eval(object$call$data, sys.frame())
-  d <- eval(object$call$data, env = parent.frame())
+  d <- eval(object$call$data, envir = parent.frame())
   yname <- all.vars(formula(object)[[2]])
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (missing(lower)) {
@@ -95,7 +100,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   ## models? For example, is this the correct variance for a quadratic fit?
   v1 <- n - p                       # stage I degrees of freedom
   v2 <- m - 1                       # stage II degrees of freedom
-  u1 <- summary(object)$sigma^2     # stage I variance estimate
+  u1 <- Sigma(object)^2             # stage I variance estimate
   u2 <- if (m == 1) 0 else var(y0)  # stage II variance estimate
   u <- (v1*u1 + v2*u2)/(v1 + v2)    # pooled estimate of variance
   rat <- u/u1                       # temporary fix 
@@ -233,7 +238,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   ## Extract data, variables, etc.
 #   d <- eval(object$call$data, sys.frame())
   d <- eval(if("data" %in% names(object)) object$data else object$call$data,
-            env = parent.frame())
+            envir = parent.frame())
   yname <- all.vars(formula(object)[[2]])
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (missing(lower)) {
@@ -250,7 +255,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   p <- length(coef(object))
   
   ## Calculate variance
-  u <- summary(object)$sigma^2 
+  u <- Sigma(object)^2
   
   ## Try to catch errors
   if (length(xname) != 1) {
@@ -400,7 +405,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   p <- length(fixef(object))
   
   ## Calculate variance
-  u <- summary(object)$sigma^2 # residual variance
+  u <- Sigma(object)^2  # residual variance
   
   ## Try to catch errors
   if (length(xname) != 1) {
@@ -520,8 +525,8 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 
-                "lower" = x0.est - w*se, 
-                "upper" = x0.est + w*se,
+                "lower" = x0.est - q2*se, 
+                "upper" = x0.est + q2*se,
                 "se" = se,
                 "interval" = interval)
     

@@ -1,5 +1,3 @@
-
-
 context("Prediction")
 
 test_that("predictions and prediction standard errors are correct", {

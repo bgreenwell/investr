@@ -124,7 +124,7 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
   v1 <- n - 2                 # stage I degrees of freedom
   v2 <- m - 1                 # stage II degrees of freedom
   v <- v1 + v2                # total degrees of freedom
-  u1 <- summary(z)$sigma^2    # stage I variance estimate
+  u1 <- Sigma(z)^2            # stage I variance estimate
   u2 <- if (m == 1) 0 else var(y0) # stage II variance estimate
   u <- (v1*u1 + v2*u2)/v      # pooled estimate of variance
   sigma <- sqrt(u)            # sqrt of pooled variance estimate

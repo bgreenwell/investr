@@ -10,7 +10,7 @@ Description: This package provides functions to facilitate inverse
         models with or without confidence/prediction bands that may be of use to 
         the general user.
 Depends: graphics, stats, nlme
-Suggests: boot, car, lme4, RColorBrewer
+Suggests: boot, car, lme4, RColorBrewer, testthat
 Date: 2014-04-18
 License: GPL (>= 2)
 URL: https://github.com/w108bmg/investr
