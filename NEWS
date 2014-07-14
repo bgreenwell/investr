@@ -10,9 +10,14 @@ Changes for version 1.0.1
 * A few minor bug fixes
 * Slightly better documentation
 
+Changes for version 1.1.0
+====================
+* Added a method for objects of class 'lme'
+* A few minor bug fixes
+* Various code improvements
+
 TODO:
 --------------------
 * Add bootstrap option to calibrate and invest
-* Add method for objects of class 'lme' (i.e., calibration with random coefficient models)
 * Add method for objects of class 'mlm' (i.e., multivariate calibration)
 * Heteroscedastic errors?

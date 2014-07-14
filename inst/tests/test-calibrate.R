@@ -68,11 +68,11 @@ test_that("approximate standard error is correct", {
                            mean.response = TRUE)
   
   ## Calculate and compare standard error using invest and car::deltaMethod
-  covmat.cal <- diag(3)
-  covmat.cal[1:2, 1:2] <- vcov(crystal.lm)
-  covmat.cal[3, 3] <- summary(crystal.lm)$sigma^2
-  coefs <- unname(coef(crystal.lm))
-  params <- c(b0 = coefs[1], b1 = coefs[2], y0 = 5)
+#   covmat.cal <- diag(3)
+#   covmat.cal[1:2, 1:2] <- vcov(crystal.lm)
+#   covmat.cal[3, 3] <- summary(crystal.lm)$sigma^2
+#   coefs <- unname(coef(crystal.lm))
+#   params <- c(b0 = coefs[1], b1 = coefs[2], y0 = 5)
   se.cal <- 2.211698 #car::deltaMethod(params, g = "(y0-b0)/b1", vcov. = covmat.cal)$SE
   se.reg <- 0.6658998 #car::deltaMethod(crystal.lm, g = "(5-b0)/b1", 
                              #parameterNames = c("b0", "b1"))$SE

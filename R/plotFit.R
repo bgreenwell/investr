@@ -1,103 +1,103 @@
-#' Plotting Confidence/Prediction Bands
-#' 
-#' Plots fitted model for an object of class \code{lm} or \code{nls}vwith the 
-#' option of adding a confidence and/or prediction band. 
-#'
-#' @param object An object that inherits from class \code{lm} or \code{nls}.
-#' @param interval A character string indicating if a prediction band, 
-#'   confidence band, both, or none should be plotted.
-#' @param level The desired confidence level.
-#' @param adjust A character string indicating the type of adjustment (if any) 
-#' to make to the confidence/prediction bands.
-#' @param k An integer to be used in computing the critical value for the 
-#' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
-#' when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
-#' @param shade A logical value indicating if the band should be shaded.
-#' @param extend.range A logical value indicating if the fitted regression line
-#' and bands (if any) should extend to the edges of the plot. Default is 
-#' \code{FALSE}.
-#' @param col.conf Shade color for confidence band.
-#' @param col.pred Shade color for prediction band.
-#' @param col.fit The color to use for the fitted line.
-#' @param border.conf The color to use for the confidence band border.
-#' @param border.pred The color to use for the prediction band border. 
-#' @param lty.conf Line type to use for confidence band border.
-#' @param lty.pred Line type to use for prediction band border.
-#' @param lty.fit Line type to use for the fitted regression line.
-#' @param lwd.conf Line width to use for confidence band border.
-#' @param lwd.pred Line width to use for prediction band border.
-#' @param lwd.fit Line width to use for the fitted regression line.
-#' @param n The number of predictor values at which to evaluate the fitted model
-#' (larger implies a smoother plot).
-#' @param xlab A title for the x axis.
-#' @param ylab A title for the y axis.
-#' @param xlim The x limits (x1, x2) of the plot.
-#' @param ylim The y limits (y1, y2) of the plot. 
-#' @param hide A logical value indicating if the fitted model should be 
-#' plotted on top of the points (FALSE) or behind them (TRUE). Default is 
-#' TRUE.
-#' @param ... Additional optional arguments passed on to \code{plot}.
-#' @rdname plotFit
-#' @export
-#' @note
-#' By default, the plotted intervals are pointwise intervals. For simultaneous 
-#' intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
-#' the Bonferroni adjustment, you must specify value for \code{k}, the number
-#' of intervals for which the coverage is to hold simultaneously. For the 
-#' Scheffe adjustment, specifying a value for \code{k} is only required when
-#' \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
-#' is set equal to \eqn{p}, the number of regression parameters. For example,
-#' if \code{object} is a simple linear regression model, then calling 
-#' \code{plotFit} with \code{interval = "confidence"} and 
-#' \code{adjust = "Scheffe"} will plot the Working-Hotelling band.
-#' 
-#' Confidence/prediction bands for nonlinear regression (i.e., objects of class
-#' \code{nls}) are based on a linear approximation as described in Bates & Watts 
-#' (2007). This funtion was inpired by the \code{plotfit} function in the 
-#' \code{nlstools} package.
-#' @references
-#' Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
-#' Applications. New York: Wiley, 2007.
-#' 
-#' F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools for Nonlinear 
-#' Regression Diagnostics.
-#' @examples
-#' \donttest{
-#' ## A linear regression example
-#' data(cars, package = "datasets")
-#' library(splines)
-#' cars.lm1 <- lm(dist ~ speed, data = cars)
-#' cars.lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
-#' cars.lm3 <- lm(dist ~ speed + I(speed^2) + I(speed^3), data = cars)
-#' cars.lm4 <- lm(dist ~ ns(speed, df = 3), data = cars)
-#' par(mfrow = c(2, 2))
-#' plotFit(cars.lm1, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
-#'         main = "linear")
-#' plotFit(cars.lm2, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
-#'         main = "quadratic")
-#' plotFit(cars.lm3, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
-#'         main = "cubic")
-#' plotFit(cars.lm4, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
-#'         main = "cubic spline")
-#'   
-#' ## A nonlinear regression example
-#' par(mfrow = c(1, 1))
-#' library(RColorBrewer) # requires that RColorBrewer be installed
-#' blues <- brewer.pal(9, "Blues")
-#' data(Puromycin, package = "datasets")
-#' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
-#' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
-#'                 start = c(Vm = 200, K = 0.05))
-#' plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE, 
-#'         col.conf = blues[4], col.pred = blues[2])
-#' }     
+##' Plotting Confidence/Prediction Bands
+##' 
+##' Plots fitted model for an object of class \code{lm} or \code{nls}vwith the 
+##' option of adding a confidence and/or prediction band. 
+##'
+##' @param object An object that inherits from class \code{lm} or \code{nls}.
+##' @param interval A character string indicating if a prediction band, 
+##'   confidence band, both, or none should be plotted.
+##' @param level The desired confidence level.
+##' @param adjust A character string indicating the type of adjustment (if any) 
+##' to make to the confidence/prediction bands.
+##' @param k An integer to be used in computing the critical value for the 
+##' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
+##' when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
+##' @param shade A logical value indicating if the band should be shaded.
+##' @param extend.range A logical value indicating if the fitted regression line
+##' and bands (if any) should extend to the edges of the plot. Default is 
+##' \code{FALSE}.
+##' @param col.conf Shade color for confidence band.
+##' @param col.pred Shade color for prediction band.
+##' @param col.fit The color to use for the fitted line.
+##' @param border.conf The color to use for the confidence band border.
+##' @param border.pred The color to use for the prediction band border. 
+##' @param lty.conf Line type to use for confidence band border.
+##' @param lty.pred Line type to use for prediction band border.
+##' @param lty.fit Line type to use for the fitted regression line.
+##' @param lwd.conf Line width to use for confidence band border.
+##' @param lwd.pred Line width to use for prediction band border.
+##' @param lwd.fit Line width to use for the fitted regression line.
+##' @param n The number of predictor values at which to evaluate the fitted model
+##' (larger implies a smoother plot).
+##' @param xlab A title for the x axis.
+##' @param ylab A title for the y axis.
+##' @param xlim The x limits (x1, x2) of the plot.
+##' @param ylim The y limits (y1, y2) of the plot. 
+##' @param hide A logical value indicating if the fitted model should be 
+##' plotted on top of the points (FALSE) or behind them (TRUE). Default is 
+##' TRUE.
+##' @param ... Additional optional arguments passed on to \code{plot}.
+##' @rdname plotFit
+##' @export
+##' @note
+##' By default, the plotted intervals are pointwise intervals. For simultaneous 
+##' intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
+##' the Bonferroni adjustment, you must specify value for \code{k}, the number
+##' of intervals for which the coverage is to hold simultaneously. For the 
+##' Scheffe adjustment, specifying a value for \code{k} is only required when
+##' \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
+##' is set equal to \eqn{p}, the number of regression parameters. For example,
+##' if \code{object} is a simple linear regression model, then calling 
+##' \code{plotFit} with \code{interval = "confidence"} and 
+##' \code{adjust = "Scheffe"} will plot the Working-Hotelling band.
+##' 
+##' Confidence/prediction bands for nonlinear regression (i.e., objects of class
+##' \code{nls}) are based on a linear approximation as described in Bates & Watts 
+##' (2007). This funtion was inpired by the \code{plotfit} function in the 
+##' \code{nlstools} package.
+##' @references
+##' Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
+##' Applications. New York: Wiley, 2007.
+##' 
+##' F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools for Nonlinear 
+##' Regression Diagnostics.
+##' @examples
+##' \donttest{
+##' ## A linear regression example
+##' data(cars, package = "datasets")
+##' library(splines)
+##' cars.lm1 <- lm(dist ~ speed, data = cars)
+##' cars.lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
+##' cars.lm3 <- lm(dist ~ speed + I(speed^2) + I(speed^3), data = cars)
+##' cars.lm4 <- lm(dist ~ ns(speed, df = 3), data = cars)
+##' par(mfrow = c(2, 2))
+##' plotFit(cars.lm1, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+##'         main = "linear")
+##' plotFit(cars.lm2, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+##'         main = "quadratic")
+##' plotFit(cars.lm3, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+##'         main = "cubic")
+##' plotFit(cars.lm4, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150), 
+##'         main = "cubic spline")
+##'   
+##' ## A nonlinear regression example
+##' par(mfrow = c(1, 1))
+##' library(RColorBrewer) # requires that RColorBrewer be installed
+##' blues <- brewer.pal(9, "Blues")
+##' data(Puromycin, package = "datasets")
+##' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
+##' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
+##'                 start = c(Vm = 200, K = 0.05))
+##' plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE, 
+##'         col.conf = blues[4], col.pred = blues[2])
+##' }     
 plotFit <- function(object, ...) {
   UseMethod("plotFit")
 } 
 
-#' @rdname plotFit
-#' @export
-#' @method plotFit lm
+##' @rdname plotFit
+##' @export
+##' @method plotFit lm
 plotFit.lm <- function(object,  
                        interval = c("none", "both", "confidence", "prediction"), level = 0.95,
                        adjust = c("none", "Bonferroni", "Scheffe"), k, ...,
@@ -274,9 +274,9 @@ plotFit.lm <- function(object,
   
 }
 
-#' @rdname plotFit
-#' @export
-#' @method plotFit nls
+##' @rdname plotFit
+##' @export
+##' @method plotFit nls
 plotFit.nls <- function(object, 
                         interval = c("none", "both", "confidence", "prediction"), level = 0.95,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 

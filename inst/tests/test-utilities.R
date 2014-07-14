@@ -1,9 +1,51 @@
-## TODO: Test that predictions and prediction standard errors are correct. The
-##       values produced by predict2.nls should be compared to the output from 
-##       SAS or JMP.
+
 
 context("Prediction")
 
-# test_that("predictions and prediction standard errors are correct", {
-#   
-# }
+test_that("predictions and prediction standard errors are correct", {
+  
+  ## DNase data from the dataframes package
+  DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
+                                0.39062500, 0.39062500, 0.78125000, 0.78125000, 
+                                1.56250000, 1.56250000, 3.12500000, 3.12500000, 
+                                6.25000000, 6.25000000, 12.50000000, 12.50000000),
+                      density = c(0.017, 0.018, 0.121, 0.124, 0.206, 0.215, 
+                                  0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
+                                  1.334, 1.364, 1.730, 1.710))
+  DNase1.nls <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
+                    data = DNase1)
+  DNase1.conf <- predict2(DNase1.nls, interval = "confidence")
+  DNase1.pred <- predict2(DNase1.nls, interval = "prediction")
+  
+  ## Fitted value standard errors from PROC NLIN in SAS/STATS
+  SAS.se.fit <- c(0.002899, 0.002899, 0.006079, 0.006079, 0.007461, 0.007461, 
+              0.007704, 0.007704, 0.007581, 0.007581, 0.009277, 0.009277,
+              0.009038, 0.009038, 0.012925, 0.012925)
+  
+  ## Confidence limits from PROC NLIN in SAS/STATS
+  SAS.conf.lwr <- c(0.02442, 0.02442, 0.09892, 0.09892, 0.19246, 0.19246,
+                    0.35768, 0.35768, 0.61640, 0.61640, 0.96082, 0.96082,
+                    1.34799, 1.34799, 1.68706, 1.68706)
+  SAS.conf.upr <- c(0.03694, 0.03694, 0.12518, 0.12518, 0.22470, 0.22470,
+                    0.39097, 0.39097, 0.64916, 0.64916, 1.00090, 1.00090,
+                    1.38704, 1.38704, 1.74291, 1.74291)
+  
+  ## Prediction limits from PROC NLIN in SAS/STATS
+  SAS.pred.lwr <- c(-0.01126, -0.01126,  0.06855,  0.06855,  0.16409,  0.16409,  
+                     0.32965,  0.32965,  0.58819,  0.58819,  0.93481,  0.93481,
+                     1.32168,  1.32168,  1.66500,  1.66500)
+  SAS.pred.upr <- c(0.07262, 0.07262, 0.15555, 0.15555, 0.25307, 0.25307,
+                    0.41901, 0.41901, 0.67736, 0.67736, 1.02692, 1.02692,
+                    1.41335, 1.41335, 1.76498, 1.76498)
+  
+  ## Expectations
+  expect_true(all.equal(round(DNase1.conf$se.fit, 6), SAS.se.fit))
+  expect_true(all.equal(round(DNase1.pred$se.fit, 6), SAS.se.fit))
+  expect_true(all.equal(round(DNase1.conf$lwr, 5), SAS.conf.lwr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.conf$upr, 5), SAS.conf.upr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred$lwr, 5), SAS.pred.lwr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred$upr, 5), SAS.pred.upr, tol = 1e-05))
+  
+  
+})
+

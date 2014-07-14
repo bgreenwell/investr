@@ -1,79 +1,80 @@
-#' Calibration for Linear and Nonlinear Regression Models.
-#' 
-#' The function \code{invest} computes the inverse estimate and a condfidence 
-#' interval for the unknown predictor value that corresponds to an observed 
-#' value of the response (or vector thereof) or specified value of the mean 
-#' response. See the references listed below for more details. 
-#' 
-#' @rdname invest
-#' @export
-#' 
-#' @param object An object that inherits from class \code{lm} or \code{nls}.
-#' @param y0 The value of the observed response(s) or specified value of the 
-#'           mean response.
-#' @param interval The type of interval required.
-#' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'              the interval to be calculated. 
-#' @param mean.response Logical indicating whether confidence intervals should
-#'                      correspond to an individual response (\code{FALSE}) or a 
-#'                      mean response
-#'        (\code{TRUE}).
-#' @param lower The lower endpoint of the interval to be searched.
-#' @param upper The upper endpoint of the interval to be searched.
-#' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
-#'            minimum of 1e-10.
-#' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
-#' (\code{TRUE}).
-#' @param adjust A logical value indicating if an adjustment should be made to
-#'               the critical value used in calculating the confidence interval.
-#'               This is useful for when the calibration curve is to be used 
-#'               multiple, say k, times.
-#' @param k The number times the calibration curve is to be used for computing a 
-#'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
-#' @param ... Additional optional arguments. At present, no optional arguments 
-#'            are used.
-#' @return An object of class \code{calibrate} containing the following 
-#'         components:
-#' \describe{
-#'   \item{\code{estimate}}{The estimate of x0.}
-#'   \item{\code{lwr}}{The lower confidence limit for x0.}
-#'   \item{\code{upr}}{The upper confidence limit for x0.}
-#'   \item{\code{se}}{An estimate of the standard error (Wald interval only).}
-#'   \item{\code{interval}}{The method used for calculating \code{lower} and 
-#'                   \code{upper} (only used by \code{print} method).}
-#' }
-#' @references
-#' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
-#' Applications. Belmont, Calif: Duxbury Press, 1994. 
-#'
-#' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
-#' Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
-#' Springer, 2004. 
-#' 
-#' Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley, 
-#' 1989.
-#' @examples
-#' data(Puromycin, package = "datasets")
-#' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
-#' Puro2.nls <- nls(rate ~ (theta1 * conc) / (theta2 + conc), 
-#'                  data = Puromycin2, start = list(theta1 = 200, theta2 = 1))
-#' plotFit(Puro2.nls, interval = "both")
-#' invest(Puro2.nls, y0 = 100, interval = "inversion")
-#' invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
+##' Calibration for Linear and Nonlinear Regression Models.
+##' 
+##' The function \code{invest} computes the inverse estimate and a condfidence 
+##' interval for the unknown predictor value that corresponds to an observed 
+##' value of the response (or vector thereof) or specified value of the mean 
+##' response. See the references listed below for more details. 
+##' 
+##' @rdname invest
+##' @export
+##' 
+##' @param object An object that inherits from class \code{lm} or \code{nls}.
+##' @param y0 The value of the observed response(s) or specified value of the 
+##'           mean response.
+##' @param interval The type of interval required.
+##' @param level A numeric scalar between 0 and 1 giving the confidence level for 
+##'              the interval to be calculated. 
+##' @param mean.response Logical indicating whether confidence intervals should
+##'                      correspond to an individual response (\code{FALSE}) or a 
+##'                      mean response
+##'        (\code{TRUE}).
+##' @param lower The lower endpoint of the interval to be searched.
+##' @param upper The upper endpoint of the interval to be searched.
+##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
+##'            minimum of 1e-10.
+##' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
+##' (\code{TRUE}).
+##' @param adjust A logical value indicating if an adjustment should be made to
+##'               the critical value used in calculating the confidence interval.
+##'               This is useful for when the calibration curve is to be used 
+##'               multiple, say k, times.
+##' @param k The number times the calibration curve is to be used for computing a 
+##'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
+##' @param ... Additional optional arguments. At present, no optional arguments 
+##'            are used.
+##' @return An object of class \code{calibrate} containing the following 
+##'         components:
+##' \describe{
+##'   \item{\code{estimate}}{The estimate of x0.}
+##'   \item{\code{lwr}}{The lower confidence limit for x0.}
+##'   \item{\code{upr}}{The upper confidence limit for x0.}
+##'   \item{\code{se}}{An estimate of the standard error (Wald interval only).}
+##'   \item{\code{interval}}{The method used for calculating \code{lower} and 
+##'                   \code{upper} (only used by \code{print} method).}
+##' }
+##' @references
+##' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
+##' Applications. Belmont, Calif: Duxbury Press, 1994. 
+##'
+##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
+##' Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
+##' Springer, 2004. 
+##' 
+##' Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley, 
+##' 1989.
+##' @examples
+##' data(Puromycin, package = "datasets")
+##' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
+##' Puro2.nls <- nls(rate ~ (theta1 * conc) / (theta2 + conc), 
+##'                  data = Puromycin2, start = list(theta1 = 200, theta2 = 1))
+##' plotFit(Puro2.nls, interval = "both")
+##' invest(Puro2.nls, y0 = 100, interval = "inversion")
+##' invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
 invest <- function(object, ...) {
   UseMethod("invest")
 } 
 
-#' @rdname invest
-#' @export
-#' @method invest lm
+##' @rdname invest
+##' @export
+##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                       level = 0.95, mean.response = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000,  
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
   ## Extract data, variables, etc.
-  d <- eval(object$call$data, sys.frame())
+#   d <- eval(object$call$data, sys.frame())
+  d <- eval(object$call$data, env = parent.frame())
   yname <- all.vars(formula(object)[[2]])
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (missing(lower)) {
@@ -83,21 +84,21 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     upper <- max(d[, xname])
   }
   interval <- match.arg(interval)
-  alpha <- 1 - level
-  eta <- mean(y0)
-  m <- length(y0)
-  n <- length(resid(object)) # in case of missing values
-  p <- length(coef(object))
+  alpha <- 1 - level          # significance level
+  eta <- mean(y0)             # mean unknown
+  m <- length(y0)             # number of unknowns 
+  n <- length(resid(object))  # in case of missing values
+  p <- length(coef(object))   # number of regression coefficients
   
   ## Calculate correct variance
   ## FIXME: is this the correct variance to use for all univariate linear 
   ## models? For example, is this the correct variance for a quadratic fit?
-  v1 <- n - p                      # stage I degrees of freedom
-  v2 <- m - 1                      # stage II degrees of freedom
-  u1 <- summary(object)$sigma^2    # stage I variance estimate
-  u2 <- if (m == 1) 0 else var(y0) # stage II variance estimate
-  u <- (v1*u1 + v2*u2)/(v1 + v2)   # pooled estimate of variance
-  rat <- u/u1                      # temporary fix 
+  v1 <- n - p                       # stage I degrees of freedom
+  v2 <- m - 1                       # stage II degrees of freedom
+  u1 <- summary(object)$sigma^2     # stage I variance estimate
+  u2 <- if (m == 1) 0 else var(y0)  # stage II variance estimate
+  u <- (v1*u1 + v2*u2)/(v1 + v2)    # pooled estimate of variance
+  rat <- u/u1                       # temporary fix 
   
   ## Try to catch errors
   if (length(xname) != 1) {
@@ -137,7 +138,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (interval == "inversion") { 
     
     ## Inversion function
-    invFun <- function(x) {
+    inversionFun <- function(x) {
       pred <- predict(object, makeData(object, x), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else u/m + rat*pred$se.fit^2
       (eta - pred$fit)^2/denom - w^2
@@ -145,9 +146,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
         
     ## Compute lower and upper confidence limits (i.e., the roots of the 
     ## inversion function)
-    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+    lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+    upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     
     ## Provide (informative) error message if confidence limits not found
@@ -220,9 +221,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
 }
 
-#' @rdname invest
-#' @export
-#' @method invest nls
+##' @rdname invest
+##' @export
+##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
                        level = 0.95, mean.response = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
@@ -230,7 +231,9 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
 {
   
   ## Extract data, variables, etc.
-  d <- eval(object$call$data, sys.frame())
+#   d <- eval(object$call$data, sys.frame())
+  d <- eval(if("data" %in% names(object)) object$data else object$call$data,
+            env = parent.frame())
   yname <- all.vars(formula(object)[[2]])
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   if (missing(lower)) {
@@ -247,7 +250,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   p <- length(coef(object))
   
   ## Calculate variance
-  u <- sigma(object)^2 
+  u <- summary(object)$sigma^2 
   
   ## Try to catch errors
   if (length(xname) != 1) {
@@ -287,7 +290,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (interval == "inversion") {
     
     ## Inversion function
-    invFun <- function(x) {
+    inversionFun <- function(x) {
       pred <- predict2(object, makeData(object, x)) # FIXME:, se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else (u/m + pred$se.fit^2)
       (eta - pred$fit)^2/denom - w^2
@@ -295,9 +298,9 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Compute lower and upper confidence limits (i.e., the roots of the 
     ## inversion function)
-    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), tol = tol, 
+    lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(invFun, interval = c(x0.est, upper), tol = tol, 
+    upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
 
     ## Provide (informative) error message if confidence limits not found
@@ -370,14 +373,12 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
 }
 
-#' @rdname invest
-#' @export
-#' @method invest lme
+##' @rdname invest
+##' @export
+##' @method invest lme
 invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, lower, upper, 
-                       q1, q2,
-#                        q1 = qnorm(1-(1+level)/2), q2 = qnorm((1+level)/2),
-                       tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
+                       level = 0.95, mean.response = FALSE, lower, upper, q1, 
+                       q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
   ## Extract data, variables, etc.
@@ -395,7 +396,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   eta <- mean(y0)
   m <- length(y0)
   if (m != 1) stop('only a single unknown allowed for objects of class "lme"')
-  n <- length(resid(object)) 
+  N <- length(resid(object)) 
   p <- length(fixef(object))
   
   ## Calculate variance
@@ -409,13 +410,11 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     stop("Only one value of the mean response is allowed.")
   }
   
-  # Critical value
-  w <- qnorm(1 - alpha/2)
+  # Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
   if (missing(q1) && missing(q2)) {
-    q2 <- w
-    q1 <- -1*w
+    q1 <- qnorm(alpha/2)
+    q2 <- qnorm(1 - alpha/2)
   }
-#   w <- qt(1-alpha/2, n-1) # suggested by Oman (1998. pg. 445)
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
@@ -442,19 +441,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (interval == "inversion") { 
     
     ## Inversion function
-#     invFun <- function(x) {
-#       pred <- predict2(object, makeData(object, x), se.fit = TRUE)
-#       denom <- if (mean.response) pred$se.fit^2 else (var.y0 + pred$se.fit^2)
-#       (eta - pred$fit)^2/denom - w^2
-#     }
-#     
-#     ## Compute lower and upper confidence limits (i.e., the roots of the 
-#     ## inversion function)
-#     lwr <- try(uniroot(invFun, interval = c(lower, x0.est), 
-#                        tol = tol, maxiter = maxiter)$root, silent = TRUE)
-#     upr <- try(uniroot(invFun, interval = c(x0.est, upper), 
-#                        tol = tol, maxiter = maxiter)$root, silent = TRUE)
-    invFun <- function(x, bound = c("lower", "upper")) {
+    inversionFun <- function(x, bound = c("lower", "upper")) {
       bound <- match.arg(bound)
       pred <- predict2(object, makeData(object, x), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
@@ -467,10 +454,12 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Compute lower and upper confidence limits (i.e., the roots of the 
     ## inversion function)
-    lwr <- try(uniroot(invFun, interval = c(lower, x0.est), bound = "lower",
-                       tol = tol, maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(invFun, interval = c(x0.est, upper), bound = "upper",
-                       tol = tol, maxiter = maxiter)$root, silent = TRUE)
+    lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), 
+                       bound = "lower", tol = tol, maxiter = maxiter)$root, 
+               silent = TRUE)
+    upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), 
+                       bound = "upper", tol = tol, maxiter = maxiter)$root, 
+               silent = TRUE)
     
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
@@ -502,7 +491,8 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     ## Function of parameters whose gradient is required
     dmFun <- function(params) {
       fun <- function(x) {
-        X <- model.matrix(eval(object$call$fixed)[-2], data = makeData(object, x))
+        X <- model.matrix(eval(object$call$fixed)[-2], 
+                          data = makeData(object, x))
         if (mean.response) {
           X %*% params - eta
         } else {
