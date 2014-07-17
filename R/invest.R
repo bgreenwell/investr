@@ -431,8 +431,8 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (inherits(x0.est, "try-error")) {
     stop(paste("Point estimate not found in the default interval (", lower, 
                ", ", upper, "). ", 
-               "Try tweaking the values of lower and upper. ",
-               "Use plotFit for guidance.", sep = ""), 
+               "Try tweaking the values of lower and upper.", 
+               sep = ""), 
          call. = FALSE)
   }
   
@@ -470,15 +470,15 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the default interval (", 
                  lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper. ", 
-                 "Use plotFit for guidance.", sep = ""), 
+                 "). ", "Try tweaking the values of lower and upper.", 
+                 sep = ""), 
            call. = FALSE)
     }
     if (inherits(upr, "try-error")) {
       stop(paste("Upper confidence limit not found in the default interval (", 
                  lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper. ", 
-                 "Use plotFit for guidance.", sep = ""), 
+                 "). ", "Try tweaking the values of lower and upper.",
+                 sep = ""), 
            call. = FALSE)
     }
     

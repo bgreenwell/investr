@@ -12,9 +12,8 @@ Changes for version 1.0.1
 
 Changes for version 1.1.0
 ====================
-* invest now accepts objcts of class 'lme' (experimental)
-* A few minor bug fixes
-* Various code improvements
+* invest now accepts objects of class 'lme' (experimental)
+* A few minor bug fixes code improvements
 * Added more tests
 
 TODO:

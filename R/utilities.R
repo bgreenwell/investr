@@ -36,7 +36,7 @@ makeData <- function(object, x) {
 ##' Construct design matrix for random effects
 ##'
 ##' Create a random effects design matrix from \code{newdata} based on a fitted 
-##' model.
+##' model. (For internal use only.)
 ##' 
 ##' @rdname makeZ
 ##' @keywords internal
@@ -109,10 +109,10 @@ predict2.lm <- function(object, newdata,
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
   xx <- list(d[[xname]])
   names(xx) <- xname
-  alpha <- 1 - level
+  alpha <- 1 - level  # FIXME: Could just use (level+1)/2 instead of 1-alpha/2
+                      #        and (1-level)/2 instead of alpha/2.
   n <- length(resid(object))
   p <- length(coef(object))
-  alpha <- 1 - level
   
   ## FIXME: Why does this throw a warning?
   pred <- suppressWarnings(predict(object, newdata = xx, se.fit = TRUE))
