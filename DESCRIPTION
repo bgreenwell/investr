@@ -1,7 +1,7 @@
 Package: investr
 Type: Package
 Title: Inverse estimation/calibration functions
-Version: 1.1.0
+Version: 1.1.1
 Author: Brandon M. Greenwell
 Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>
 Description: This package provides functions to facilitate inverse 
@@ -10,7 +10,8 @@ Description: This package provides functions to facilitate inverse
         models with or without confidence/prediction bands that may be of use to 
         the general user.
 Depends: graphics, stats
-Suggests: boot, car, nlme, testthat
+Suggests: boot, car, testthat
+Imports: nlme
 Date: 2014-04-18
 License: GPL (>= 2)
 URL: https://github.com/w108bmg/investr

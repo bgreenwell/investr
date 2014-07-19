@@ -13,7 +13,7 @@ with linear, nonlinear, and (linear) mixed models.
 \tabular{ll}{
 Package: \tab investr\cr
 Type: \tab Package\cr
-Version: \tab 1.1.0\cr
+Version: \tab 1.1.1\cr
 Date: \tab 2014-04-18\cr
 License: \tab GPL (>= 2)\cr
 }

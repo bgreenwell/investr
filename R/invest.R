@@ -77,56 +77,36 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                       tol = .Machine$double.eps^0.25, maxiter = 1000,  
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
-  ## Extract data, variables, etc.
-#   d <- eval(object$call$data, sys.frame())
-  d <- eval(object$call$data, envir = parent.frame())
-  yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
-  if (missing(lower)) {
-    lower <- min(d[, xname])
-  }
-  if (missing(upper)) {
-    upper <- max(d[, xname])
-  }
-  interval <- match.arg(interval)
-  alpha <- 1 - level          # significance level
+
+  vars <- getVars(object)  # extract data and variable information
+  xname <- vars$x.names  # predictor variable name
+  yname <- vars$y.names  # response variable name
+  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
+  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
   eta <- mean(y0)             # mean unknown
   m <- length(y0)             # number of unknowns 
   n <- length(resid(object))  # in case of missing values
   p <- length(coef(object))   # number of regression coefficients
-  
-  ## Calculate correct variance
   ## FIXME: is this the correct variance to use for all univariate linear 
-  ## models? For example, is this the correct variance for a quadratic fit?
-  v1 <- n - p                       # stage I degrees of freedom
-  v2 <- m - 1                       # stage II degrees of freedom
-  u1 <- Sigma(object)^2             # stage I variance estimate
-  u2 <- if (m == 1) 0 else var(y0)  # stage II variance estimate
-  u <- (v1*u1 + v2*u2)/(v1 + v2)    # pooled estimate of variance
-  rat <- u/u1                       # temporary fix 
+  ##        models? For example, is this the correct variance for a quadratic 
+  ##        fit?
+  df1 <- n - p  # stage I degrees of freedom
+  df2 <- m - 1  # stage II degrees of freedom
+  var1 <- Sigma(object)^2  # stage I variance estimate
+  var2 <- if (m == 1) 0 else var(y0)  # stage II variance estimate
+  var.pooled <- (df1*var1 + df2*var2)/(df1 + df2)  # pooled estimate of variance
+  rat <- var.pooled/var1  # right variance?
   
   ## Try to catch errors
-  if (length(xname) != 1) {
-    stop("Only one independent variable allowed.")
-  }
-  if (mean.response && m > 1) {
-    stop("Only one mean response value allowed.")
-  }
-  
-  # Adjustment for simultaneous intervals
-  adjust <- match.arg(adjust)
-  w <- if (adjust == "Bonferroni" && m == 1) {
-         qt(1 - alpha/(2 * k), n+m-p-1)
-       } else {
-         qt(1 - alpha/2, n+m-p-1)
-       }
+  if (length(xname) != 1) stop("Only one independent variable allowed.") 
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
-      predict(object, newdata = makeData(object, x)) - eta
-    }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-    silent = TRUE)
-
+    predict(object, newdata = makeData(object, x)) - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
   ## Provide (informative) error message if point estimate is not found
   if (inherits(x0.est, "try-error")) {
     stop(paste("Point estimate not found in the default interval (", lower, 
@@ -135,20 +115,27 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                "Use plotFit for guidance.", sep = ""), 
          call. = FALSE)
   }
-
+  
   ## Return point estimate only
+  interval <- match.arg(interval)
   if (interval == "none") return(x0.est)
-
+  
+  ## Critical value for confidence interval computations
+  adjust <- match.arg(adjust)
+  crit <- if (adjust == "Bonferroni" && m == 1) qt((level + 2*k - 1) / (2*k), n+m-p-1)
+          else qt((level+1) / 2, n+m-p-1)
+  
   ## inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
     
     ## Inversion function
     inversionFun <- function(x) {
       pred <- predict(object, makeData(object, x), se.fit = TRUE)
-      denom <- if (mean.response) pred$se.fit^2 else u/m + rat*pred$se.fit^2
-      (eta - pred$fit)^2/denom - w^2
+      denom <- if (mean.response) pred$se.fit^2 else var.pooled/m + 
+        rat*pred$se.fit^2
+      (eta - pred$fit)^2/denom - crit^2
     }
-        
+    
     ## Compute lower and upper confidence limits (i.e., the roots of the 
     ## inversion function)
     lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), tol = tol, 
@@ -178,7 +165,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                 "upper" = upr, 
                 "interval" = interval)
   } 
-
+  
   ## Wald interval -------------------------------------------------------------
   if (interval == "Wald") { 
     
@@ -193,8 +180,8 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-          predict(object.copy, makeData(object.copy, x)) - z
-        }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
+        predict(object.copy, makeData(object.copy, x)) - z
+      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
     ## Variance-covariane matrix
@@ -204,18 +191,18 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     } else {
       params <- c(coef(object), eta)
       covmat <- diag(p + 1)
-      covmat[p + 1, p + 1] <- u/m
+      covmat[p + 1, p + 1] <- var.pooled/m
       covmat[1:p, 1:p] <- vcov(object)
     }
-          
+    
     ## Calculate gradient, and return standard error
     gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
-
+    
     ## Store results in a list
     res <- list("estimate" = x0.est, 
-                "lower" = x0.est - se * w, 
-                "upper" = x0.est + se * w, 
+                "lower" = x0.est - crit * se, 
+                "upper" = x0.est + crit * se, 
                 "se" = se,
                 "interval" = interval)
   }
@@ -232,53 +219,34 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
                        level = 0.95, mean.response = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
-                       adjust = c("none", "Bonferroni"), k, ...) 
-{
+                       adjust = c("none", "Bonferroni"), k, ...) {
   
-  ## Extract data, variables, etc.
-#   d <- eval(object$call$data, sys.frame())
-  d <- eval(if("data" %in% names(object)) object$data else object$call$data,
-            envir = parent.frame())
-  yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
-  if (missing(lower)) {
-    lower <- min(d[, xname])
-  }
-  if (missing(upper)) {
-    upper <- max(d[, xname])
-  }
-  interval <- match.arg(interval)
-  alpha <- 1 - level
-  eta <- mean(y0)
-  m <- length(y0)
-  n <- length(resid(object)) 
-  p <- length(coef(object))
-  
-  ## Calculate variance
-  u <- Sigma(object)^2
+  vars <- getVars(object)  # extract data and variable information
+  xname <- vars$x.names  # predictor variable name
+  yname <- vars$y.names  # response variable name
+  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
+  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
+  eta <- mean(y0)  # mean response
+  m <- length(y0)  # number of unknowns 
+  n <- length(resid(object))  # sample size
+  p <- length(coef(object))  # number of parameters
+  var.pooled <- Sigma(object)^2  # residual variance
   
   ## Try to catch errors
-  if (length(xname) != 1) {
-    stop("Only one independent variable allowed.")
-  }
-  if(mean.response && m > 1) {
-    stop("Only one value of the mean response is allowed.")
-  }
+  if (vars$x.dim != 1) stop("Only one independent variable allowed.")
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   
-  # Adjustment for simultaneous intervals
+  ## Critical value for confidence interval computations
   adjust <- match.arg(adjust)
-  w <- if (adjust == "Bonferroni" && m == 1) {
-         qt(1 - alpha/(2 * k), n+m-p-1)
-       } else {
-         qt(1 - alpha/2, n+m-p-1)
-       }
-  
+  crit <- if (adjust == "Bonferroni" && m == 1) qt((level + 2*k - 1) / (2*k), n+m-p-1)
+          else qt((level + 1) / 2, n+m-p-1)
+
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
-      predict(object, newdata = makeData(object, x)) - eta
-    }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-    silent = TRUE)
-
+    predict(object, newdata = makeData(object, x)) - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
   ## Provide (informative) error message if point estimate is not found
   if (inherits(x0.est, "try-error")) {
     stop(paste("Point estimate not found in the default interval (", lower, 
@@ -289,6 +257,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   }
   
   ## Return point estimate only
+  interval <- match.arg(interval)
   if (interval == "none") return(x0.est)
   
   ## Inversion interval --------------------------------------------------------
@@ -297,8 +266,8 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     ## Inversion function
     inversionFun <- function(x) {
       pred <- predict2(object, makeData(object, x)) # FIXME:, se.fit = TRUE)
-      denom <- if (mean.response) pred$se.fit^2 else (u/m + pred$se.fit^2)
-      (eta - pred$fit)^2/denom - w^2
+      denom <- if (mean.response) pred$se.fit^2 else (var.pooled/m + pred$se.fit^2)
+      (eta - pred$fit)^2/denom - crit^2
     }
     
     ## Compute lower and upper confidence limits (i.e., the roots of the 
@@ -307,7 +276,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
                        maxiter = maxiter)$root, silent = TRUE)
     upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
-
+    
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the default interval (", 
@@ -356,7 +325,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     } else {
       params <- c(coef(object), eta)
       covmat <- diag(p + 1)
-      covmat[p + 1, p + 1] <- u/m
+      covmat[p + 1, p + 1] <- var.pooled/m
       covmat[1:p, 1:p] <- vcov(object)
     }
     
@@ -366,12 +335,12 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 
-                "lower" = x0.est - w * se, 
-                "upper" = x0.est + w * se, 
+                "lower" = x0.est - crit * se, 
+                "upper" = x0.est + crit * se, 
                 "se" = se,
                 "interval" = interval)
   }
-
+  
   ## Assign class label and return results
   class(res) <- "calibrate"
   res
@@ -386,40 +355,25 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
                        q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
-  ## Extract data, variables, etc.
-  d <- getData(object) #eval(object$call$data, sys.frame())
-  yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
-  if (missing(lower)) {
-    lower <- min(d[, xname])
-  }
-  if (missing(upper)) {
-    upper <- max(d[, xname])
-  }
-  interval <- match.arg(interval)
-  alpha <- 1 - level
+  vars <- getVars(object)  # extract data and variable information
+  xname <- vars$x.names  # predictor variable name
+  yname <- vars$y.names  # response variable name
+  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
+  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
   eta <- mean(y0)
   m <- length(y0)
-  if (m != 1) stop('only a single unknown allowed for objects of class "lme"')
+  if (m != 1) stop('Only a single unknown allowed for objects of class "lme".')
   N <- length(resid(object)) 
   p <- length(fixef(object))
-  
-  ## Calculate variance
-  u <- Sigma(object)^2  # residual variance
+#   res.var <- Sigma(object)^2  # residual variance
   
   ## Try to catch errors
-  if (length(xname) != 1) {
-    stop("Only one independent variable allowed.")
-  }
-  if(mean.response && m > 1) {
-    stop("Only one value of the mean response is allowed.")
-  }
+  if (vars$x.dim != 1) stop("Only one independent variable allowed.")
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   
-  # Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
-  if (missing(q1) && missing(q2)) {
-    q1 <- qnorm(alpha/2)
-    q2 <- qnorm(1 - alpha/2)
-  }
+  ## Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
+  if (missing(q1)) q1 <- qnorm((1-level) / 2)
+  if (missing(q2)) q2 <- qnorm((1+level) / 2)
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
@@ -437,6 +391,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   }
   
   ## Return point estimate only
+  interval <- match.arg(interval)
   if (interval == "none") return(x0.est)
   
   ## Estimate variance of new response
@@ -525,8 +480,8 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Store results in a list
     res <- list("estimate" = x0.est, 
-                "lower" = x0.est - q2*se, 
-                "upper" = x0.est + q2*se,
+                "lower" = x0.est - q2 * se, 
+                "upper" = x0.est + q2 * se,
                 "se" = se,
                 "interval" = interval)
     

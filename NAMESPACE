@@ -1,6 +1,8 @@
 
 export(
   calibrate,
+  getData,
+  getVars,
   invest,
   plotFit
 )    
@@ -8,15 +10,16 @@ export(
 ## Methods
 S3method(calibrate, default)    
 S3method(calibrate, formula)
-S3method(calibrate, lm)    
+S3method(calibrate, lm)  
+S3method(getData, lm)  
 S3method(invest, lm)    
 S3method(invest, nls) 
 S3method(invest, lme)  # new (experimental)  
 S3method(plotFit, lm)    
 S3method(plotFit, nls) 
 S3method(print, calibrate)
-
-
+## Recommended packages
+importFrom(nlme, getData, fixef, asOneFormula, getVarCov)
 
 
 

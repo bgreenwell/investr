@@ -7,7 +7,7 @@ makeZ(object, newdata)
 }
 \description{
 Create a random effects design matrix from \code{newdata} based on a fitted
-model.
+model. (For internal use only.)
 }
 \keyword{internal}
 
