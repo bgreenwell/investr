@@ -16,7 +16,7 @@
 ##' @export getData
 ##' @method getData lm
 ##' @export
-getData.lm <- function(object) {
+getData.lm <- function(object, envir) {
   mCall <- object$call
   data <- eval(mCall$data)
   if (is.null(data)) return(data)
@@ -60,14 +60,16 @@ getData.lm <- function(object) {
 # data(cars, package = "datasets")
 # cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
 # getVars(cars.lm)
-getVars <- function(object) {
+getVars <- function(object, return.data = FALSE) {
   data <- getData(object)  # extract data from object
-  x.names <- intersect(all.vars(formula(object)[[3]]), colnames(data))  
+  x.names <- intersect(all.vars(formula(object)[[3]]), colnames(data)) 
   y.names <- all.vars(formula(object)[[2]])
   x <- data[, x.names]  # extract predictor columns
   y <- data[, y.names]  # extract response columns
-  list(x.names = x.names, y.names = y.names, x = x, y = y,
-       x.dim = length(x.names), y.dim = length(y.names))
+  res <- list(x.names = x.names, y.names = y.names, x = x, y = y,
+              x.dim = length(x.names), y.dim = length(y.names))
+  if (return.data) res$data <- data
+  res
 }
 
 ##' Extract residual standard error
@@ -86,23 +88,15 @@ Sigma.lme <- function(object, ...) object$sigma
 ##' Make new data frame
 ##' 
 ##' Create a new data frame from a specified x value that has the same structure 
-##' as the data frame used to create \code{object}. 
+##' as the data frame used to create \code{object}. (For internal use only.)
 ##' 
 ##' @keywords internal
 makeData <- function(object, x) {
-  
-  ## FIXME: What if object$call$data is NULL?
-  .data <- if (inherits(object, "lme")) {
-    getData(object) # object$data
-  } else {
-    eval(object$call$data, sys.frame())
-  }
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data))
-  if (length(xname) != 1) stop("Only a single predictor variable is allowed.")
-  newdata <- data.frame(x)
-  names(newdata) <- xname
-  newdata
-  
+  vars <- getVars(object)
+#   if (is.null(dim(x))) x <- t(x)
+#   if (ncol(x) != vars$x.dim) stop("Must supply values for each covariate.")
+  if (vars$x.dim != 1) stop("Only objects with a single covariate are allowed.")
+  setNames(data.frame(x), vars$x.names)
 }
 
 ##' Construct design matrix for random effects
@@ -113,10 +107,10 @@ makeData <- function(object, x) {
 ##' @rdname makeZ
 ##' @keywords internal
 makeZ <- function(object, newdata) {
-  Q <- object$dims$Q
-  mCall <- object$call
-  fixed <- eval(eval(mCall$fixed)[-2])
-  reSt <- object$modelStruct$reStruct
+  Q <- object$dims$Q  # number of grouping levels
+  mCall <- object$call  # list containing image of the nlme call
+  fixed <- eval(eval(mCall$fixed)[-2])  # fixed effects formula
+  reSt <- object$modelStruct$reStruct  # random effects structure
   mfArgs <- list(formula = asOneFormula(formula(reSt), fixed),
                  data = newdata, na.action = na.fail,
                  drop.unused.levels = TRUE)
@@ -141,9 +135,10 @@ makeX <- function(object, newdata) {
 ##' 
 ##' @keywords internal
 varY <- function(object, newdata) {
-  Z <- makeZ(object, newdata)  # random effects design matrix
-  G <- getVarCov(object)  # random effects variance covariance matrix
-  as.numeric(Z %*% G %*% t(Z) + Sigma(object)^2)  # ZGZ' + (sigma^2)I
+  Zmat <- makeZ(object, newdata)  # random effects design matrix
+  Gmat <- getVarCov(object)  # random effects variance-covariance matrix
+  var.y <- Zmat %*% Gmat %*% t(Zmat) + Sigma(object)^2  # ZGZ' + (sigma^2)I
+  if (is.matrix(var.y)) unname(diag(var.y)) else var.y
 }
 
 ##' Predict method for (Single-Regressor) Linear, Nonlinear, and (Linear) Mixed
@@ -163,75 +158,44 @@ predict2.lm <- function(object, newdata,
                         level = 0.95, 
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
-  
-  ## TODO:
-  ##   (1) How should missing values be handled?
-  
-  ## Extract data, variables, etc.
-  if (missing(newdata)) {
-    d <- eval(object$call$data, envir = parent.frame())
-    if (!is.null(object$call$subset)) {
-      dsub <- with(d, eval(object$call$subset))
-      d <- d[dsub, ]
-    }
-  } else {
-    d <- as.data.frame(newdata) 
-  }
-  yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(d))
-  xx <- list(d[[xname]])
-  names(xx) <- xname
-  alpha <- 1 - level  # FIXME: Could just use (level+1)/2 instead of 1-alpha/2
-                      #        and (1-level)/2 instead of alpha/2.
-  n <- length(resid(object))
-  p <- length(coef(object))
-  
-  ## FIXME: Why does this throw a warning?
-  pred <- suppressWarnings(predict(object, newdata = xx, se.fit = TRUE))
+
+  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
+  n <- length(resid(object))  # sample size
+  p <- length(coef(object))  # number of regression coefficients
+  pred <- suppressWarnings(predict(object, newdata = newdata, se.fit = TRUE))
 
   ## Compute results
   interval <- match.arg(interval)
   if (interval == "none") {
-    
-    ## Store results in a list
-    res <- pred
-  
+    res <- pred  
   } else { 
-    
-    ## Adjustment for simultaneous inference.
+    ## Critical value for interval computations
     adjust <- match.arg(adjust)
-    w <- if (adjust == "Bonferroni") {
-           qt(1 - alpha/(2*k), pred$df)
-         } else if (adjust == "Scheffe") {
-           if (interval == "confidence") {
-             sqrt(p*qf(1 - alpha, p, pred$df))  # Working-Hotelling band
-           } else {
-             sqrt(k*qf(1 - alpha, k, pred$df))  # need k for prediction
-           }     
-         } else {      
-           qt(1 - alpha/2, pred$df)      
-         }
-    
-    ## Confidence interval for mean response
-    if (interval == "confidence") {
-
-        lwr <- pred$fit - w * pred$se.fit
-        upr <- pred$fit + w * pred$se.fit
-    
-    ## Prediction interval for individual response
-    } else {
-      
-      lwr <- pred$fit - w * sqrt(Sigma(object)^2 + pred$se.fit^2)
-      upr <- pred$fit + w * sqrt(Sigma(object)^2 + pred$se.fit^2)
-
+    crit <- if (adjust == "Bonferroni") {
+              qt((level + 2*k - 1)/(2*k), pred$df)
+            } else if (adjust == "Scheffe") {
+              if (interval == "confidence") {
+                sqrt(p*qf(level, p, pred$df))  # Working-Hotelling band
+              } else {
+                sqrt(k*qf(level, k, pred$df))  # need k for prediction
+              }     
+            } else {      
+              qt((level + 1)/2, pred$df)      
+            }
+    ## Calculate intervals
+    if (interval == "confidence") {  # confidence interval for mean response
+        lwr <- pred$fit - crit * pred$se.fit
+        upr <- pred$fit + crit * pred$se.fit
+    } else {  # prediction interval for individual response
+      lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
     }
-    
     ## Store results in a list
     res <- list(fit = as.numeric(pred$fit), 
                 lwr = as.numeric(lwr), 
                 upr = as.numeric(upr))
   }
-    
+  
   ## Return list of results
   return(res)
   
@@ -244,88 +208,52 @@ predict2.nls <- function(object, newdata,
                          adjust = c("none", "Bonferroni", "Scheffe"), k, 
                          ...) {
   
-  ## TODO:
-  ##   (1) Add option se.fit
-  ##   (2) How should missing values be handled?
-  
-  ## Extract data, variables, etc.
-  if (missing(newdata)) {
-    .data <- eval(if("data" %in% names(object)) object$data else object$call$data,
-                  envir = parent.frame())
-    if (!is.null(object$call$subset)) {
-      .data <- .data[with(.data, eval(object$call$subset)), ]  # subset data
-    }
-  } else {
-    .data <- as.data.frame(newdata) 
-  }
-  yname <- all.vars(formula(object)[[2]])
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data))
-  xx <- .data[[xname]]       # predictor values
-  alpha <- 1 - level         # alpha level
-  n <- length(resid(object)) # sample size
+  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
+  xname <- getVars(object)$x.names  # extract covariate label
+  n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of regression parameters
   
-  ## Stop if object$call$algorithm == "plinear"
+  ## No support for the Golub-Pereyra algorithm for partially linear 
+  ## least-squares models
   if (object$call$algorithm == "plinear") {
-    stop(paste("predict2.nls not yet implemented for 'nls' objects fit with the 
-                plinear algorithm"))
+    stop(paste("The Golub-Pereyra algorithm for partially linear least-squares 
+               models is currently not supported."))
   }
   
-  ## Compute gradient 
-  param.names <- names(coef(object)) 
-  for (i in 1:length(param.names)) { 
-    assign(param.names[i], coef(object)[i])  # FIXME: Should assign be used here?
-  }
-  assign(xname, .data[, xname])
-  form <- object$m$formula()
-  rhs <- eval(form[[3]])
-  if (is.null(attr(rhs, "gradient"))) {
-    f0 <- attr(numericDeriv(form[[3]], param.names), "gradient")
-  } else {
-    f0 <- attr(rhs, "gradient")
-  }
-  
-  ## Compute standard error of fitted values
+  ## Calculate standard error of fitted values
+  f0 <- attr(predict(object, newdata = newdata), "gradient")
   R1 <- object$m$Rmat()
   v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
   se.fit <- sqrt(Sigma(object)^2 * v0)
-  pred <- list(fit = object$m$predict(.data), se.fit = se.fit)  
-
+  pred <- list(fit = object$m$predict(newdata), se.fit = se.fit) 
+  
   ## Compute results
   interval <- match.arg(interval)
   if (interval == "none") {
-    
-    ## Store results in a list
-    res <- pred
-                
+    res <- pred                
   } else { 
-    
     # Adjustment for simultaneous inference
     adjust <- match.arg(adjust)
-    w <- if (adjust == "Bonferroni") {
-           qt(1 - alpha/(2*k), df.residual(object))
-         } else if (adjust == "Scheffe") {
-           if (interval == "confidence") {
-             sqrt(p * qf(1 - alpha, p, df.residual(object))) 
-           } else {
-             sqrt(k * qf(1 - alpha, k, df.residual(object))) 
-           }     
-         } else {      
-           qt(1 - alpha/2, df.residual(object))      
-         }
+    alpha <- 1 - level
+    crit <- if (adjust == "Bonferroni") {
+              qt(1 - alpha/(2*k), df.residual(object))
+            } else if (adjust == "Scheffe") {
+              if (interval == "confidence") {
+                sqrt(p * qf(1 - alpha, p, df.residual(object))) 
+              } else {
+                sqrt(k * qf(1 - alpha, k, df.residual(object))) 
+              }     
+            } else {      
+              qt(1 - alpha/2, df.residual(object))      
+            }
     
-    ## Confidence interval for mean response
-    if (interval == "confidence") {
-      
-      lwr <- pred$fit - w * pred$se.fit
-      upr <- pred$fit + w * pred$se.fit
-      
-      ## Prediction interval for individual response
-    } else {
-      
-      lwr <- pred$fit - w * sqrt(Sigma(object)^2 + pred$se.fit^2)
-      upr <- pred$fit + w * sqrt(Sigma(object)^2 + pred$se.fit^2)
-      
+    
+    if (interval == "confidence") {  # confidence limits for mean response
+      lwr <- pred$fit - crit * pred$se.fit  # lower limits
+      upr <- pred$fit + crit * pred$se.fit  # upper limits
+    } else {  # prediction limits for individual response
+      lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # lower limits
+      upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # upper limits
     }
     
     ## Store results in a list
@@ -342,18 +270,14 @@ predict2.nls <- function(object, newdata,
 
 ##' @keywords internal
 predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
-  
-  ## TODO:
-  ##   (1) Check output from se.fit = TRUE against SAS
-  
-  if (missing(newdata)) newdata <- object$data
-  fit <- predict(object, newdata = newdata, level = 0)
+  if (missing(newdata)) newdata <- getData(object)
+  fit <- predict(object, newdata = newdata, level = 0)  # population predictions
+  ## Approximate standard error of fitted values
   if (se.fit) {
-    X <- makeX(object, makeData(object, newdata))
-    se.fit <- sqrt(diag(X %*% vcov(object) %*% t(X)))
+    Xmat <- makeX(object, makeData(object, newdata))
+    se.fit <- sqrt(diag(Xmat %*% vcov(object) %*% t(Xmat)))
     list(fit = fit, se.fit = se.fit)
   } else fit
-  
 }
 
 ##' Crystal weight data
