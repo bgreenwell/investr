@@ -16,9 +16,10 @@
 ##' @export getData
 ##' @method getData lm
 ##' @export
-getData.lm <- function(object, envir) {
+getData.lm <- function(object) {
+  # FIXME: Need to fix scoping issue caused by eval!
   mCall <- object$call
-  data <- eval(mCall$data)
+  data <- eval(mCall$data)  
   if (is.null(data)) return(data)
   ## Handle missing data
   naAct <- object[["na.action"]]
@@ -41,7 +42,7 @@ getData.lm <- function(object, envir) {
 ##' 
 ##' Extract the variables used to fit a particular model.
 ##' 
-##' @rdname getVars
+##' @rdname getVarInfo
 ##' @export
 ##' 
 ##' @param object A fitted model object.
@@ -55,13 +56,10 @@ getData.lm <- function(object, envir) {
 ##'   \item{\code{x.dim}}{The number of predictor variables used.}
 ##'   \item{\code{y.dim}}{The number of response variables used.}
 ##' }
-# 
-# @examples
-# data(cars, package = "datasets")
-# cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
-# getVars(cars.lm)
-getVars <- function(object, return.data = FALSE) {
-  data <- getData(object)  # extract data from object
+getVarInfo <- function(object, return.data = FALSE) {
+  # FIXME: Need to fix scoping issue vaused by eval withing getData!
+  data <- try(getData(object), silent = TRUE)  # extract data from object
+  if (inherits(data, "try-error")) stop("Scoping issuse with function 'getData'.")
   x.names <- intersect(all.vars(formula(object)[[3]]), colnames(data)) 
   y.names <- all.vars(formula(object)[[2]])
   x <- data[, x.names]  # extract predictor columns
@@ -92,7 +90,7 @@ Sigma.lme <- function(object, ...) object$sigma
 ##' 
 ##' @keywords internal
 makeData <- function(object, x) {
-  vars <- getVars(object)
+  vars <- getVarInfo(object)
 #   if (is.null(dim(x))) x <- t(x)
 #   if (ncol(x) != vars$x.dim) stop("Must supply values for each covariate.")
   if (vars$x.dim != 1) stop("Only objects with a single covariate are allowed.")
@@ -208,11 +206,6 @@ predict2.nls <- function(object, newdata,
                          adjust = c("none", "Bonferroni", "Scheffe"), k, 
                          ...) {
   
-  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
-  xname <- getVars(object)$x.names  # extract covariate label
-  n <- length(resid(object))  # sample size
-  p <- length(coef(object))  # number of regression parameters
-  
   ## No support for the Golub-Pereyra algorithm for partially linear 
   ## least-squares models
   if (object$call$algorithm == "plinear") {
@@ -220,8 +213,25 @@ predict2.nls <- function(object, newdata,
                models is currently not supported."))
   }
   
-  ## Calculate standard error of fitted values
-  f0 <- attr(predict(object, newdata = newdata), "gradient")
+  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
+  xname <- getVarInfo(object)$x.names  # extract covariate label
+  n <- length(resid(object))  # sample size
+  p <- length(coef(object))  # number of regression parameters
+  
+  ## Compute standard error
+  param.names <- names(coef(object)) 
+  for (i in 1:length(param.names)) { 
+    assign(param.names[i], coef(object)[i]) 
+  }
+  assign(xname, newdata[, xname])
+  form <- object$m$formula()
+  rhs <- eval(form[[3]])
+  if (is.null(attr(rhs, "gradient"))) {
+    f0 <- attr(numericDeriv(form[[3]], param.names), "gradient")
+  } else {  # self start models should have this attribute
+    f0 <- attr(rhs, "gradient")
+  }
+#   f0 <- attr(predict(object, newdata = newdata), "gradient")
   R1 <- object$m$Rmat()
   v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
   se.fit <- sqrt(Sigma(object)^2 * v0)

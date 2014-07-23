@@ -46,7 +46,7 @@ test_that("predictions and prediction standard errors are correct", {
   SAS.pred.lwr.new <- c(1.45376, 1.64754, 0.41047, 1.56474, 1.25081)
   SAS.pred.upr.new <- c(1.54510, 1.74598, 0.49958, 1.65829, 1.34300)
   
-  ## Expectations
+  ## Expectations for original data
   expect_true(all.equal(round(DNase1.conf$se.fit, 6), SAS.se.fit))
   expect_true(all.equal(round(DNase1.pred$se.fit, 6), SAS.se.fit))
   expect_true(all.equal(round(DNase1.conf$lwr, 5), SAS.conf.lwr, tol = 1e-05))
@@ -54,6 +54,7 @@ test_that("predictions and prediction standard errors are correct", {
   expect_true(all.equal(round(DNase1.pred$lwr, 5), SAS.pred.lwr, tol = 1e-05))
   expect_true(all.equal(round(DNase1.pred$upr, 5), SAS.pred.upr, tol = 1e-05))
   
+  ## Expectations for new data
   expect_true(all.equal(round(DNase1.conf2$se.fit, 6), SAS.se.fit.new))
   expect_true(all.equal(round(DNase1.pred2$se.fit, 6), SAS.se.fit.new))
   expect_true(all.equal(round(DNase1.conf2$lwr, 5), SAS.conf.lwr.new, tol = 1e-05))

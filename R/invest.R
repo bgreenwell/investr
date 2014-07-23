@@ -1,3 +1,5 @@
+## Warning: Using getData2 for now to see if scoping issues go away!
+
 ##' Calibration for Linear and Nonlinear Regression Models.
 ##' 
 ##' The function \code{invest} computes the inverse estimate and a condfidence 
@@ -78,22 +80,19 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
 
-  vars <- getVars(object)  # extract data and variable information
+  vars <- getVarInfo(object)  # extract data and variable information
   xname <- vars$x.names  # predictor variable name
   yname <- vars$y.names  # response variable name
   if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
   if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
-  eta <- mean(y0)             # mean unknown
-  m <- length(y0)             # number of unknowns 
+  eta <- mean(y0)  # mean unknown
+  m <- length(y0)  # number of unknowns 
   n <- length(resid(object))  # in case of missing values
   p <- length(coef(object))   # number of regression coefficients
-  ## FIXME: is this the correct variance to use for all univariate linear 
-  ##        models? For example, is this the correct variance for a quadratic 
-  ##        fit?
-  df1 <- n - p  # stage I degrees of freedom
-  df2 <- m - 1  # stage II degrees of freedom
-  var1 <- Sigma(object)^2  # stage I variance estimate
-  var2 <- if (m == 1) 0 else var(y0)  # stage II variance estimate
+  df1 <- n - p  # stage 1 degrees of freedom
+  df2 <- m - 1  # stage 2 degrees of freedom
+  var1 <- Sigma(object)^2  # stage 1 variance estimate
+  var2 <- if (m == 1) 0 else var(y0)  # stage 2 variance estimate
   var.pooled <- (df1*var1 + df2*var2)/(df1 + df2)  # pooled estimate of variance
   rat <- var.pooled/var1  # right variance?
   
@@ -109,7 +108,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Provide (informative) error message if point estimate is not found
   if (inherits(x0.est, "try-error")) {
-    stop(paste("Point estimate not found in the default interval (", lower, 
+    stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
                "Try tweaking the values of lower and upper. ",
                "Use plotFit for guidance.", sep = ""), 
@@ -145,14 +144,14 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
-      stop(paste("Lower confidence limit not found in the default interval (", 
+      stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper. ", 
                  "Use plotFit for guidance.", sep = ""), 
            call. = FALSE)
     }
     if (inherits(upr, "try-error")) {
-      stop(paste("Upper confidence limit not found in the default interval (", 
+      stop(paste("Upper confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper. ", 
                  "Use plotFit for guidance.", sep = ""), 
@@ -221,7 +220,14 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        adjust = c("none", "Bonferroni"), k, ...) {
   
-  vars <- getVars(object)  # extract data and variable information
+  ## No support for the Golub-Pereyra algorithm for partially linear 
+  ## least-squares models
+  if (object$call$algorithm == "plinear") {
+    stop(paste("The Golub-Pereyra algorithm for partially linear least-squares 
+               models is currently not supported."))
+  }
+  
+  vars <- getVarInfo(object)  # extract data and variable information
   xname <- vars$x.names  # predictor variable name
   yname <- vars$y.names  # response variable name
   if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
@@ -249,7 +255,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Provide (informative) error message if point estimate is not found
   if (inherits(x0.est, "try-error")) {
-    stop(paste("Point estimate not found in the default interval (", lower, 
+    stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
                "Try tweaking the values of lower and upper. ",
                "Use plotFit for guidance.", sep = ""), 
@@ -279,14 +285,14 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
-      stop(paste("Lower confidence limit not found in the default interval (", 
+      stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper. ", 
                  "Use plotFit for guidance.", sep = ""), 
            call. = FALSE)
     }
     if (inherits(upr, "try-error")) {
-      stop(paste("Upper confidence limit not found in the default interval (", 
+      stop(paste("Upper confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper. ", 
                  "Use plotFit for guidance.", sep = ""), 
@@ -355,7 +361,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
                        q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
-  vars <- getVars(object)  # extract data and variable information
+  vars <- getVarInfo(object)  # extract data and variable information
   xname <- vars$x.names  # predictor variable name
   yname <- vars$y.names  # response variable name
   if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
@@ -383,7 +389,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Provide (informative) error message if point estimate is not found
   if (inherits(x0.est, "try-error")) {
-    stop(paste("Point estimate not found in the default interval (", lower, 
+    stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
                "Try tweaking the values of lower and upper.", 
                sep = ""), 
@@ -423,14 +429,14 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
-      stop(paste("Lower confidence limit not found in the default interval (", 
+      stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper.", 
                  sep = ""), 
            call. = FALSE)
     }
     if (inherits(upr, "try-error")) {
-      stop(paste("Upper confidence limit not found in the default interval (", 
+      stop(paste("Upper confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
                  "). ", "Try tweaking the values of lower and upper.",
                  sep = ""), 
