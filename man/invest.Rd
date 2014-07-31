@@ -9,12 +9,12 @@
 invest(object, ...)
 
 \method{invest}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, lower, upper,
+  level = 0.95, mean.response = FALSE, data, lower, upper,
   tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
   "Bonferroni"), k, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, lower, upper,
+  level = 0.95, mean.response = FALSE, data, lower, upper,
   tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
   "Bonferroni"), k, ...)
 
@@ -69,13 +69,13 @@ are used.}
 \value{
 An object of class \code{calibrate} containing the following
         components:
-\describe{
-  \item{\code{estimate}}{The estimate of x0.}
-  \item{\code{lwr}}{The lower confidence limit for x0.}
-  \item{\code{upr}}{The upper confidence limit for x0.}
-  \item{\code{se}}{An estimate of the standard error (Wald interval only).}
-  \item{\code{interval}}{The method used for calculating \code{lower} and
-                  \code{upper} (only used by \code{print} method).}
+\itemize{
+  \item \code{estimate} The estimate of x0.
+  \item \code{lwr} The lower confidence limit for x0.
+  \item \code{upr} The upper confidence limit for x0.
+  \item \code{se} An estimate of the standard error (Wald interval only).
+  \item \code{interval} The method used for calculating \code{lower} and
+                  \code{upper} (only used by \code{print} method).
 }
 }
 \description{
@@ -94,14 +94,18 @@ invest(Puro2.nls, y0 = 100, interval = "inversion")
 invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
 }
 \references{
-Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and
-Applications. Belmont, Calif: Duxbury Press, 1994.
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 
-Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for
-Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York:
-Springer, 2004.
+Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
+\emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer.
 
-Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley,
-1989.
+Seber, G. A. F., and Wild, C. J. (1989)
+\emph{Nonlinear regression}. Wiley.
+
+Oman, Samuel D. (1998).
+Calibration with Random Slopes.
+\emph{Biometrics} \bold{85}(2): 439--449.
+doi:10.1093/biomet/85.2.439.
 }
 

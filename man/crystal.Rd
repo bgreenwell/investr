@@ -9,13 +9,13 @@ The data give the growing time and final weight of crystals.
 }
 \details{
 \itemize{
-  \item time time taken to grow (hours)
-  \item weight final weight of the crystal (grams)
+  \item \code{time} Time taken to grow (hours).
+  \item \code{weight} Final weight of the crystal (grams).
 }
 }
 \references{
-Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and
-Applications. Belmont, Calif: Duxbury Press, 1994.
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 }
 \keyword{datasets}
 

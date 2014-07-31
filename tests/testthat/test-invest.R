@@ -33,21 +33,23 @@ context("Nonlinear calibration/regulation - inversion interval")
 
 context("Nonlinear calibration/regulation - Wald interval")
 
-# test_that("approximate standard error is correct", {
-#   
-#   ## Nasturtium data from the drc package
-#   nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
-#                                  4.000), each = 6),
-#                     weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
-#                                854, 851, 850, 870,  825, 953, 834, 810, 875, 
-#                                880, 834, 795,  837, 834, 810, 693, 690, 722, 
-#                                738, 563,  591, 429, 395, 435, 412, 273, 257, 
-#                                200,  244, 209, 225, 128, 221))
-#   nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3*log(conc))),
-#                  start = list(theta1 = 1000, theta2 = -1, theta3 = 1), 
-#                  data = nas)
-#   
-#   se <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")$se
-#   expect_true(all.equal(se, 0.2847019, tol = 1e-07))
-#   
-# })
+test_that("approximate standard error is correct", {
+  
+  ## Nasturtium data from the drc package
+  nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
+                                 4.000), each = 6),
+                    weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
+                               854, 851, 850, 870,  825, 953, 834, 810, 875, 
+                               880, 834, 795,  837, 834, 810, 693, 690, 722, 
+                               738, 563,  591, 429, 395, 435, 412, 273, 257, 
+                               200,  244, 209, 225, 128, 221))
+  nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3*log(conc))),
+                 start = list(theta1 = 1000, theta2 = -1, theta3 = 1), 
+                 data = nas)
+  
+#   se1 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")$se
+  se2 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald", tol = 1e-10)$se
+#   expect_false(all.equal(se1, 0.2847019, tol = 1e-07))
+  expect_true(all.equal(se2, 0.2847019, tol = 1e-07))
+  
+})

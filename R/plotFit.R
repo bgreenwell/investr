@@ -1,12 +1,13 @@
 ##' Plotting Confidence/Prediction Bands
 ##' 
-##' Plots fitted model for an object of class \code{lm} or \code{nls}vwith the 
+##' Plots fitted model for an object of class \code{lm} or \code{nls} with the 
 ##' option of adding a confidence and/or prediction band. 
 ##'
 ##' @param object An object that inherits from class \code{lm} or \code{nls}.
 ##' @param interval A character string indicating if a prediction band, 
 ##'   confidence band, both, or none should be plotted.
 ##' @param level The desired confidence level.
+##' @param data An optional data frame containing the variables in the model. 
 ##' @param adjust A character string indicating the type of adjustment (if any) 
 ##' to make to the confidence/prediction bands.
 ##' @param k An integer to be used in computing the critical value for the 
@@ -42,7 +43,7 @@
 ##' @note
 ##' By default, the plotted intervals are pointwise intervals. For simultaneous 
 ##' intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
-##' the Bonferroni adjustment, you must specify value for \code{k}, the number
+##' the Bonferroni adjustment, you must specify a value for \code{k}, the number
 ##' of intervals for which the coverage is to hold simultaneously. For the 
 ##' Scheffe adjustment, specifying a value for \code{k} is only required when
 ##' \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
@@ -53,14 +54,15 @@
 ##' 
 ##' Confidence/prediction bands for nonlinear regression (i.e., objects of class
 ##' \code{nls}) are based on a linear approximation as described in Bates & Watts 
-##' (2007). This funtion was inpired by the \code{plotfit} function in the 
-##' \code{nlstools} package.
+##' (2007). This funtion was inpired by the \code{\link[nlstools]{plotfit}} function
+##' from the \code{nlstools} package.
 ##' @references
-##' Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its 
-##' Applications. New York: Wiley, 2007.
+##' Bates, D. M., and Watts, D. G. (2007)
+##' \emph{Nonlinear Regression Analysis and its Applications}. Wiley.
 ##' 
-##' F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools for Nonlinear 
-##' Regression Diagnostics.
+##' F. Baty and M. L. Delignette-Muller (2012), 
+##' A Toolbox for Nonlinear Regression in R: The Package nlstools.
+##' \emph{Journal of Statistical Software} \bold{(under revision)}.
 ##' @examples
 ##' \donttest{
 ##' ## A linear regression example
@@ -98,9 +100,9 @@ plotFit <- function(object, ...) {
 ##' @rdname plotFit
 ##' @export
 ##' @method plotFit lm
-plotFit.lm <- function(object,  
+plotFit.lm <- function(object, 
                        interval = c("none", "both", "confidence", "prediction"), 
-                       level = 0.95, 
+                       level = 0.95, data,
                        adjust = c("none", "Bonferroni", "Scheffe"), k, ...,
                        shade = FALSE, extend.range = FALSE, hide = TRUE,
                        col.conf = if (shade) grey(0.7) else "black", 
@@ -110,8 +112,16 @@ plotFit.lm <- function(object,
                        lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim = NULL)
 {
   
-  ## Preliminary (extract variable information, etc.)
-  vars <- getVarInfo(object)  # extract data and variable information
+  ## TODO:
+  ##  * Correctly plot data when model contains transformed response.  For 
+  ##    example, lm(log(y) ~ x) and lm(y ~ x) will both plot as y ~ x.
+  
+  ## form <- formula(object)
+  ## form.y <- form[[2]]
+  ## form.x <- form[[3]]
+  
+  ## Preliminary (extract variable names, etc.)
+  vars <- if(missing(data)) getVarInfo(object)  else getVarInfo(object, data)
   if (vars$x.dim != 1) stop("Only a single predictor is allowed.")
   if (missing(xlim)) xlim <- range(vars$x)  # default plot domain
   xx <- if (extend.range) {  # set up plotting grid
@@ -209,7 +219,8 @@ plotFit.lm <- function(object,
 ##' @export
 ##' @method plotFit nls
 plotFit.nls <- function(object, 
-                        interval = c("none", "both", "confidence", "prediction"), level = 0.95,
+                        interval = c("none", "both", "confidence", "prediction"), 
+                        level = 0.95, data,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 
                         shade = FALSE, extend.range = FALSE, hide = TRUE,
                         col.conf = if (shade) grey(0.7) else "black", 
@@ -220,7 +231,7 @@ plotFit.nls <- function(object,
 {
   
   ## Preliminary (extract variable information, etc.)
-  vars <- getVarInfo(object)  # extract data and variable information
+  vars <- if(missing(data)) getVarInfo(object)  else getVarInfo(object, data)
   if (vars$x.dim != 1) stop("Only a single predictor is allowed.")
   if (missing(xlim)) xlim <- range(vars$x)  # default plot domain
   xx <- if (extend.range) {  # set up plotting grid

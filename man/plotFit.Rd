@@ -8,8 +8,8 @@
 plotFit(object, ...)
 
 \method{plotFit}{lm}(object, interval = c("none", "both", "confidence",
-  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
-  k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  "prediction"), level = 0.95, data, adjust = c("none", "Bonferroni",
+  "Scheffe"), k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
   col.conf = if (shade) grey(0.7) else "black", col.pred = if (shade)
   grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
   col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
@@ -17,8 +17,8 @@ plotFit(object, ...)
   n = 500, xlab, ylab, xlim, ylim = NULL)
 
 \method{plotFit}{nls}(object, interval = c("none", "both", "confidence",
-  "prediction"), level = 0.95, adjust = c("none", "Bonferroni", "Scheffe"),
-  k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  "prediction"), level = 0.95, data, adjust = c("none", "Bonferroni",
+  "Scheffe"), k, ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
   col.conf = if (shade) grey(0.7) else "black", col.pred = if (shade)
   grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
   col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
@@ -32,6 +32,8 @@ plotFit(object, ...)
 confidence band, both, or none should be plotted.}
 
 \item{level}{The desired confidence level.}
+
+\item{data}{An optional data frame containing the variables in the model.}
 
 \item{adjust}{A character string indicating the type of adjustment (if any)
 to make to the confidence/prediction bands.}
@@ -86,13 +88,13 @@ TRUE.}
 \item{...}{Additional optional arguments passed on to \code{plot}.}
 }
 \description{
-Plots fitted model for an object of class \code{lm} or \code{nls}vwith the
+Plots fitted model for an object of class \code{lm} or \code{nls} with the
 option of adding a confidence and/or prediction band.
 }
 \note{
 By default, the plotted intervals are pointwise intervals. For simultaneous
 intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
-the Bonferroni adjustment, you must specify value for \code{k}, the number
+the Bonferroni adjustment, you must specify a value for \code{k}, the number
 of intervals for which the coverage is to hold simultaneously. For the
 Scheffe adjustment, specifying a value for \code{k} is only required when
 \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k}
@@ -103,8 +105,8 @@ if \code{object} is a simple linear regression model, then calling
 
 Confidence/prediction bands for nonlinear regression (i.e., objects of class
 \code{nls}) are based on a linear approximation as described in Bates & Watts
-(2007). This funtion was inpired by the \code{plotfit} function in the
-\code{nlstools} package.
+(2007). This funtion was inpired by the \code{\link[nlstools]{plotfit}} function
+from the \code{nlstools} package.
 }
 \examples{
 \donttest{
@@ -138,10 +140,11 @@ plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE,
 }
 }
 \references{
-Bates, D. M., and Watts, D. G. Nonlinear Regression Analysis and its
-Applications. New York: Wiley, 2007.
+Bates, D. M., and Watts, D. G. (2007)
+\emph{Nonlinear Regression Analysis and its Applications}. Wiley.
 
-F. Baty and M. L. Delignette-Muller (2012), nlstools: Tools for Nonlinear
-Regression Diagnostics.
+F. Baty and M. L. Delignette-Muller (2012),
+A Toolbox for Nonlinear Regression in R: The Package nlstools.
+\emph{Journal of Statistical Software} \bold{(under revision)}.
 }
 

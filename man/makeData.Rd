@@ -3,11 +3,11 @@
 \alias{makeData}
 \title{Make new data frame}
 \usage{
-makeData(object, x)
+makeData(x, label)
 }
 \description{
 Create a new data frame from a specified x value that has the same structure
-as the data frame used to create \code{object}.
+as the data frame used to create \code{object}. (For internal use only.)
 }
 \keyword{internal}
 

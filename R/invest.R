@@ -1,5 +1,3 @@
-## Warning: Using getData2 for now to see if scoping issues go away!
-
 ##' Calibration for Linear and Nonlinear Regression Models.
 ##' 
 ##' The function \code{invest} computes the inverse estimate and a condfidence 
@@ -41,24 +39,28 @@
 ##'            are used.
 ##' @return An object of class \code{calibrate} containing the following 
 ##'         components:
-##' \describe{
-##'   \item{\code{estimate}}{The estimate of x0.}
-##'   \item{\code{lwr}}{The lower confidence limit for x0.}
-##'   \item{\code{upr}}{The upper confidence limit for x0.}
-##'   \item{\code{se}}{An estimate of the standard error (Wald interval only).}
-##'   \item{\code{interval}}{The method used for calculating \code{lower} and 
-##'                   \code{upper} (only used by \code{print} method).}
+##' \itemize{
+##'   \item \code{estimate} The estimate of x0.
+##'   \item \code{lwr} The lower confidence limit for x0.
+##'   \item \code{upr} The upper confidence limit for x0.
+##'   \item \code{se} An estimate of the standard error (Wald interval only).
+##'   \item \code{interval} The method used for calculating \code{lower} and 
+##'                   \code{upper} (only used by \code{print} method).
 ##' }
 ##' @references
-##' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
-##' Applications. Belmont, Calif: Duxbury Press, 1994. 
+##' Graybill, F. A., and Iyer, H. K. (1994)
+##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
 ##'
-##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. Statistical Tools for 
-##' Nonlinear Regression: A Practical Guide with S-PLUS and R Examples. New York: 
-##' Springer, 2004. 
+##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
+##' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer. 
 ##' 
-##' Seber, G. A. F., and Wild, C. J.. Nonlinear regression. New York: Wiley, 
-##' 1989.
+##' Seber, G. A. F., and Wild, C. J. (1989)
+##' \emph{Nonlinear regression}. Wiley.
+##' 
+##' Oman, Samuel D. (1998).
+##' Calibration with Random Slopes.
+##' \emph{Biometrics} \bold{85}(2): 439--449.
+##' doi:10.1093/biomet/85.2.439.
 ##' @examples
 ##' data(Puromycin, package = "datasets")
 ##' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
@@ -75,12 +77,12 @@ invest <- function(object, ...) {
 ##' @export
 ##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
-                      level = 0.95, mean.response = FALSE, lower, upper, 
+                      level = 0.95, mean.response = FALSE, data, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000,  
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
 
-  vars <- getVarInfo(object)  # extract data and variable information
+  vars <- if (missing(data)) getVarInfo(object) else getVarInfo(object, data)
   xname <- vars$x.names  # predictor variable name
   yname <- vars$y.names  # response variable name
   if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
@@ -102,7 +104,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(object, x)) - eta
+    predict(object, newdata = makeData(x, xname)) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -129,7 +131,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Inversion function
     inversionFun <- function(x) {
-      pred <- predict(object, makeData(object, x), se.fit = TRUE)
+      pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else var.pooled/m + 
         rat*pred$se.fit^2
       (eta - pred$fit)^2/denom - crit^2
@@ -179,7 +181,8 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-        predict(object.copy, makeData(object.copy, x)) - z
+#         predict(object.copy, makeData(object.copy, x)) - z
+        predict(object.copy, newdata = makeData(x, xname)) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -216,9 +219,12 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @export
 ##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, lower, upper, 
-                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       level = 0.95, mean.response = FALSE, data, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000,
                        adjust = c("none", "Bonferroni"), k, ...) {
+  
+  ## TODO:
+  ##  * Add bootstrap option.
   
   ## No support for the Golub-Pereyra algorithm for partially linear 
   ## least-squares models
@@ -227,7 +233,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
                models is currently not supported."))
   }
   
-  vars <- getVarInfo(object)  # extract data and variable information
+  vars <- if (missing(data)) getVarInfo(object) else getVarInfo(object, data)
   xname <- vars$x.names  # predictor variable name
   yname <- vars$y.names  # response variable name
   if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
@@ -249,7 +255,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
 
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(object, x)) - eta
+    predict(object, newdata = makeData(x, xname)) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -271,7 +277,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Inversion function
     inversionFun <- function(x) {
-      pred <- predict2(object, makeData(object, x)) # FIXME:, se.fit = TRUE)
+      pred <- predict2(object, newdata = makeData(x, xname)) 
       denom <- if (mean.response) pred$se.fit^2 else (var.pooled/m + pred$se.fit^2)
       (eta - pred$fit)^2/denom - crit^2
     }
@@ -320,7 +326,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-        predict(object.copy, makeData(object.copy, x)) - z
+        predict(object.copy, newdata = makeData(x, xname)) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -383,7 +389,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(object, x), level = 0) - eta
+    predict(object, newdata = makeData(x, xname), level = 0) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -401,7 +407,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (interval == "none") return(x0.est)
   
   ## Estimate variance of new response
-  if (!mean.response) var.y0 <- varY(object, makeData(object, x0.est))
+  if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0.est, xname))
   
   ## Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
@@ -409,7 +415,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     ## Inversion function
     inversionFun <- function(x, bound = c("lower", "upper")) {
       bound <- match.arg(bound)
-      pred <- predict2(object, makeData(object, x), se.fit = TRUE)
+      pred <- predict2(object, newdata = makeData(x, xname), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
       if (bound == "upper") {
         (eta - pred$fit)/denom - q1
@@ -458,7 +464,7 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     dmFun <- function(params) {
       fun <- function(x) {
         X <- model.matrix(eval(object$call$fixed)[-2], 
-                          data = makeData(object, x))
+                          data = makeData(x, xname))
         if (mean.response) {
           X %*% params - eta
         } else {

@@ -35,17 +35,20 @@
 ##'            are used.
 ##' @return An object of class \code{calibrate} containing the following 
 ##'         components:
-##' \describe{
-##'   \item{\code{estimate}}{The estimate of x0.}
-##'   \item{\code{lwr}}{The lower confidence limit for x0.}
-##'   \item{\code{upr}}{The upper confidence limit for x0.}
-##'   \item{\code{se}}{An estimate of the standard error (Wald interval only).}
-##'   \item{\code{interval}}{The method used for calculating \code{lower} and 
-##'                   \code{upper} (only used by \code{print} method).}
+##' \itemize{
+##'   \item \code{estimate} The estimate of x0.
+##'   \item \code{lwr} The lower confidence limit for x0.
+##'   \item \code{upr} The upper confidence limit for x0.
+##'   \item \code{se} An estimate of the standard error (Wald interval only).
+##'   \item \code{interval} The method used for calculating \code{lower} and 
+##'                   \code{upper} (only used by \code{print} method).
 ##' }
 ##' @references 
-##' Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and 
-##' Applications. Belmont, Calif: Duxbury Press, 1994.
+##' Graybill, F. A., and Iyer, H. K. (1994)
+##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+##' 
+##' Miller, R. G. (1981)
+##' \emph{Simultaneous Statistical Inference}. Springer-Verlag.
 ##' @rdname calibrate
 ##' @aliases print.calibrate
 ##' @export
@@ -78,13 +81,6 @@
 ##' library(car)
 ##' deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 ##' }
-# calibrate <- function(z, ...) {
-#   ## TODO:
-#   ##   (1) Add option for maximum modulus intervals; adjust = "maximum".
-#   if (is.null(class(z))) class(z) <- data.class(z)
-#   UseMethod("calibrate")
-# } 
-
 calibrate <- function(object, ...) {
   UseMethod("calibrate")
 }
@@ -92,7 +88,8 @@ calibrate <- function(object, ...) {
 ##' @rdname calibrate
 ##' @export
 ##' @method calibrate default
-calibrate.default <- function(object, y0, interval = c("inversion", "Wald"), 
+calibrate.default <- function(object, y0, 
+                              interval = c("inversion", "Wald", "none"), 
                               level = 0.95, mean.response = FALSE, 
                               adjust = c("none", "Bonferroni", "Scheffe"), k, 
                               ...) {
@@ -110,56 +107,49 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     y <- object[[2]]
     if (length(x) != length(y)) {
       stop(paste("Components of '", deparse(substitute(object)), 
-                 "' not of same length.", sep = ""))
+                 "' not of same length.", sep = ""), call. = FALSE)
     }
   } else {
     stop(paste(deparse(substitute(object)), 
-               "' is not a valid matrix, list, or data frame.", sep = ""))
+               "' is not a valid matrix, list, or data frame.", sep = ""),
+         call. = FALSE)
   }
-  eta <- mean(y0)             # mean of new observations
-  m <- length(y0)             # number of new observations
-  z <- lm(y ~ x, data = data.frame(x, y)) # fit simple linear regression model
-  e <- resid(z)               # residuals
-  n <- length(e)              # sample size
-  v1 <- n - 2                 # stage I degrees of freedom
-  v2 <- m - 1                 # stage II degrees of freedom
-  v <- v1 + v2                # total degrees of freedom
-  u1 <- Sigma(z)^2            # stage I variance estimate
-  u2 <- if (m == 1) 0 else var(y0) # stage II variance estimate
-  u <- (v1*u1 + v2*u2)/v      # pooled estimate of variance
-  sigma <- sqrt(u)            # sqrt of pooled variance estimate
-  b <- as.numeric(coef(z))    # regression coefficients
-  x0.mle <- (eta - b[1L])/b[2L] # MLE of x0
-  ssx <- sum((x - mean(x))^2)   # sum-of-squares for x, Sxx
-  alpha <- 1 - level            # significance level
-  interval <- match.arg(interval)
+  eta <- mean(y0)  # mean of new observations
+  m <- length(y0)  # number of new observations
+  if (mean.response && m > 1) stop("Only one mean response value allowed.")
+  b <- unname(coef(z <- lm(y ~ x, data = data.frame(x, y))))  # coefficients
+  n <- length(e <- resid(z))  # sample size and residuals
+  df <- (df1 <- n - 2) + (df2 <- m - 1)  # degrees of freedom
+  var1 <- Sigma(z)^2  # stage 1 variance estimate
+  var2 <- if (m == 1) 0 else var(y0)  # stage 2 variance estimate
+  var.pooled <- (df1 * var1 + df2 * var2) / df  # pooled estimate of variance
+  sigma.pooled <- sqrt(var.pooled)  # sqrt of pooled variance estimate
+  ssx <- sum((x - mean(x))^2)  # sum-of-squares for x, Sxx
+  x0.mle <- (eta - b[1L])/b[2L]  # MLE of x0
   
-  ## Try to catch errors
-  if (mean.response && m > 1) {
-    stop("Only one mean response value allowed.")
-  }
+  ## Return point estimate only
+  interval <- match.arg(interval)
+  if (interval == "none") return(x0.mle)
   
   # Adjustment for simultaneous intervals
-  adjust <- match.arg(adjust)
-  w <- if (adjust == "Bonferroni" && m == 1) {
-         qt(1 - alpha/(2*k), n+m-3)
-       } else if (adjust == "Scheffe" && m == 1) {
-         sqrt(k * qf(1 - alpha, k, n+m-3))
-       } else {
-         qt(1 - alpha/2, n+m-3)
-       }
+  adjust <- match.arg(adjust)  # FIXME: Does simultaneous work for m > 1?
+  crit <- if (m != 1 || adjust == "none") qt((1 + level)/2, n+m-3) else {
+    switch(adjust,
+          "Bonferroni" = qt((level + 2*k - 1) / (2*k), n+m-3),
+          "Scheffe"    = sqrt(k * qf(level, k, n+m-3)))
+  }
 
   ## Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
 
-    c1 <- b[2L]^2 - (sigma^2 * w^2)/ssx
+    c1 <- b[2L]^2 - (sigma^2 * crit^2)/ssx
     c2 <- if (mean.response) {
       c1/n + (eta - mean(y))^2/ssx
     } else {
       c1*(1/m + 1/n) + (eta - mean(y))^2/ssx
     }
     c3 <- b[2L] * (eta - mean(y))
-    c4 <- w * sigma
+    c4 <- crit * sigma
     
     ## FIXME: catch errors and throw an appropriate warning
     if (c1 < 0 && c2 <= 0) {
@@ -173,20 +163,13 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
       lwr <- mean(x) + (c3 - c4*sqrt(c2))/c1
       upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
       if (c1 < 0 && c2 > 0) {
-        
-#         stop(paste("The calibration line is not well determined.\nReturning two semi-infinite intervals:\n(", -Inf, ",", 
-#                    round(upr, 4), ") and (", round(lwr, 4), ",", Inf, ")"), 
-#              call. = FALSE)
         stop(paste("The calibration line is not well determined. The resulting \nconfidence region is the union of two semi-infinite intervals:\n(", -Inf, ",", 
                    round(upr, 4), ") U (", round(lwr, 4), ",", Inf, ")"), 
              call. = FALSE)
-        
       }
       
     }
-    res <- list("estimate" = x0.mle,
-                "lower" = lwr,
-                "upper" = upr,
+    res <- list("estimate" = x0.mle, "lower" = lwr, "upper" = upr, 
                 "interval" = interval)
   
   }
@@ -202,11 +185,8 @@ calibrate.default <- function(object, y0, interval = c("inversion", "Wald"),
     }
 
     ## Store results in a list
-    res <- list("estimate" = x0.mle,
-                "lower" = x0.mle - w*se,
-                "upper" = x0.mle + w*se,
-                "se" = se, 
-                "interval" = interval)
+    res <- list("estimate" = x0.mle, "lower" = x0.mle - crit * se,
+                "upper" = x0.mle + crit * se, "se" = se, "interval" = interval)
     
   } 
   
@@ -241,8 +221,7 @@ calibrate.formula <- function(formula, data = NULL, ..., subset,
 ##' @export
 ##' @method calibrate lm
 calibrate.lm <- function(object, ...) {
-  d <- eval(object$call$data) # may be null
-  calibrate(formula(object), data = d, ...)
+  calibrate(formula(object), data = eval(object$call$data), ...)
 } 
 
 ##' @keywords internal

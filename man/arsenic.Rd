@@ -10,13 +10,13 @@ water samples.
 }
 \details{
 \itemize{
-  \item actual True amount of arsenic present
-  \item measured Measured amount of arsenic present
+  \item \code{actual} True amount of arsenic present
+  \item \code{measured} Measured amount of arsenic present
 }
 }
 \references{
-Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and
-Applications. Belmont, Calif: Duxbury Press, 1994.
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 }
 \keyword{datasets}
 

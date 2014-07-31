@@ -9,9 +9,9 @@
 \usage{
 calibrate(object, ...)
 
-\method{calibrate}{default}(object, y0, interval = c("inversion", "Wald"),
-  level = 0.95, mean.response = FALSE, adjust = c("none", "Bonferroni",
-  "Scheffe"), k, ...)
+\method{calibrate}{default}(object, y0, interval = c("inversion", "Wald",
+  "none"), level = 0.95, mean.response = FALSE, adjust = c("none",
+  "Bonferroni", "Scheffe"), k, ...)
 
 \method{calibrate}{formula}(formula, data = NULL, ..., subset,
   na.action = na.fail)
@@ -62,13 +62,13 @@ are used.}
 \value{
 An object of class \code{calibrate} containing the following
         components:
-\describe{
-  \item{\code{estimate}}{The estimate of x0.}
-  \item{\code{lwr}}{The lower confidence limit for x0.}
-  \item{\code{upr}}{The upper confidence limit for x0.}
-  \item{\code{se}}{An estimate of the standard error (Wald interval only).}
-  \item{\code{interval}}{The method used for calculating \code{lower} and
-                  \code{upper} (only used by \code{print} method).}
+\itemize{
+  \item \code{estimate} The estimate of x0.
+  \item \code{lwr} The lower confidence limit for x0.
+  \item \code{upr} The upper confidence limit for x0.
+  \item \code{se} An estimate of the standard error (Wald interval only).
+  \item \code{interval} The method used for calculating \code{lower} and
+                  \code{upper} (only used by \code{print} method).
 }
 }
 \description{
@@ -112,7 +112,10 @@ deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 }
 }
 \references{
-Graybill, F. A., and Iyer, H. K. Regression analysis: Concepts and
-Applications. Belmont, Calif: Duxbury Press, 1994.
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+
+Miller, R. G. (1981)
+\emph{Simultaneous Statistical Inference}. Springer-Verlag.
 }
 

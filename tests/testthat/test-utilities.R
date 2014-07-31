@@ -1,6 +1,6 @@
 context("Prediction")
 
-test_that("predictions and prediction standard errors are correct", {
+test_that("predict2.nls results match SAS results", {
   
   ## DNase data from the dataframes package
   DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
@@ -11,8 +11,10 @@ test_that("predictions and prediction standard errors are correct", {
                                   0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
                                   1.334, 1.364, 1.730, 1.710))
   DNase1.new <- data.frame(conc = c(8.0, 12.0, 1.0, 10.0, 5.5))
-  DNase1.nls <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
-                    data = DNase1)
+#   DNase1.nls <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
+#                     data = DNase1)
+  DNase1.nls <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
+                    data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
   DNase1.conf <- predict2(DNase1.nls, interval = "confidence")
   DNase1.conf2 <- predict2(DNase1.nls, newdata = DNase1.new, 
                            interval = "confidence")
