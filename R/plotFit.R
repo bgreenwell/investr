@@ -164,14 +164,16 @@ plotFit.lm <- function(object,
   }
   
   ## Automatic limits for y-axis
-  ylim <- if(interval == "prediction" || interval == "both") {
-    c(min(c(pred.ymin, vars$y)), max(c(pred.ymax, vars$y)))
-  } else if (interval == "confidence") {
-    c(min(c(conf.ymin, vars$y)), max(c(conf.ymax, vars$y)))
-  } else if (interval == "none") {
-    c(min(c(fit.ymin, vars$y)), max(c(fit.ymax, vars$y)))
-  } else {
-    ylim
+  if (missing(ylim)) {
+    if(interval == "prediction" || interval == "both") {
+      ylim <- c(min(c(pred.ymin, vars$y)), max(c(pred.ymax, vars$y)))
+    }
+    if (interval == "confidence") {
+      ylim <- c(min(c(conf.ymin, vars$y)), max(c(conf.ymax, vars$y)))
+    } 
+    if (interval == "none") {
+      ylim <- c(min(c(fit.ymin, vars$y)), max(c(fit.ymax, vars$y)))
+    }
   }
   
   ## Plot fitted curve, etc.
