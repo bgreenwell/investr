@@ -84,7 +84,7 @@ predict2.nls <- function(object, newdata,
   } else {
     as.data.frame(newdata) 
   }
-  xname <- getVarInfo(object)$x.names  # extract covariate label
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(newdata)) 
   n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of regression parameters
   
@@ -153,7 +153,8 @@ predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
     object$data 
   } else {
     as.data.frame(newdata) 
-  }  xname <- getVarInfo(object)$x.names
+  }  
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(newdata)) 
   fit <- predict(object, newdata = newdata, level = 0)  # population predictions
   ## Approximate standard error of fitted values
   if (se.fit) {

@@ -93,9 +93,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
   ## Set up for inverse estimation
+  m <- length(y0)  # number of unknowns 
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean unknown
-  m <- length(y0)  # number of unknowns 
   n <- length(resid(object))  # in case of missing values
   p <- length(coef(object))   # number of regression coefficients
   df1 <- n - p  # stage 1 degrees of freedom
@@ -249,9 +249,9 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
   ## Set up for inverse estimation
+  m <- length(y0)  # number of unknowns 
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean response
-  m <- length(y0)  # number of unknowns 
   n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of parameters
   var.pooled <- Sigma(object)^2  # residual variance
@@ -388,9 +388,9 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Set up for inverse estimation
 #   if(m > 1) stop("Only one response value allowed.")
+  m <- length(y0)
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)
-  m <- length(y0)
   if (m != 1) stop('Only a single unknown allowed for objects of class "lme".')
   N <- length(resid(object)) 
   p <- length(fixef(object))

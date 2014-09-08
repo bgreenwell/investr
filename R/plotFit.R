@@ -129,8 +129,6 @@ plotFit.lm <- function(object,
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   xvals <- .data[, xname]
 #   yvals <- .data[, yname]
   yvals <- with(.data, eval(formula(object)[[2]]))
@@ -286,8 +284,6 @@ plotFit.nls <- function(object,
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   xvals <- .data[, xname]
   #   yvals <- .data[, yname]
   yvals <- with(.data, eval(formula(object)[[2]]))

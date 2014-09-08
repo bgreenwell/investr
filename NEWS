@@ -13,11 +13,17 @@ Changes for version 1.0.1
 Changes for version 1.1.0
 ====================
 * invest now accepts objects of class 'lme' (experimental)
-* A few minor bug fixes code improvements
+* A few minor bug fixes and code improvements
 * Added more tests
+
+Changes for version 1.1.1
+====================
+* Updated citation file
+* Minor code changes
+* plotFit should now plot models with transformed responses correctly
 
 TODO:
 --------------------
 * Add bootstrap option to calibrate and invest
-* Add method for objects of class 'mlm' (i.e., multivariate calibration)
+* Add invest method for objects of class 'mlm' (i.e., multivariate calibration)
 * Heteroscedastic errors?
