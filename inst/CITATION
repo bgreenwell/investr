@@ -1,10 +1,18 @@
-bibentry("Manual",
-   title = "investr: Functions for Inverse Estimation with Linear and Nonlinear Regression Models in R.",
-   author = as.person("Brandon M. Greenwell"),
-   year   = "2013",
-   note   = "R package version 1.0.1",
-   url    = "https://github.com/w108bmg/investr",
-   key = "investr-package",
+citHeader("To cite investr in publications use:")
 
-   mheader = "To cite invest in publications use:"
+citEntry(entry = "Article",
+  title        = "investr: An R Package for Inverse Estimation",
+  author       = personList(as.person("Brandon M. Greenwell"), as.person("Christine M. Schubert Kabban")),
+  journal      = "The R Journal",
+  year         = "2014",
+  volume       = "6",
+  number       = "1",
+  pages        = "90--100",
+  url          = "http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf",
+
+  textVersion  =
+  paste("Brandon M. Greenwell and Christine M. Schubert Kabban (2014).",
+        "investr: An R Package for Inverse Estimation.",
+        "The R Journal, 6(1), 90-100.",
+        "URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.")
 )

@@ -11,8 +11,7 @@ test_that("predict2.nls results match SAS results", {
                                   0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
                                   1.334, 1.364, 1.730, 1.710))
   DNase1.new <- data.frame(conc = c(8.0, 12.0, 1.0, 10.0, 5.5))
-#   DNase1.nls <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
-#                     data = DNase1)
+  
   DNase1.nls <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
                     data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
   DNase1.conf <- predict2(DNase1.nls, interval = "confidence")
@@ -62,7 +61,7 @@ test_that("predict2.nls results match SAS results", {
   expect_true(all.equal(round(DNase1.conf2$lwr, 5), SAS.conf.lwr.new, tol = 1e-05))
   expect_true(all.equal(round(DNase1.conf2$upr, 5), SAS.conf.upr.new, tol = 1e-05))
   expect_true(all.equal(round(DNase1.pred2$lwr, 5), SAS.pred.lwr.new, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.pred2$upr, 5), SAS.pred.upr.new, tol = 1e-04))
+  expect_true(all.equal(round(DNase1.pred2$upr, 5), SAS.pred.upr.new, tol = 1e-05))
   
 })
 

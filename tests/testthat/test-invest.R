@@ -47,8 +47,11 @@ test_that("approximate standard error is correct", {
                  start = list(theta1 = 1000, theta2 = -1, theta3 = 1), 
                  data = nas)
   
+#   getData(nas.nls)
+  
 #   se1 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")$se
-  se2 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald", tol = 1e-10)$se
+  se2 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald", data = nas,
+                tol = 1e-10)$se
 #   expect_false(all.equal(se1, 0.2847019, tol = 1e-07))
   expect_true(all.equal(se2, 0.2847019, tol = 1e-07))
   

@@ -5,7 +5,7 @@
 \title{Concentrations of arsenic in water samples}
 \format{A data frame with 32 rows and 2 variables}
 \description{
-The data give the actual and measures concentration of arsenic present in
+The data give the actual and measured concentrations of arsenic present in
 water samples.
 }
 \details{

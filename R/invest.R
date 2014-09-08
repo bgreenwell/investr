@@ -18,6 +18,8 @@
 ##'                      correspond to an individual response (\code{FALSE}) or a 
 ##'                      mean response
 ##'        (\code{TRUE}).
+##' @param data An optional data frame. This is required if \code{object$data} 
+##'             is \code{NULL}.
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
@@ -81,12 +83,17 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                       tol = .Machine$double.eps^0.25, maxiter = 1000,  
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
-
-  vars <- if (missing(data)) getVarInfo(object) else getVarInfo(object, data)
-  xname <- vars$x.names  # predictor variable name
-  yname <- vars$y.names  # response variable name
-  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
-  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Set up for inverse estimation
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean unknown
   m <- length(y0)  # number of unknowns 
   n <- length(resid(object))  # in case of missing values
@@ -95,12 +102,8 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   df2 <- m - 1  # stage 2 degrees of freedom
   var1 <- Sigma(object)^2  # stage 1 variance estimate
   var2 <- if (m == 1) 0 else var(y0)  # stage 2 variance estimate
-  var.pooled <- (df1*var1 + df2*var2)/(df1 + df2)  # pooled estimate of variance
-  rat <- var.pooled/var1  # right variance?
-  
-  ## Try to catch errors
-  if (length(xname) != 1) stop("Only one independent variable allowed.") 
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
+  var.pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
+  rat <- var.pooled / var1  # right variance?
   
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
@@ -123,8 +126,11 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   ## Critical value for confidence interval computations
   adjust <- match.arg(adjust)
-  crit <- if (adjust == "Bonferroni" && m == 1) qt((level + 2*k - 1) / (2*k), n+m-p-1)
-          else qt((level+1) / 2, n+m-p-1)
+  crit <- if (adjust == "Bonferroni" && m == 1) {
+            qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
+          } else {
+            qt((level+1) / 2, n+m-p-1)  # no adjustment
+          }
   
   ## inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
@@ -233,25 +239,30 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
                models is currently not supported."))
   }
   
-  vars <- if (missing(data)) getVarInfo(object) else getVarInfo(object, data)
-  xname <- vars$x.names  # predictor variable name
-  yname <- vars$y.names  # response variable name
-  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
-  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Set up for inverse estimation
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean response
   m <- length(y0)  # number of unknowns 
   n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of parameters
   var.pooled <- Sigma(object)^2  # residual variance
   
-  ## Try to catch errors
-  if (vars$x.dim != 1) stop("Only one independent variable allowed.")
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
-  
   ## Critical value for confidence interval computations
   adjust <- match.arg(adjust)
-  crit <- if (adjust == "Bonferroni" && m == 1) qt((level + 2*k - 1) / (2*k), n+m-p-1)
-          else qt((level + 1) / 2, n+m-p-1)
+  crit <- if (adjust == "Bonferroni" && m == 1) {
+            qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
+          } else {
+            qt((level + 1) / 2, n+m-p-1)  # no adjustment
+          }
 
   ## Calculate point estimate by inverting fitted model
   x0.est <- try(uniroot(function(x) {
@@ -367,21 +378,23 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
                        q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
 {
   
-  vars <- getVarInfo(object)  # extract data and variable information
-  xname <- vars$x.names  # predictor variable name
-  yname <- vars$y.names  # response variable name
-  if (missing(lower)) lower <- min(vars$x)  # search grid lower limit default
-  if (missing(upper)) upper <- max(vars$x)  # search grid upper limit default
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else object$data
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Set up for inverse estimation
+#   if(m > 1) stop("Only one response value allowed.")
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)
   m <- length(y0)
   if (m != 1) stop('Only a single unknown allowed for objects of class "lme".')
   N <- length(resid(object)) 
   p <- length(fixef(object))
 #   res.var <- Sigma(object)^2  # residual variance
-  
-  ## Try to catch errors
-  if (vars$x.dim != 1) stop("Only one independent variable allowed.")
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
   
   ## Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
   if (missing(q1)) q1 <- qnorm((1-level) / 2)

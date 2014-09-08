@@ -142,14 +142,14 @@ calibrate.default <- function(object, y0,
   ## Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
 
-    c1 <- b[2L]^2 - (sigma^2 * crit^2)/ssx
+    c1 <- b[2L]^2 - (sigma.pooled^2 * crit^2)/ssx
     c2 <- if (mean.response) {
       c1/n + (eta - mean(y))^2/ssx
     } else {
       c1*(1/m + 1/n) + (eta - mean(y))^2/ssx
     }
     c3 <- b[2L] * (eta - mean(y))
-    c4 <- crit * sigma
+    c4 <- crit * sigma.pooled
     
     ## FIXME: catch errors and throw an appropriate warning
     if (c1 < 0 && c2 <= 0) {
@@ -179,9 +179,9 @@ calibrate.default <- function(object, y0,
     
     ## Compute standard error for Wald interval
     se <- if (mean.response) {
-      abs((sigma/b[2]))*sqrt((1/n + (x0.mle - mean(x))^2/ssx))
+      abs((sigma.pooled/b[2]))*sqrt((1/n + (x0.mle - mean(x))^2/ssx))
     } else {
-      abs((sigma/b[2]))*sqrt((1/m + 1/n + (x0.mle - mean(x))^2/ssx))
+      abs((sigma.pooled/b[2]))*sqrt((1/m + 1/n + (x0.mle - mean(x))^2/ssx))
     }
 
     ## Store results in a list

@@ -14,7 +14,7 @@ plotFit(object, ...)
   grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
   col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
   1 else 3, lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1,
-  n = 500, xlab, ylab, xlim, ylim = NULL)
+  n = 500, xlab, ylab, xlim, ylim)
 
 \method{plotFit}{nls}(object, interval = c("none", "both", "confidence",
   "prediction"), level = 0.95, data, adjust = c("none", "Bonferroni",
@@ -23,7 +23,7 @@ plotFit(object, ...)
   grey(0.9) else "black", border.conf = col.conf, border.pred = col.pred,
   col.fit = "black", lty.conf = if (shade) 1 else 2, lty.pred = if (shade)
   1 else 3, lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1,
-  n = 500, xlab, ylab, xlim, ylim = NULL)
+  n = 500, xlab, ylab, xlim, ylim)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{lm} or \code{nls}.}

@@ -2,7 +2,7 @@
 export(
   calibrate,
   getData,
-  getVars,
+  getVarInfo,
   invest,
   plotFit
 )    

@@ -16,7 +16,11 @@ predict2.lm <- function(object, newdata,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
-  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
+  newdata <- if (missing(newdata)) {
+    eval(object$call$data, envir = parent.frame()) 
+  } else {
+    as.data.frame(newdata) 
+  } 
   n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of regression coefficients
   pred <- suppressWarnings(predict(object, newdata = newdata, se.fit = TRUE))
@@ -59,7 +63,7 @@ predict2.lm <- function(object, newdata,
 }
 
 ##' @keywords internal
-predict2.nls <- function(object, newdata, 
+predict2.nls <- function(object, newdata,
                          interval = c("none", "confidence", "prediction"), 
                          level = 0.95, 
                          adjust = c("none", "Bonferroni", "Scheffe"), k, 
@@ -75,7 +79,11 @@ predict2.nls <- function(object, newdata,
                models is currently not supported."))
   }
   
-  newdata <- if (missing(newdata)) getData(object) else as.data.frame(newdata) 
+  newdata <- if (missing(newdata)) {
+    eval(object$call$data, envir = parent.frame()) 
+  } else {
+    as.data.frame(newdata) 
+  }
   xname <- getVarInfo(object)$x.names  # extract covariate label
   n <- length(resid(object))  # sample size
   p <- length(coef(object))  # number of regression parameters
@@ -141,8 +149,11 @@ predict2.nls <- function(object, newdata,
 
 ##' @keywords internal
 predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
-  if (missing(newdata)) newdata <- getData(object)
-  xname <- getVarInfo(object)$x.names
+  newdata <- if (missing(newdata)) {
+    object$data 
+  } else {
+    as.data.frame(newdata) 
+  }  xname <- getVarInfo(object)$x.names
   fit <- predict(object, newdata = newdata, level = 0)  # population predictions
   ## Approximate standard error of fitted values
   if (se.fit) {
