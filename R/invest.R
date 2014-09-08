@@ -374,8 +374,9 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @export
 ##' @method invest lme
 invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, lower, upper, q1, 
-                       q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...) 
+                       level = 0.95, mean.response = FALSE, data, lower, upper, 
+                       q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       ...) 
 {
   
   ## Extract data, variable names, etc.
@@ -427,9 +428,9 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Inversion function
     inversionFun <- function(x, bound = c("lower", "upper")) {
-      bound <- match.arg(bound)
       pred <- predict2(object, newdata = makeData(x, xname), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
+      bound <- match.arg(bound)
       if (bound == "upper") {
         (eta - pred$fit)/denom - q1
       } else {

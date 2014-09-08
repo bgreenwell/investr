@@ -158,7 +158,8 @@ predict2.lme <- function(object, newdata, se.fit = FALSE, ...) {
   fit <- predict(object, newdata = newdata, level = 0)  # population predictions
   ## Approximate standard error of fitted values
   if (se.fit) {
-    Xmat <- makeX(object, makeData(x, xname))
+    Xmat <- makeX(object, newdata)
+#     Xmat <- makeX(object, newdata = makeData(newdata, xname))
     se.fit <- sqrt(diag(Xmat %*% vcov(object) %*% t(Xmat)))
     list(fit = fit, se.fit = se.fit)
   } else fit
