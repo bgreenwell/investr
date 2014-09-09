@@ -1,6 +1,8 @@
+## The following tests are for testing the prediction function and estimated
+## standard errors of the fitted values
 context("Prediction")
 
-test_that("predict2.nls results match SAS results", {
+test_that("results from predict2 match results from PROC NLIN in SAS", {
   
   ## DNase data from the dataframes package
   DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
@@ -65,3 +67,23 @@ test_that("predict2.nls results match SAS results", {
   
 })
 
+# test_that("results from predict2 match results from PROC MIXED in SAS", {
+#   
+#   
+# )}
+
+# ## The following tests are for testing the various utility functions in the 
+# ## package
+# context("Utility functions")
+# 
+# test_that("utility functions work correctly", {
+#   
+#   ## makeData
+#   
+#   ## makeX
+#   
+#   ## makeZ
+#   
+#   ##varY
+#   
+# )}

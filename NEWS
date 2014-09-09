@@ -23,9 +23,3 @@ Changes for version 1.1.1
 * plotFit should now plot models with transformed responses correctly
 * Fixed error causing invest to fail because of a missing data argument
 * Added more tests
-
-TODO:
---------------------
-* Add bootstrap option to calibrate and invest
-* Add invest method for objects of class 'mlm' (i.e., multivariate calibration)
-* Heteroscedastic errors?
