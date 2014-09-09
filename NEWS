@@ -21,6 +21,8 @@ Changes for version 1.1.1
 * Updated citation file
 * Minor code changes
 * plotFit should now plot models with transformed responses correctly
+* Fixed error causing invest to fail because of a missing data argument
+* Added more tests
 
 TODO:
 --------------------

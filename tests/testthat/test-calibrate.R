@@ -1,6 +1,6 @@
-## Tests for calibrate.R
-
-context("Linear calibration/regulation - inversion interval")
+## The following tests are for calibration with simple linear regression models 
+## fit using the lm() function.
+context("Calibration and regulation in the simple linear regression model")
 
 test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
     
@@ -23,6 +23,8 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
                                  383.03, 410.70, 444.40, 469.14, 501.16))
   chamber.reg <- calibrate(chamber, y0 = 400, mean.response = TRUE, 
                            level = 0.99)
+  
+  ## Expectations for regulation
   expect_that(round(chamber.reg$estimate, 1), equals(66.5))
   expect_that(round(chamber.reg$lower, 2), equals(65.07))
   expect_that(round(chamber.reg$upper, 2), equals(68.03))
@@ -31,6 +33,8 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
   crystal.lm <- lm(weight ~ time, data = crystal)
   crystal.reg <- calibrate(crystal.lm, y0 = 5, mean.response = TRUE, 
                            level = 0.9)
+  
+  ## Expectations for calibration
   expect_that(round(crystal.reg$estimate, 2), equals(9.93))
   expect_that(round(crystal.reg$lower, 2), equals(8.65))
   expect_that(round(crystal.reg$upper, 2), equals(11.05))
@@ -45,9 +49,8 @@ test_that("errors are handled appropriately", {
   y <-  3 + 0.01*x + rnorm(length(x), sd = 0.5)
   d1 <- data.frame(x, y)
   d2 <- list(x = 1:11, y = 1:10 + rnorm(10, sd = 1))
-  #   fit <- lm(y ~ x, data = d)
-  #   plotFit(fit, interval = "both", xlim = c(-10, 25))
-  #   abline(h = c(2, 3), col = "red")
+  
+  ## Expectations
   expect_that(calibrate(d1, y0 = 3), gives_warning())
   expect_that(calibrate(d1, y0 = 3, mean.response = TRUE), gives_warning())
   expect_that(calibrate(d1, y0 = 2), throws_error())
@@ -56,8 +59,6 @@ test_that("errors are handled appropriately", {
   expect_that(calibrate(y ~ x + I(x^2), y0 = 2.5), throws_error())
   
 })
-
-context("Linear calibration/regulation - Wald interval")
 
 test_that("approximate standard error is correct", {
   
@@ -76,6 +77,8 @@ test_that("approximate standard error is correct", {
   se.cal <- 2.211698 #car::deltaMethod(params, g = "(y0-b0)/b1", vcov. = covmat.cal)$SE
   se.reg <- 0.6658998 #car::deltaMethod(crystal.lm, g = "(5-b0)/b1", 
                              #parameterNames = c("b0", "b1"))$SE
+
+  ## Expectations
   expect_that(round(crystal.cal$se, 5), equals(round(se.cal, 5))) # small diff
   expect_that(crystal.reg$se, equals(se.reg))
   

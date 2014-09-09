@@ -19,7 +19,7 @@ invest(object, ...)
   "Bonferroni"), k, ...)
 
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, lower, upper, q1, q2,
+  level = 0.95, mean.response = FALSE, data, lower, upper, q1, q2,
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
