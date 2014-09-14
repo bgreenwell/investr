@@ -1,7 +1,7 @@
 Package: investr
 Type: Package
 Title: Inverse Estimation/Calibration Functions
-Version: 1.1.2
+Version: 1.1.2.9000
 Author: Brandon M. Greenwell
 Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>
 Description: Functions to facilitate inverse estimation/calibration in linear,
