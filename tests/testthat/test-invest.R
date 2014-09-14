@@ -52,15 +52,15 @@ test_that("approximate standard error is correct", {
   
   ## Expectations
   expect_true(all.equal(se1, 0.2847019, tol = 1e-05))  # less precise
-  expect_true(all.equal(se2, 0.2847019, tol = 1e-07))  # more precise
+  expect_true(all.equal(se2, 0.2847019, tol = 1e-05))  # more precise
   
 })
 
 ## The following tests are for linear calibration with random coefficient models
 ## fit using the lme() function from the nlme package.
-context("Linear calibration with random coefficient models")
+context("Linear calibration with random coefficients")
 
-test_that("inversion interval works", {
+test_that("inversion method works", {
 
   ## Load required packages
   require(nlme)
@@ -95,13 +95,13 @@ test_that("inversion interval works", {
   res <- invest(fitLME, y0 = 500, interval = "inversion")
   
   ## Expectations
-  expect_true(all.equal(res$estimate, 8.015521, tol = 1e-07)) 
-  expect_true(all.equal(res$lower, 4.227965, tol = 1e-07)) 
-  expect_true(all.equal(res$upper, 11.91918, tol = 1e-06)) 
+  expect_true(all.equal(res$estimate, 8.015521, tol = 1e-05)) 
+  expect_true(all.equal(res$lower, 4.227962, tol = 1e-05))  # 4.227965
+  expect_true(all.equal(res$upper, 11.91918, tol = 1e-05)) 
   
 })
 
-test_that("approximate standard error is correct", {
+test_that("Wald method works", {
   
   ## Load required packages
   require(nlme)
@@ -143,13 +143,13 @@ test_that("approximate standard error is correct", {
   ci.t <- 8.015521 + tvals*1.954191
   
   ## Expectations
-  expect_true(all.equal(res.norm$estimate, 8.015521, tol = 1e-07))  # estimate
-  expect_true(all.equal(res.t$estimate, 8.015521, tol = 1e-07))     # estimate
-  expect_true(all.equal(res.norm$se, 1.954191, tol = 1e-06))  # SE 
-  expect_true(all.equal(res.t$se, 1.954191, tol = 1e-06))     # SE 
-  expect_true(all.equal(res.norm$lower, ci.norm[1], tol = 1e-06))  # lower limit
-  expect_true(all.equal(res.t$lower, ci.t[1], tol = 1e-06))        # lower limit
-  expect_true(all.equal(res.norm$upper, ci.norm[2], tol = 1e-07))  # upper limit
-  expect_true(all.equal(res.t$upper, ci.t[2], tol = 1e-07))        # upper limit
+  expect_true(all.equal(res.norm$estimate, 8.015521, tol = 1e-05))  # estimate
+  expect_true(all.equal(res.t$estimate, 8.015521, tol = 1e-05))     # estimate
+  expect_true(all.equal(res.norm$se, 1.954191, tol = 1e-05))  # SE 
+  expect_true(all.equal(res.t$se, 1.954191, tol = 1e-05))     # SE 
+  expect_true(all.equal(res.norm$lower, ci.norm[1], tol = 1e-05))  # lower limit
+  expect_true(all.equal(res.t$lower, ci.t[1], tol = 1e-05))        # lower limit
+  expect_true(all.equal(res.norm$upper, ci.norm[2], tol = 1e-05))  # upper limit
+  expect_true(all.equal(res.t$upper, ci.t[2], tol = 1e-05))        # upper limit
   
 })
