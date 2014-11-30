@@ -2,20 +2,21 @@ investr
 ================================================================================
 
 `investr` stands for **inverse estimation in R**. Inverse 
-estimation, also referred to as the calibration problem, is in a sense the 
-reverse of the prediction problem. Inverse estimation is a classical and well-known problem in regression. In simple terms, it involves the use of an observed value of the response to make inference on the corresponding unknown value of the explanatory variable. To our knowledge, however, statistical software is somewhat lacking the capabilities for analyzing these types of problems. The package is currently listed on CRAN and can easily be installed:
+estimation, also referred to as the calibration problem, is a classical and well-known problem in regression. In simple terms, it involves the use of an observed value of the response (or specified value of the mean response) to make inference on the corresponding unknown value of the explanatory variable. 
+
+The package is currently listed on CRAN and can easily be installed:
 ```S
   ## Install from CRAN
   install.packages("investr", dep = TRUE)
 ```
-The package is also currently listed in the ChemPhys task view (http://cran.r-project.org/web/views/ChemPhys.html), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
+The package is also currently listed in the ChemPhys task view (http://cran.r-project.org/web/views/ChemPhys.html) --- a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```S
   ## Install the ChemPhys task view
   install.packages("ctv")
   library("ctv")
   install.views("ChemPhys")
 ```
-The development version of `investr` can be found on GitHub at https://github.com/w108bmg/investr and can easily be installed using the the `devtools` package (Wickham and Chang, 2013):
+The development version can easily be installed using the the `devtools` package (Wickham and Chang, 2013):
 ```S
   ## Install development version from GitHub
   install.packages("devtools")
