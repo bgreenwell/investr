@@ -1,7 +1,7 @@
 ##' @keywords internal
 simulate.nls <- function (object, nsim = 1, seed = NULL, ...) {
   
-  ## Set seed value
+  ## Initialize random number generator
   if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
     runif(1)
   if (is.null(seed)) 

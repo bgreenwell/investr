@@ -23,6 +23,7 @@
 ##' @param pboot Logical indicating whether to perform a parametric bootstrap.
 ##' @param nsim Number of bootstrap simulations, positive integer; the bootstrap 
 ##'             B (or R).
+##' @param seed Optional argument to set.seed.
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
@@ -88,9 +89,9 @@ invest <- function(object, ...) {
 ##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                       level = 0.95, mean.response = FALSE, data, pboot = FALSE,
-                      nsim = 1, lower, upper, tol = .Machine$double.eps^0.25, 
-                      maxiter = 1000, adjust = c("none", "Bonferroni"), k,  ...) 
-{
+                      nsim = 1, seed = NULL, lower, upper, 
+                      tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                      adjust = c("none", "Bonferroni"), k,  ...) {
   
   ## Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -134,6 +135,18 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Initialize random number generator
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
+      runif(1)
+    if (is.null(seed)) 
+      RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    else {
+      R.seed <- get(".Random.seed", envir = .GlobalEnv)
+      set.seed(seed)
+      RNGstate <- structure(seed, kind = as.list(RNGkind()))
+      on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
     
     ## Bootstrap replicates
     cat("\nTaking bootstrap samples, please wait ...\n")
@@ -277,9 +290,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
                        level = 0.95, mean.response = FALSE, data, pboot = FALSE,
-                       nsim = 1, lower, upper, tol = .Machine$double.eps^0.25, 
-                       maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...) 
-{
+                       nsim = 1, seed = NULL, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       adjust = c("none", "Bonferroni"), k, ...) {
   
   ## TODO:
   ##  * Add bootstrap option.
@@ -336,6 +349,18 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Initialize random number generator
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
+      runif(1)
+    if (is.null(seed)) 
+      RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    else {
+      R.seed <- get(".Random.seed", envir = .GlobalEnv)
+      set.seed(seed)
+      RNGstate <- structure(seed, kind = as.list(RNGkind()))
+      on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
     
     ## Bootstrap replicates
     cat("\nTaking bootstrap samples, please wait ...\n")

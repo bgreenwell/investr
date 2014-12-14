@@ -30,15 +30,16 @@ There are currently three main funtions in the `investr` package:
  * `calibrate`;
  * `invest`;
 
-`plotFit`
+```{r, results='hide'}
+library(investr)  # load package
+```
+
+Plotting confidence/prediction bands
 --------------------------------------------------------------------------------
 The function `plotFit` produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). Currently, it can only be used with single-predictor objects of class `lm`, `nls`, or '`lme`; however, for objects of class `nls`, the confidence/prediction bands are based on the linear approximation and can be misleading (Bates and Watts, 1988, pg. 65).
 
-### Usage
+### Confidence and prediction band
 ```S
-## Load package
-library(investr)
-
 ## A nonlinear regression example
 par(mfrow = c(1, 1))
 data(Puromycin, package = "datasets")
@@ -49,6 +50,9 @@ plotFit(Puro.nls, interval = "prediction", pch = 19, shade = T,
         col.pred = rgb(0, 1, 1, 0.4))
 
 ```
+
+### Working-Hotelling band
+Coming soon!
 
 `calibrate`
 --------------------------------------------------------------------------------
@@ -74,21 +78,27 @@ plotFit(fit, interval = "prediction", shade = T, pch = 19)
 abline(h = 150, v = c(res$lower, res$estimate, res$upper))
 ```
 
-Inverting a prediction interval
+Inversion interval
 --------------------------------------------------------------------------------
-Nothing yet!
+Coming soon!
 
-## Crystal growth data from Graybill & Iyer (1994)
+### Crystal growth data from Graybill & Iyer (1994)
 ```{r}
+library(investr)
 fit <- lm(weight ~ time, data = crystal) 
-plotFit(fit, interval = "confidence", shade = T, col.conf = "lightblue", 
-        pch = 19)
-(res <- calibrate(fit, y0 = 8, interval = "inversion", mean.response = T))
-abline(h = 8, v = c(res$lower, res$estimate, res$upper), lty = 2)
+calibrate(fit, y0 = 8, interval = "inversion", mean.response = T)
 ```
+
+### Bioassay on Nasturtium
+```{r}
+library(investr)
+fit <- lm(weight ~ time, data = crystal) 
+calibrate(fit, y0 = 8, interval = "inversion", mean.response = T)
+```
+
 Wald-based interval
 --------------------------------------------------------------------------------
-Nothing yet!
+Coming soon!
 
 Parametric bootstrap
 --------------------------------------------------------------------------------
@@ -98,3 +108,17 @@ $\widehat{x}_0$ is asymptotically normally distirbuted, and the inversion
 interval is based on inverting an asmptotic prediction interval for the 
 response and is based on a linear approximation. For these reasons, a 
 bootstrap approach may be preferred. 
+
+```{r}
+
+## Fit log-logistic model
+mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+           start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+           data = nasturtium)
+
+## Parametric bootstrap
+x0.star <- invest(mod, y0 = c(309, 296, 419), pboot = TRUE, nsim = 9999,
+                  seed = 101)
+quantile(x0.star, c(0.025, 0.975))  # 95% percentile interval
+
+```
