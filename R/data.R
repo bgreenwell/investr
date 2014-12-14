@@ -10,7 +10,7 @@
 ##' @keywords datasets
 ##' @format A data frame with 14 rows and 2 variables
 ##' @name crystal  
-##' @references
+##' @source
 ##' Graybill, F. A., and Iyer, H. K. (1994)
 ##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.                       
 NULL
@@ -21,14 +21,38 @@ NULL
 ##' water samples.
 ##' 
 ##' \itemize{
-##'   \item \code{actual} True amount of arsenic present
-##'   \item \code{measured} Measured amount of arsenic present 
+##'   \item \code{actual} True amount of arsenic present.
+##'   \item \code{measured} Measured amount of arsenic present.
 ##' }
 ##' @docType data
 ##' @keywords datasets
 ##' @format A data frame with 32 rows and 2 variables
 ##' @name arsenic  
-##' @references 
+##' @source 
 ##' Graybill, F. A., and Iyer, H. K. (1994)
 ##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
+NULL 
+
+##' Bioassay on Nasturtium
+##' 
+##' The data give the actual concentrations of an agrochemical present in soil 
+##' samples versus the weight of the plant after three weeks of growth. 
+##' 
+##' \itemize{
+##'   \item \code{conc} True concentration of agrochemical (g/ha).
+##'   \item \code{weight} Weight of plant (mg) after 3 weeks' growth.
+##' }
+##' @docType data
+##' @keywords datasets
+##' @format A data frame with 42 rows and 2 variables
+##' @name nasturtium  
+##' @source 
+##' Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration 
+##' Problems, \emph{Journal of the American Statistical Association}, \bold{83}, 
+##' 650-–656.
+##' @references
+##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
+##' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with 
+##' S-PLUS and R Examples}. Springer. 
+##' 
 NULL 
