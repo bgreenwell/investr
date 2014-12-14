@@ -14,9 +14,9 @@ invest(object, ...)
   "Bonferroni"), k, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, lower, upper,
-  tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
-  "Bonferroni"), k, ...)
+  level = 0.95, mean.response = FALSE, data, pboot = FALSE, nsim = 1,
+  lower, upper, tol = .Machine$double.eps^0.25, maxiter = 1000,
+  adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, data, lower, upper, q1, q2,
@@ -60,6 +60,10 @@ multiple, say k, times.}
 
 \item{k}{The number times the calibration curve is to be used for computing a
 confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
+
+\item{pboot}{Logical indicating whether to perform a parametric bootstrap.}
+
+\item{nsim}{Number of simulations, positive integer; the bootstrap B (or R).}
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals.
 Only used when object inherits from class \code{lme}. Defaults to

@@ -20,6 +20,9 @@
 ##'        (\code{TRUE}).
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
+##' @param pboot Logical indicating whether to perform a parametric bootstrap.
+##' @param nsim Number of bootstrap simulations, positive integer; the bootstrap 
+##'             B (or R).
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
@@ -39,8 +42,9 @@
 ##'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
-##' @return An object of class \code{calibrate} containing the following 
-##'         components:
+##' @return Either a numeric vector containing the bootstrap replicates 
+##'         (code{pboot = TRUE}) or an object of class \code{calibrate} 
+##'         containing the following components:
 ##' \itemize{
 ##'   \item \code{estimate} The estimate of x0.
 ##'   \item \code{lwr} The lower confidence limit for x0.
@@ -50,7 +54,11 @@
 ##'                   \code{upper} (only used by \code{print} method).
 ##' }
 ##' @references
-##' Graybill, F. A., and Iyer, H. K. (1994)
+##' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
+##' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
+##' URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
+##'
+##' Graybill, F. A., and Iyer, H. K. (1994).
 ##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
 ##'
 ##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
@@ -79,9 +87,10 @@ invest <- function(object, ...) {
 ##' @export
 ##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
-                      level = 0.95, mean.response = FALSE, data, lower, upper, 
-                      tol = .Machine$double.eps^0.25, maxiter = 1000,  
-                      adjust = c("none", "Bonferroni"), k,  ...) {
+                      level = 0.95, mean.response = FALSE, data, pboot = FALSE,
+                      nsim = 1, lower, upper, tol = .Machine$double.eps^0.25, 
+                      maxiter = 1000, adjust = c("none", "Bonferroni"), k,  ...) 
+{
   
   ## Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -118,6 +127,48 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                "Try tweaking the values of lower and upper. ",
                "Use plotFit for guidance.", sep = ""), 
          call. = FALSE)
+  }
+  
+  ## Parametric bootstrap ------------------------------------------------------
+  if (pboot) {
+    
+    ## Sanity check
+    stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Bootstrap replicates
+    cat("\nTaking bootstrap samples, please wait ...\n")
+    x0.star <- raply(nsim, {
+      
+      ## Update model using simulated response data
+      boot.data <- eval(object$call$data)  # copy data
+      boot.data[, yname] <- simulate(object)[[1]]  # simulate new response
+      boot.object <- update(object, data = boot.data)  # FIXME: tryCatch?
+      
+      ## FIXME: Y0 ~ Normal(?, sigma)
+      if (mean.response) {
+        y0.star <- y0  # hold constant in bootstrap replications
+      } else {
+        y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+      }
+      
+      ## Calculate point estimate
+      tryCatch(uniroot(function(x) {
+        predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
+      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+      error = function(e) NA)
+      
+    }, .progress = "text")
+    
+    ## Check for errors and return bootstrap replicates
+    if (anyNA(x0.star)) {
+      warning("some bootstrap runs failed (", sum(is.na(x0.star)), "/", nsim, 
+              ")")
+      x0.star <- na.omit(x0.star)  # remove runs that failed
+      attributes(x0.star) <- NULL  # remove attributes
+    }
+    attr(x0.star, "original") <- x0.est  # attach original estimate
+    return(x0.star)  # return bootstrap replicates
+    
   }
   
   ## Return point estimate only
@@ -225,9 +276,10 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @export
 ##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, data, lower, upper, 
-                       tol = .Machine$double.eps^0.25, maxiter = 1000,
-                       adjust = c("none", "Bonferroni"), k, ...) {
+                       level = 0.95, mean.response = FALSE, data, pboot = FALSE,
+                       nsim = 1, lower, upper, tol = .Machine$double.eps^0.25, 
+                       maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...) 
+{
   
   ## TODO:
   ##  * Add bootstrap option.
@@ -277,6 +329,48 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
                "Try tweaking the values of lower and upper. ",
                "Use plotFit for guidance.", sep = ""), 
          call. = FALSE)
+  }
+  
+  ## Parametric bootstrap ------------------------------------------------------
+  if (pboot) {
+    
+    ## Sanity check
+    stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Bootstrap replicates
+    cat("\nTaking bootstrap samples, please wait ...\n")
+    x0.star <- raply(nsim, {
+    
+      ## Update model using simulated response data
+      boot.data <- eval(object$call$data)  # copy data
+      boot.data[, yname] <- simulate(object)[[1]]  # simulate new response
+      boot.object <- update(object, data = boot.data)  # FIXME: tryCatch?
+      
+      ## FIXME: Y0 ~ Normal(?, sigma)
+      if (mean.response) {
+        y0.star <- y0  # hold constant in bootstrap replications
+      } else {
+        y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+      }
+      
+      ## Calculate point estimate
+      tryCatch(uniroot(function(x) {
+        predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
+      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+      error = function(e) NA)
+      
+    }, .progress = "text")
+    
+    ## Check for errors and return bootstrap replicates
+    if (anyNA(x0.star)) {
+      warning("some bootstrap runs failed (", sum(is.na(x0.star)), "/", nsim, 
+              ")")
+      x0.star <- na.omit(x0.star)  # remove runs that failed
+      attributes(x0.star) <- NULL  # remove attributes
+    }
+    attr(x0.star, "original") <- x0.est  # attach original estimate
+    return(x0.star)  # return bootstrap replicates
+    
   }
   
   ## Return point estimate only

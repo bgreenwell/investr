@@ -23,7 +23,7 @@ calibrate(object, ...)
 or a data frame.}
 
 \item{...}{Additional optional arguments. At present, no optional arguments
-are used.}
+           are used.}
 
 \item{y0}{The value of the observed response(s) or specified value of the
 mean response.}
@@ -83,10 +83,6 @@ techniques to find the solution. When the underlying model is that of the
 simple linear regression model with normal errors, closed-form expressions
 exist which are utilized by the function \code{calibrate}.
 }
-\section{Warning}{
-
-  You must not call this function unless ...
-}
 \examples{
 \donttest{
 ## Inverting a prediction interval for an individual response
@@ -104,9 +100,9 @@ calibrate(crystal.lm, y0 = 8, interval = "inversion", mean.response = TRUE)
 ## Wald interval and approximate standard error based on the delta method
 calibrate(crystal.lm, y0 = 8, interval = "Wald", mean.response = TRUE)
 
-## Alterntively, we can use the car package to compute the standard error (this
-## is trickier though when mean.respone = FALSE, hence, it is better to use the
-## calibrate function).
+## Alterntively, we can use the car package to compute the standard error
+## (this is trickier though when mean.respone = FALSE, hence, it is better
+## to use the calibrate function).
 library(car)
 deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 }

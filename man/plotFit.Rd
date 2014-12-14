@@ -110,33 +110,13 @@ from the \code{nlstools} package.
 }
 \examples{
 \donttest{
-## A linear regression example
-data(cars, package = "datasets")
-library(splines)
-cars.lm1 <- lm(dist ~ speed, data = cars)
-cars.lm2 <- lm(dist ~ speed + I(speed^2), data = cars)
-cars.lm3 <- lm(dist ~ speed + I(speed^2) + I(speed^3), data = cars)
-cars.lm4 <- lm(dist ~ ns(speed, df = 3), data = cars)
-par(mfrow = c(2, 2))
-plotFit(cars.lm1, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150),
-        main = "linear")
-plotFit(cars.lm2, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150),
-        main = "quadratic")
-plotFit(cars.lm3, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150),
-        main = "cubic")
-plotFit(cars.lm4, interval = "both", xlim = c(-10, 40), ylim = c(-50, 150),
-        main = "cubic spline")
-
 ## A nonlinear regression example
-par(mfrow = c(1, 1))
-library(RColorBrewer) # requires that RColorBrewer be installed
-blues <- brewer.pal(9, "Blues")
 data(Puromycin, package = "datasets")
 Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
                 start = c(Vm = 200, K = 0.05))
 plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE,
-        col.conf = blues[4], col.pred = blues[2])
+        col.conf = "darkgrey", col.pred = "lightgrey")
 }
 }
 \references{
