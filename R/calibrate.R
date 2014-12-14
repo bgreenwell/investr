@@ -33,6 +33,7 @@
 ##'          confidence interval. Only needed when \code{adjust = TRUE}.
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
+##'            
 ##' @return An object of class \code{calibrate} containing the following 
 ##'         components:
 ##' \itemize{
@@ -43,21 +44,25 @@
 ##'   \item \code{interval} The method used for calculating \code{lower} and 
 ##'                   \code{upper} (only used by \code{print} method).
 ##' }
+##' 
 ##' @references 
 ##' Graybill, F. A., and Iyer, H. K. (1994)
 ##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 ##' 
 ##' Miller, R. G. (1981)
 ##' \emph{Simultaneous Statistical Inference}. Springer-Verlag.
+##' 
 ##' @rdname calibrate
+##' 
 ##' @aliases print.calibrate
+##' 
 ##' @export
-##' @section Warning:
-##'   You must not call this function unless ...
+##'
 ##' @note The function \code{invest} is more general, but based on numerical
 ##' techniques to find the solution. When the underlying model is that of the 
 ##' simple linear regression model with normal errors, closed-form expressions
 ##' exist which are utilized by the function \code{calibrate}.
+##' 
 ##' @examples
 ##' \donttest{
 ##' ## Inverting a prediction interval for an individual response
@@ -75,9 +80,9 @@
 ##' ## Wald interval and approximate standard error based on the delta method
 ##' calibrate(crystal.lm, y0 = 8, interval = "Wald", mean.response = TRUE)
 ##' 
-##' ## Alterntively, we can use the car package to compute the standard error (this 
-##' ## is trickier though when mean.respone = FALSE, hence, it is better to use the
-##' ## calibrate function).
+##' ## Alterntively, we can use the car package to compute the standard error 
+##' ## (this is trickier though when mean.respone = FALSE, hence, it is better 
+##' ## to use the calibrate function).
 ##' library(car)
 ##' deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
 ##' }
