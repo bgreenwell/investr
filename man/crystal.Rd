@@ -4,6 +4,10 @@
 \alias{crystal}
 \title{Crystal weight data}
 \format{A data frame with 14 rows and 2 variables}
+\source{
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+}
 \description{
 The data give the growing time and final weight of crystals.
 }
@@ -12,10 +16,6 @@ The data give the growing time and final weight of crystals.
   \item \code{time} Time taken to grow (hours).
   \item \code{weight} Final weight of the crystal (grams).
 }
-}
-\references{
-Graybill, F. A., and Iyer, H. K. (1994)
-\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 }
 \keyword{datasets}
 

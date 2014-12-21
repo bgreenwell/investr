@@ -49,7 +49,7 @@ NULL
 ##' @source 
 ##' Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration 
 ##' Problems, \emph{Journal of the American Statistical Association}, \bold{83}, 
-##' 650-–656.
+##' 650--656.
 ##' @references
 ##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
 ##' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with 

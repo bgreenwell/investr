@@ -4,19 +4,19 @@
 \alias{arsenic}
 \title{Concentrations of arsenic in water samples}
 \format{A data frame with 32 rows and 2 variables}
+\source{
+Graybill, F. A., and Iyer, H. K. (1994)
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+}
 \description{
 The data give the actual and measured concentrations of arsenic present in
 water samples.
 }
 \details{
 \itemize{
-  \item \code{actual} True amount of arsenic present
-  \item \code{measured} Measured amount of arsenic present
+  \item \code{actual} True amount of arsenic present.
+  \item \code{measured} Measured amount of arsenic present.
 }
-}
-\references{
-Graybill, F. A., and Iyer, H. K. (1994)
-\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 }
 \keyword{datasets}
 
