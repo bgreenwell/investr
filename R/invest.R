@@ -445,7 +445,8 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     res <- list(t0 = x0.est, 
                 t = x0.star, 
                 R = nsim, 
-                sim = type)
+                sim = type,
+                level = level)
     class(res) = "bootCal"
 #     attr(res, "boot_fail") <- num_fail
     return(res)
@@ -693,10 +694,10 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
 }
 
 ##' @keywords internal
-print.bootCal <- function(x, digits = 4, ...) {
-  op <- cbind(x$t0, mean(x$t) - x$t0, sd(x$t))
-  colnames(op) <- c("original", "bias", "std. error")
-  rownames(op) <- "estimate"
+print.bootCal <- function(x, digits = 4, ...) { 
+  ci <- quantile(x$t, probs = c((1-x$level)/2, (1+x$level)/2))
+  names(ci) <- c("lower", "upper")
+  op <- c("estimate" = x$t0, ci, "se" = sd(x$t), "bias" = mean(x$t) - x$t0)
   print(op, digits = digits)
   invisible(x)
 } 
@@ -712,7 +713,7 @@ plot.bootCal <- function(object) {
   t <- object$t  # bootstrap replicates
   t0 <- object$t0  # original estimate
   
-  ## Calculate number of histogram bins
+  ## Calculate number of histogram breaks (better than default)
   if (!is.null(t0)) {
     nclass <- min(max(ceiling(length(t)/25), 10), 100)
     rg <- range(t)
