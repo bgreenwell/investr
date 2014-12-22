@@ -734,8 +734,8 @@ plot.bootCal <- function(object) {
        xlab = "Bootstrap estimate")
   qqnorm(t, xlab = "Standard normal quantile", ylab = "Bootstrap quantile",
          main = "")
-  abline(mean(x$t), sqrt(var(t)), lty = 2)
+  qqline(t)
   par(mfrow = c(1, 1))
-  invisible(x)
+  invisible(object)
   
 }
