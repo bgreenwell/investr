@@ -289,8 +289,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @export
 ##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, data, pboot = FALSE,
-                       nsim = 1, seed = NULL, lower, upper, 
+                       level = 0.95, mean.response = FALSE, data, boot = FALSE,
+                       type = c("parametric", "nonparametric"), nsim = 1, 
+                       seed = NULL, progress = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        adjust = c("none", "Bonferroni"), k, ...) {
   
@@ -345,10 +346,15 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   }
   
   ## Parametric bootstrap ------------------------------------------------------
-  if (pboot) {
+  if (boot) {
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Set up progress bar (if requested)
+    if (progress) { 
+      pb <- txtProgressBar(min = 0, max = nsim, style = 3)
+    }
     
     ## Initialize random number generator
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
@@ -362,40 +368,88 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
     
-    ## Bootstrap replicates
-    cat("\nTaking bootstrap samples, please wait ...\n")
-    x0.star <- raply(nsim, {
+    ## Simulate new response vectors
+    ftd <- fitted(object)  # fitted values
+    res <- residuals(object) # redisuals
+    type <- match.arg(type)
+    if (type == "parametric") {  
+      ss <- simulate(object, nsim = nsim)
+    } else {
+      ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
+    }
     
+    ## Function to calculate inverse estimate
+    x0Fun <- function(i) {
+      
       ## Update model using simulated response data
       boot.data <- eval(object$call$data)  # copy data
-      boot.data[, yname] <- simulate(object)[[1]]  # simulate new response
-      boot.object <- update(object, data = boot.data)  # FIXME: tryCatch?
+      boot.data[, yname] <- ss[[i]]  # simulated response vector
+      boot.object <- tryCatch(update(object, data = boot.data),
+                              error = function(e) NULL)
       
-      ## FIXME: Y0 ~ Normal(?, sigma)
-      if (mean.response) {
-        y0.star <- y0  # hold constant in bootstrap replications
+      ## If updating the model fails, then return value is NA
+      if (is.null(boot.object)) {
+        ret <- NA
       } else {
-        y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+        
+        ## Simulate new response (different from simulated response vector)
+        if (mean.response) {  # regulation
+          y0.star <- y0  # hold constant in bootstrap replications
+        } else {  # calibration
+          if (type == "parametric") {
+            y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+          } else {
+            y0.star <- y0 + sample(res, size = length(y0), replace = TRUE)
+          }
+        }
+        
+        ## Calculate point estimate
+        ret <- tryCatch(uniroot(function(x) {
+            predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
+          }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+          error = function(e) NA)
       }
       
-      ## Calculate point estimate
-      tryCatch(uniroot(function(x) {
-        predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
-      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-      error = function(e) NA)
+      ## Update progress bar
+      if (progress) { 
+        setTxtProgressBar(pb, i) 
+      }
       
-    }, .progress = "text")
+      ## Return estimate
+      ret
+      
+    }
     
-    ## Check for errors and return bootstrap replicates
+    ## Calculate bootstrap replicates
+    x0.star <- sapply(seq_len(nsim), x0Fun)
+    
+    ## Check for errors and return the runs that did not fail
     if (anyNA(x0.star)) {
-      warning("some bootstrap runs failed (", sum(is.na(x0.star)), "/", nsim, 
+      num_fail <- sum(is.na(x0.star))
+      warning("some bootstrap runs failed (", num_fail, "/", nsim, 
               ")")
       x0.star <- na.omit(x0.star)  # remove runs that failed
       attributes(x0.star) <- NULL  # remove attributes
+    } else {
+      num_fail <- 0
     }
-    attr(x0.star, "original") <- x0.est  # attach original estimate
-    return(x0.star)  # return bootstrap replicates
-    
+#     attr(x0.star, "original") <- x0.est  # attach original estimate
+#     class(x0.star) <- c("bootcal")
+#     return(x0.star)  # return bootstrap replicates
+   
+    ## boot() ends with the equivalent of
+    ## structure(list(t0 = t0, t = t.star, R = R, data = data, seed = seed,
+    ##  	       statistic = statistic, sim = sim, call = call,
+    ##		       ran.gen = ran.gen, mle = mle),
+    ##		       class = "boot")
+    res <- list(t0 = x0.est, 
+                t = x0.star, 
+                R = nsim, 
+                sim = type)
+    class(res) = "bootCal"
+#     attr(res, "boot_fail") <- num_fail
+    return(res)
+
   }
   
   ## Return point estimate only
@@ -635,5 +689,52 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   ## Assign class label and return results
   class(res) <- "calibrate"
   res
+  
+}
+
+##' @keywords internal
+print.bootCal <- function(x, digits = 4, ...) {
+  op <- cbind(x$t0, mean(x$t) - x$t0, sd(x$t))
+  colnames(op) <- c("original", "bias", "std. error")
+  rownames(op) <- "estimate"
+  print(op, digits = digits)
+  invisible(x)
+} 
+
+##' Plots of the Output of a Bootstrap Calibraion Simlation
+##' 
+##' This takes a bootstrap calibration object and produces plots for the 
+##' bootstrap replicates of the inverse estimate.
+##' 
+##' @param object An object that inherits from class \code{bootCal}.
+plot.bootCal <- function(object) {
+  
+  t <- object$t  # bootstrap replicates
+  t0 <- object$t0  # original estimate
+  
+  ## Calculate number of histogram bins
+  if (!is.null(t0)) {
+    nclass <- min(max(ceiling(length(t)/25), 10), 100)
+    rg <- range(t)
+    if (t0 < rg[1L]) 
+      rg[1L] <- t0
+    else if (t0 > rg[2L]) 
+      rg[2L] <- t0
+    rg <- rg + 0.05 * c(-1, 1) * diff(rg)
+    lc <- diff(rg)/(nclass - 2)
+    n1 <- ceiling((t0 - rg[1L])/lc)
+    n2 <- ceiling((rg[2L] - t0)/lc)
+    bks <- t0 + (-n1:n2) * lc
+  }
+  
+  ## Plots
+  par(mfrow = c(1, 2))
+  hist(t, breaks = bks, probability = TRUE, main = "",
+       xlab = "Bootstrap estimate")
+  qqnorm(t, xlab = "Standard normal quantile", ylab = "Bootstrap quantile",
+         main = "")
+  abline(mean(x$t), sqrt(var(t)), lty = 2)
+  par(mfrow = c(1, 1))
+  invisible(x)
   
 }
