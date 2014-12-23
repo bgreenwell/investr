@@ -12,12 +12,9 @@ Depends:
     graphics,
     stats
 Suggests:
-    boot,
-    car,
     testthat
 Imports:
-    nlme,
-    plyr
+    nlme
 Date: 2014-04-18
 License: GPL (>= 2)
 URL: https://github.com/w108bmg/investr

@@ -21,17 +21,21 @@
 ##'        (\code{TRUE}).
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
-##' @param pboot Logical indicating whether to perform a parametric bootstrap.
-##' @param nsim Number of bootstrap simulations, positive integer; the bootstrap 
-##'             B (or R).
-##' @param seed Optional argument to set.seed.
+##' @param boot Logical indicating whether to carry out a bootstrap simulation.
+##' @param nsim Positive integer specifying the number of bootstrap simulations; 
+##'             the bootstrap B (or R).
+##' @param type Character string specifying the type of bootstrap, 
+##'             \code{"parametric"} or \code{"nonparametric"}.
+##' @param seed Optional argument to \code{set.seed}.
+##' @param progress Logical indicating whether to display a text-based progress
+##'                 bar during the bootstrap simulation.
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-##'           Only used when object inherits from class \code{"lme"}. Defaults to
+##'           Only used when \code{object} inherits from class \code{"lme"}. Defaults to
 ##'           \code{qnorm((1+level)/2)}.
 ##' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-##'           Only used when object inherits from class \code{"lme"}. Defaults to
+##'           Only used when \code{object} inherits from class \code{"lme"}. Defaults to
 ##'           \code{qnorm((1-level)/2)}.
 ##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
 ##'            minimum of 1e-10.
@@ -81,13 +85,24 @@
 ##' \emph{Biometrics} \bold{85}(2): 439--449.
 ##' doi:10.1093/biomet/85.2.439.
 ##' @examples
-##' data(Puromycin, package = "datasets")
-##' Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
-##' Puro2.nls <- nls(rate ~ (theta1 * conc) / (theta2 + conc), 
-##'                  data = Puromycin2, start = list(theta1 = 200, theta2 = 1))
-##' plotFit(Puro2.nls, interval = "both")
-##' invest(Puro2.nls, y0 = 100, interval = "inversion")
-##' invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
+##' ##
+##' ## Nasturtium example (nonlinear regression with replication)
+##' ##
+##' 
+##' ## Log-logistic model
+##' mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+##'            start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+##'            data = nasturtium)
+##'            
+##' ## Compute approximate 95% calibration intervals
+##' invest(mod, y0 = c(309, 296, 419), interval = "inversion")
+##' invest(mod, y0 = c(309, 296, 419), interval = "Wald")  
+##' 
+##' ## Bootstrap calibration intervals
+##' #boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999, 
+##' #              progress = TRUE, seed = 101)
+##' #boo  # print bootstrap summary
+##' #plot(boo)  # plot results
 invest <- function(object, ...) {
   UseMethod("invest")
 } 
@@ -96,8 +111,9 @@ invest <- function(object, ...) {
 ##' @export
 ##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
-                      level = 0.95, mean.response = FALSE, data, pboot = FALSE,
-                      nsim = 1, seed = NULL, lower, upper, 
+                      level = 0.95, mean.response = FALSE, data, boot = FALSE,
+                      type = c("parametric", "nonparametric"), nsim = 1, 
+                      seed = NULL, progress = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
@@ -139,10 +155,15 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   }
   
   ## Parametric bootstrap ------------------------------------------------------
-  if (pboot) {
+  if (boot) {
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
+    
+    ## Set up progress bar (if requested)
+    if (progress) { 
+      pb <- txtProgressBar(min = 0, max = nsim, style = 3)
+    }
     
     ## Initialize random number generator
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
@@ -156,40 +177,82 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
     
-    ## Bootstrap replicates
-    cat("\nTaking bootstrap samples, please wait ...\n")
-    x0.star <- raply(nsim, {
+    ## Simulate new response vectors
+    ftd <- fitted(object)  # fitted values
+    res <- residuals(object) # redisuals
+    type <- match.arg(type)
+    if (type == "parametric") {  
+      ss <- simulate(object, nsim = nsim)
+    } else {
+      ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
+    }
+    
+    ## Function to calculate inverse estimate
+    x0Fun <- function(i) {
       
       ## Update model using simulated response data
       boot.data <- eval(object$call$data)  # copy data
-      boot.data[, yname] <- simulate(object)[[1]]  # simulate new response
-      boot.object <- update(object, data = boot.data)  # FIXME: tryCatch?
+      boot.data[, yname] <- ss[[i]]  # simulated response vector
+      boot.object <- tryCatch(update(object, data = boot.data),
+                              error = function(e) NULL)
       
-      ## FIXME: Y0 ~ Normal(?, sigma)
-      if (mean.response) {
-        y0.star <- y0  # hold constant in bootstrap replications
+      ## If updating the model fails, then return value is NA
+      if (is.null(boot.object)) {
+        ret <- NA
       } else {
-        y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+        
+        ## Simulate new response (different from simulated response vector)
+        if (mean.response) {  # regulation
+          y0.star <- y0  # hold constant in bootstrap replications
+        } else {  # calibration
+          if (type == "parametric") {
+            y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
+          } else {
+            y0.star <- y0 + sample(res, size = length(y0), replace = TRUE)
+          }
+        }
+        
+        ## Calculate point estimate
+        ret <- tryCatch(uniroot(function(x) {
+          predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
+        }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+        error = function(e) NA)
       }
       
-      ## Calculate point estimate
-      tryCatch(uniroot(function(x) {
-        predict(boot.object, newdata = makeData(x, xname)) - mean(y0.star)
-      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-      error = function(e) NA)
+      ## Update progress bar
+      if (progress) { 
+        setTxtProgressBar(pb, i) 
+      }
       
-    }, .progress = "text")
+      ## Return estimate
+      ret
+      
+    }
     
-    ## Check for errors and return bootstrap replicates
+    ## Calculate bootstrap replicates
+    x0.star <- sapply(seq_len(nsim), x0Fun)
+    
+    ## Check for errors and return the runs that did not fail
     if (anyNA(x0.star)) {
-      warning("some bootstrap runs failed (", sum(is.na(x0.star)), "/", nsim, 
+      num_fail <- sum(is.na(x0.star))
+      warning("some bootstrap runs failed (", num_fail, "/", nsim, 
               ")")
       x0.star <- na.omit(x0.star)  # remove runs that failed
       attributes(x0.star) <- NULL  # remove attributes
+    } else {
+      num_fail <- NULL
     }
-    attr(x0.star, "original") <- x0.est  # attach original estimate
-    return(x0.star)  # return bootstrap replicates
     
+    ## Create and return a bootCal object (essentially a list that can later be 
+    ## converted to an object of class boot)
+    res <- list(original  = x0.est,  # original estimate
+                bootreps  = x0.star,  # bootstrap replicates
+                nsim      = nsim,  # number of simulations
+                level     = level)  # desired confidence level
+    class(res) = "bootCal"
+    attr(res, "bootFail") <- num_fail
+    return(res)
+     
   }
   
   ## Return point estimate only
@@ -452,7 +515,6 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     attr(res, "bootFail") <- num_fail
     return(res)
 
-
   }
   
   ## Return point estimate only
@@ -701,24 +763,27 @@ print.bootCal <- function(x, digits = 4, ...) {
               digits = digits)
   names(ci) <- c("lower", "upper")
   op <- c("estimate" = x$original, 
-          "se" = sd(x$bootreps), 
-          "bias" = mean(x$bootreps) - x$original,
-          "nreps" = length(x$bootreps))
+          "se"       = sd(x$bootreps), 
+          "bias"     = mean(x$bootreps) - x$original)
   print(round(op, digits = digits))
   cat("\n", "Percentile bootstrap interval: (", ci[1], ",", ci[2], ")", "\n")
   invisible(x)
 } 
 
-##' Plots of the Output of a Bootstrap Calibraion Simulation
+##' Plots of the Output of a Bootstrap Calibration Simulation
 ##' 
 ##' This takes a bootstrap calibration object and produces plots for the 
 ##' bootstrap replicates of the inverse estimate.
 ##' 
+##' @rdname plot.bootCal
+##' @export
+##' @method plot bootCal
+##' 
 ##' @param object An object that inherits from class \code{"bootCal"}.
 plot.bootCal <- function(object) {
   
-  t <- object$t  # bootstrap replicates
-  t0 <- object$t0  # original estimate
+  t <- object$bootreps  # bootstrap replicates
+  t0 <- object$original  # original estimate
   
   ## Calculate number of histogram breaks (better than default)
   if (!is.null(t0)) {
@@ -738,7 +803,7 @@ plot.bootCal <- function(object) {
   ## Plots
   par(mfrow = c(1, 2))
   hist(t, breaks = bks, probability = TRUE, main = "",
-       xlab = "Bootstrap estimate")
+       xlab = "Bootstrap replicate")
   qqnorm(t, xlab = "Standard normal quantile", ylab = "Bootstrap quantile",
          main = "")
   qqline(t)

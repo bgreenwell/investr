@@ -84,12 +84,19 @@ simple linear regression model with normal errors, closed-form expressions
 exist which are utilized by the function \code{calibrate}.
 }
 \examples{
-\donttest{
+##
+## Arsenic example (simple linear regression with replication)
+##
+
 ## Inverting a prediction interval for an individual response
 arsenic.lm <- lm(measured ~ actual, data = arsenic)
 plotFit(arsenic.lm, interval = "prediction", shade = TRUE,
         col.pred = "lightblue")
 calibrate(arsenic.lm, y0 = 3, interval = "inversion")
+
+##
+## Crystal weight example (simple linear regression)
+##
 
 ## Inverting a confidence interval for the mean response
 crystal.lm <- lm(weight ~ time, data = crystal)
@@ -99,13 +106,6 @@ calibrate(crystal.lm, y0 = 8, interval = "inversion", mean.response = TRUE)
 
 ## Wald interval and approximate standard error based on the delta method
 calibrate(crystal.lm, y0 = 8, interval = "Wald", mean.response = TRUE)
-
-## Alterntively, we can use the car package to compute the standard error
-## (this is trickier though when mean.respone = FALSE, hence, it is better
-## to use the calibrate function).
-library(car)
-deltaMethod(crystal.lm, g = "(8 - b0) / b1", parameterNames = c("b0", "b1"))
-}
 }
 \references{
 Graybill, F. A., and Iyer, H. K. (1994)

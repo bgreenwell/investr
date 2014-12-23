@@ -9,8 +9,9 @@
 invest(object, ...)
 
 \method{invest}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, pboot = FALSE, nsim = 1,
-  seed = NULL, lower, upper, tol = .Machine$double.eps^0.25,
+  level = 0.95, mean.response = FALSE, data, boot = FALSE,
+  type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
@@ -46,12 +47,18 @@ the interval to be calculated.}
 \item{data}{An optional data frame. This is required if \code{object$data}
 is \code{NULL}.}
 
-\item{pboot}{Logical indicating whether to perform a parametric bootstrap.}
+\item{boot}{Logical indicating whether to carry out a bootstrap simulation.}
 
-\item{nsim}{Number of bootstrap simulations, positive integer; the bootstrap
-B (or R).}
+\item{type}{Character string specifying the type of bootstrap,
+\code{"parametric"} or \code{"nonparametric"}.}
 
-\item{seed}{Optional argument to set.seed.}
+\item{nsim}{Positive integer specifying the number of bootstrap simulations;
+the bootstrap B (or R).}
+
+\item{seed}{Optional argument to \code{set.seed}.}
+
+\item{progress}{Logical indicating whether to display a text-based progress
+bar during the bootstrap simulation.}
 
 \item{lower}{The lower endpoint of the interval to be searched.}
 
@@ -71,11 +78,11 @@ multiple, say k, times.}
 confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals.
-Only used when object inherits from class \code{"lme"}. Defaults to
+Only used when \code{object} inherits from class \code{"lme"}. Defaults to
 \code{qnorm((1+level)/2)}.}
 
 \item{q2}{Optional upper cutoff to be used in forming confidence intervals.
-Only used when object inherits from class \code{"lme"}. Defaults to
+Only used when \code{object} inherits from class \code{"lme"}. Defaults to
 \code{qnorm((1-level)/2)}.}
 }
 \value{
@@ -105,13 +112,24 @@ value of the response (or vector thereof) or specified value of the mean
 response. See the references listed below for more details.
 }
 \examples{
-data(Puromycin, package = "datasets")
-Puromycin2 <- Puromycin[Puromycin$state == "treated", ]
-Puro2.nls <- nls(rate ~ (theta1 * conc) / (theta2 + conc),
-                 data = Puromycin2, start = list(theta1 = 200, theta2 = 1))
-plotFit(Puro2.nls, interval = "both")
-invest(Puro2.nls, y0 = 100, interval = "inversion")
-invest(Puro2.nls, y0 = 100, interval = "inversion", mean.response = TRUE)
+##
+## Nasturtium example (nonlinear regression with replication)
+##
+
+## Log-logistic model
+mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+           start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+           data = nasturtium)
+
+## Compute approximate 95\% calibration intervals
+invest(mod, y0 = c(309, 296, 419), interval = "inversion")
+invest(mod, y0 = c(309, 296, 419), interval = "Wald")
+
+## Bootstrap calibration intervals
+boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999,
+              progress = TRUE, seed = 101)
+boo  # print bootstrap summary
+plot(boo)  # plot results
 }
 \references{
 Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package
