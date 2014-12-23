@@ -15,6 +15,9 @@ S3method(invest, lme)  # new (experimental)
 S3method(plotFit, lm)    
 S3method(plotFit, nls) 
 S3method(print, calibrate)
+S3method(print, bootCal)
+S3method(plot, bootCal)
+
 ## Recommended packages
 importFrom(nlme, fixef, asOneFormula, getVarCov)
 
