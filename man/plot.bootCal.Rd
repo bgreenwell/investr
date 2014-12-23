@@ -3,10 +3,13 @@
 \alias{plot.bootCal}
 \title{Plots of the Output of a Bootstrap Calibration Simulation}
 \usage{
-\method{plot}{bootCal}(object)
+\method{plot}{bootCal}(x, ...)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{"bootCal"}.}
+\item{x}{An object that inherits from class \code{"bootCal"}.}
+
+\item{...}{Additional optional arguments. At present, no optional arguments
+are used.}
 }
 \description{
 This takes a bootstrap calibration object and produces plots for the

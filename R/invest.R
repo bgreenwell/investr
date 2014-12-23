@@ -99,10 +99,10 @@
 ##' invest(mod, y0 = c(309, 296, 419), interval = "Wald")  
 ##' 
 ##' ## Bootstrap calibration intervals
-##' #boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999, 
-##' #              progress = TRUE, seed = 101)
-##' #boo  # print bootstrap summary
-##' #plot(boo)  # plot results
+##' boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999, 
+##'               progress = TRUE, seed = 101)
+##' boo  # print bootstrap summary
+##' plot(boo)  # plot results
 invest <- function(object, ...) {
   UseMethod("invest")
 } 
@@ -779,11 +779,13 @@ print.bootCal <- function(x, digits = 4, ...) {
 ##' @export
 ##' @method plot bootCal
 ##' 
-##' @param object An object that inherits from class \code{"bootCal"}.
-plot.bootCal <- function(object) {
+##' @param x An object that inherits from class \code{"bootCal"}.
+##' @param ... Additional optional arguments. At present, no optional arguments 
+##'            are used.
+plot.bootCal <- function(x, ...) {
   
-  t <- object$bootreps  # bootstrap replicates
-  t0 <- object$original  # original estimate
+  t <- x$bootreps  # bootstrap replicates
+  t0 <- x$original  # original estimate
   
   ## Calculate number of histogram breaks (better than default)
   if (!is.null(t0)) {
@@ -808,6 +810,6 @@ plot.bootCal <- function(object) {
          main = "")
   qqline(t)
   par(mfrow = c(1, 1))
-  invisible(object)
+  invisible(x)
   
 }

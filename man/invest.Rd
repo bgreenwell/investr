@@ -126,10 +126,10 @@ invest(mod, y0 = c(309, 296, 419), interval = "inversion")
 invest(mod, y0 = c(309, 296, 419), interval = "Wald")
 
 ## Bootstrap calibration intervals
-boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999,
-              progress = TRUE, seed = 101)
-boo  # print bootstrap summary
-plot(boo)  # plot results
+#boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999,
+#              progress = TRUE, seed = 101)
+#boo  # print bootstrap summary
+#plot(boo)  # plot results
 }
 \references{
 Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package
