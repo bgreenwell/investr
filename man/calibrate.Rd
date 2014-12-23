@@ -19,8 +19,8 @@ calibrate(object, ...)
 \method{calibrate}{lm}(object, ...)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{lm}, a matrix, a list,
-or a data frame.}
+\item{object}{An object that inherits from class \code{"lm"}, a matrix, a
+list, or a data frame.}
 
 \item{...}{Additional optional arguments. At present, no optional arguments
            are used.}
@@ -60,7 +60,7 @@ used in the fitting process.}
 contain \code{NA}s.}
 }
 \value{
-An object of class \code{calibrate} containing the following
+An object of class \code{"calibrate"} containing the following
         components:
 \itemize{
   \item \code{estimate} The estimate of x0.

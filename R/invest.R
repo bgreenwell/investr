@@ -8,7 +8,8 @@
 ##' @rdname invest
 ##' @export
 ##' 
-##' @param object An object that inherits from class \code{lm} or \code{nls}.
+##' @param object An object that inherits from class \code{"lm"}, \code{"nls"}, 
+##'               or \code{"lme"}.
 ##' @param y0 The value of the observed response(s) or specified value of the 
 ##'           mean response.
 ##' @param interval The type of interval required.
@@ -27,10 +28,10 @@
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-##'           Only used when object inherits from class \code{lme}. Defaults to
+##'           Only used when object inherits from class \code{"lme"}. Defaults to
 ##'           \code{qnorm((1+level)/2)}.
 ##' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-##'           Only used when object inherits from class \code{lme}. Defaults to
+##'           Only used when object inherits from class \code{"lme"}. Defaults to
 ##'           \code{qnorm((1-level)/2)}.
 ##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
 ##'            minimum of 1e-10.
@@ -43,17 +44,24 @@
 ##'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
-##' @return Either a numeric vector containing the bootstrap replicates 
-##'         (code{pboot = TRUE}) or an object of class \code{calibrate} 
+##' @return If \code{boot = FALSE}, then an object of class \code{"calibrate"} 
 ##'         containing the following components:
-##' \itemize{
-##'   \item \code{estimate} The estimate of x0.
-##'   \item \code{lwr} The lower confidence limit for x0.
-##'   \item \code{upr} The upper confidence limit for x0.
-##'   \item \code{se} An estimate of the standard error (Wald interval only).
-##'   \item \code{interval} The method used for calculating \code{lower} and 
-##'                   \code{upper} (only used by \code{print} method).
-##' }
+##'   \itemize{
+##'     \item \code{estimate} The estimate of x0.
+##'     \item \code{lwr} The lower confidence limit for x0.
+##'     \item \code{upr} The upper confidence limit for x0.
+##'     \item \code{se} An estimate of the standard error (Wald interval only).
+##'     \item \code{interval} The method used for calculating \code{lower} and 
+##'           \code{upper} (only used by \code{print} method).
+##'   }
+##'         Otherwise, an object of class \code{"bootCal"} containing the 
+##'         following components:
+##'   \itemize{
+##'     \item \code{original} The estimate of x0.
+##'     \item \code{bootreps} The lower confidence limit for x0.
+##'     \item \code{nsim} The number of bootstrap replicates.
+##'     \item \code{level} The desired confidence level.
+##'   }
 ##' @references
 ##' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
 ##' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
@@ -431,25 +439,19 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
       x0.star <- na.omit(x0.star)  # remove runs that failed
       attributes(x0.star) <- NULL  # remove attributes
     } else {
-      num_fail <- 0
+      num_fail <- NULL
     }
-#     attr(x0.star, "original") <- x0.est  # attach original estimate
-#     class(x0.star) <- c("bootcal")
-#     return(x0.star)  # return bootstrap replicates
-   
-    ## boot() ends with the equivalent of
-    ## structure(list(t0 = t0, t = t.star, R = R, data = data, seed = seed,
-    ##  	       statistic = statistic, sim = sim, call = call,
-    ##		       ran.gen = ran.gen, mle = mle),
-    ##		       class = "boot")
-    res <- list(t0 = x0.est, 
-                t = x0.star, 
-                R = nsim, 
-                sim = type,
-                level = level)
+
+    ## Create and return a bootCal object (essentially a list that can later be 
+    ## converted to an object of class boot)
+    res <- list(original  = x0.est,  # original estimate
+                bootreps  = x0.star,  # bootstrap replicates
+                nsim      = nsim,  # number of simulations
+                level     = level)  # desired confidence level
     class(res) = "bootCal"
-#     attr(res, "boot_fail") <- num_fail
+    attr(res, "bootFail") <- num_fail
     return(res)
+
 
   }
   
@@ -695,19 +697,24 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
 
 ##' @keywords internal
 print.bootCal <- function(x, digits = 4, ...) { 
-  ci <- quantile(x$t, probs = c((1-x$level)/2, (1+x$level)/2))
+  ci <- round(quantile(x$bootreps, probs = c((1-x$level)/2, (1+x$level)/2)),
+              digits = digits)
   names(ci) <- c("lower", "upper")
-  op <- c("estimate" = x$t0, ci, "se" = sd(x$t), "bias" = mean(x$t) - x$t0)
-  print(op, digits = digits)
+  op <- c("estimate" = x$original, 
+          "se" = sd(x$bootreps), 
+          "bias" = mean(x$bootreps) - x$original,
+          "nreps" = length(x$bootreps))
+  print(round(op, digits = digits))
+  cat("\n", "Percentile bootstrap interval: (", ci[1], ",", ci[2], ")", "\n")
   invisible(x)
 } 
 
-##' Plots of the Output of a Bootstrap Calibraion Simlation
+##' Plots of the Output of a Bootstrap Calibraion Simulation
 ##' 
 ##' This takes a bootstrap calibration object and produces plots for the 
 ##' bootstrap replicates of the inverse estimate.
 ##' 
-##' @param object An object that inherits from class \code{bootCal}.
+##' @param object An object that inherits from class \code{"bootCal"}.
 plot.bootCal <- function(object) {
   
   t <- object$t  # bootstrap replicates

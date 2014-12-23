@@ -5,8 +5,8 @@
 ##' observed value of the response (or vector thereof) or specified value of the 
 ##' mean response. See the reference listed below for more details.
 ##'  
-##' @param object An object that inherits from class \code{lm}, a matrix, a list, 
-##' or a data frame.
+##' @param object An object that inherits from class \code{"lm"}, a matrix, a 
+##' list, or a data frame.
 ##' @param formula A formula of the form \code{y ~ x}.
 ##' @param data an optional data frame, list or environment (or object coercible 
 ##' by \code{as.data.frame} to a data frame) containing the variables in the 
@@ -34,7 +34,7 @@
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
 ##'            
-##' @return An object of class \code{calibrate} containing the following 
+##' @return An object of class \code{"calibrate"} containing the following 
 ##'         components:
 ##' \itemize{
 ##'   \item \code{estimate} The estimate of x0.

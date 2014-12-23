@@ -26,7 +26,7 @@ plotFit(object, ...)
   n = 500, xlab, ylab, xlim, ylim)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{lm} or \code{nls}.}
+\item{object}{An object that inherits from class \code{"lm"} or \code{"nls"}.}
 
 \item{...}{Additional optional arguments passed on to \code{plot}.}
 
@@ -88,8 +88,8 @@ TRUE.}
 \item{ylim}{The y limits (y1, y2) of the plot.}
 }
 \description{
-Plots fitted model for an object of class \code{lm} or \code{nls} with the
-option of adding a confidence and/or prediction band.
+Plots fitted model for an object of class \code{"lm"} or \code{"nls"} with
+the option of adding a confidence and/or prediction band.
 }
 \note{
 By default, the plotted intervals are pointwise intervals. For simultaneous

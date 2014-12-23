@@ -14,8 +14,9 @@ invest(object, ...)
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, pboot = FALSE, nsim = 1,
-  seed = NULL, lower, upper, tol = .Machine$double.eps^0.25,
+  level = 0.95, mean.response = FALSE, data, boot = FALSE,
+  type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald", "none"),
@@ -23,7 +24,8 @@ invest(object, ...)
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{lm} or \code{nls}.}
+\item{object}{An object that inherits from class \code{"lm"}, \code{"nls"},
+or \code{"lme"}.}
 
 \item{...}{Additional optional arguments. At present, no optional arguments
 are used.}
@@ -69,25 +71,32 @@ multiple, say k, times.}
 confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals.
-Only used when object inherits from class \code{lme}. Defaults to
+Only used when object inherits from class \code{"lme"}. Defaults to
 \code{qnorm((1+level)/2)}.}
 
 \item{q2}{Optional upper cutoff to be used in forming confidence intervals.
-Only used when object inherits from class \code{lme}. Defaults to
+Only used when object inherits from class \code{"lme"}. Defaults to
 \code{qnorm((1-level)/2)}.}
 }
 \value{
-Either a numeric vector containing the bootstrap replicates
-        (code{pboot = TRUE}) or an object of class \code{calibrate}
+If \code{boot = FALSE}, then an object of class \code{"calibrate"}
         containing the following components:
-\itemize{
-  \item \code{estimate} The estimate of x0.
-  \item \code{lwr} The lower confidence limit for x0.
-  \item \code{upr} The upper confidence limit for x0.
-  \item \code{se} An estimate of the standard error (Wald interval only).
-  \item \code{interval} The method used for calculating \code{lower} and
-                  \code{upper} (only used by \code{print} method).
-}
+  \itemize{
+    \item \code{estimate} The estimate of x0.
+    \item \code{lwr} The lower confidence limit for x0.
+    \item \code{upr} The upper confidence limit for x0.
+    \item \code{se} An estimate of the standard error (Wald interval only).
+    \item \code{interval} The method used for calculating \code{lower} and
+          \code{upper} (only used by \code{print} method).
+  }
+        Otherwise, an object of class \code{"bootCal"} containing the
+        following components:
+  \itemize{
+    \item \code{original} The estimate of x0.
+    \item \code{bootreps} The lower confidence limit for x0.
+    \item \code{nsim} The number of bootstrap replicates.
+    \item \code{level} The desired confidence level.
+  }
 }
 \description{
 The function \code{invest} computes the inverse estimate and a condfidence

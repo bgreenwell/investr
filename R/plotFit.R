@@ -1,9 +1,9 @@
 ##' Plotting Confidence/Prediction Bands
 ##' 
-##' Plots fitted model for an object of class \code{lm} or \code{nls} with the 
-##' option of adding a confidence and/or prediction band. 
+##' Plots fitted model for an object of class \code{"lm"} or \code{"nls"} with 
+##' the option of adding a confidence and/or prediction band. 
 ##'
-##' @param object An object that inherits from class \code{lm} or \code{nls}.
+##' @param object An object that inherits from class \code{"lm"} or \code{"nls"}.
 ##' @param interval A character string indicating if a prediction band, 
 ##'   confidence band, both, or none should be plotted.
 ##' @param level The desired confidence level.
