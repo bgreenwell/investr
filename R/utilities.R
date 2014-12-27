@@ -5,6 +5,11 @@
 ##' 
 ##' @keywords internal
 AnyNA <- function(x) {
+#   if(exists("anyNA", mode = "function")) {
+#     return(anyNA(x))  # use built-in function if available
+#   } else {
+#     return(any(is.na(x)))
+#   }
   any(is.na(x))
 }
   

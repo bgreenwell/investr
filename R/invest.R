@@ -93,6 +93,7 @@
 ##' mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
 ##'            start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
 ##'            data = nasturtium)
+##' plotFit(mod, lwd.fit = 2)
 ##'            
 ##' ## Compute approximate 95% calibration intervals
 ##' invest(mod, y0 = c(309, 296, 419), interval = "inversion")
