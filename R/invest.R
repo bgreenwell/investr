@@ -233,7 +233,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     x0.star <- sapply(seq_len(nsim), x0Fun)
     
     ## Check for errors and return the runs that did not fail
-    if (anyNA(x0.star)) {
+    if (AnyNA(x0.star)) {
       num_fail <- sum(is.na(x0.star))
       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
               ")")
@@ -495,7 +495,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     x0.star <- sapply(seq_len(nsim), x0Fun)
     
     ## Check for errors and return the runs that did not fail
-    if (anyNA(x0.star)) {
+    if (AnyNA(x0.star)) {
       num_fail <- sum(is.na(x0.star))
       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
               ")")
