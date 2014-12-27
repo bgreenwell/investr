@@ -91,16 +91,8 @@ plotFit.lm <- function(object,
                        col.fit = "black", lty.conf = if (shade) 1 else 2, 
                        lty.pred = if (shade) 1 else 3, lty.fit = 1, 
                        lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                       xlab, ylab, xlim, ylim)
+                       xlab, ylab, xlim, ylim) 
 {
-  
-  ## TODO:
-  ##  * Correctly plot data when model contains transformed response.  For 
-  ##    example, lm(log(y) ~ x) and lm(y ~ x) will both plot as y ~ x.
-  
-  ## form <- formula(object)
-  ## form.y <- form[[2]]
-  ## form.x <- form[[3]]
   
   ## Preliminary (extract data, variable names, etc.)
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -110,7 +102,6 @@ plotFit.lm <- function(object,
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
-#   yvals <- .data[, yname]
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   ## Plot limits, labels, etc.
@@ -167,7 +158,7 @@ plotFit.lm <- function(object,
     }
   }
   
-  ## Plot fitted curve, etc.
+  ## Plot data, mean response, etc.
   plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
        panel.first = if (hide) {  # draw points last
          if (shade) {
@@ -265,7 +256,6 @@ plotFit.nls <- function(object,
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
-  #   yvals <- .data[, yname]
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   ## Plot limits, labels, etc.
@@ -322,7 +312,7 @@ plotFit.nls <- function(object,
     }
   }
   
-  ## Plot data, fit, etc.
+  ## Plot data, mean response, etc.
   plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
        panel.first = if (hide) {
          if (shade) {
