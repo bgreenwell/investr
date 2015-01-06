@@ -99,9 +99,10 @@
 ##' invest(mod, y0 = c(309, 296, 419), interval = "inversion")
 ##' invest(mod, y0 = c(309, 296, 419), interval = "Wald")  
 ##' 
-##' ## Bootstrap calibration intervals
-##' boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 9999, 
-##'               progress = TRUE, seed = 101)
+##' ## Bootstrap calibration intervals. In general, nsim should be as large as 
+##' ## reasonably possible (say, nsim = 9999).
+##' boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 999, 
+##'               seed = 101)
 ##' boo  # print bootstrap summary
 ##' plot(boo)  # plot results
 invest <- function(object, ...) {

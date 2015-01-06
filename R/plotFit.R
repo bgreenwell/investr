@@ -64,15 +64,15 @@
 ##' A Toolbox for Nonlinear Regression in R: The Package nlstools.
 ##' \emph{Journal of Statistical Software} \bold{(under revision)}.
 ##' @examples
-##' \donttest{
+##' ##
 ##' ## A nonlinear regression example
+##' ##
 ##' data(Puromycin, package = "datasets")
 ##' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 ##' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
 ##'                 start = c(Vm = 200, K = 0.05))
 ##' plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE, 
-##'         col.conf = "darkgrey", col.pred = "lightgrey")
-##' }     
+##'         col.conf = "darkgrey", col.pred = "lightgrey")  
 plotFit <- function(object, ...) {
   UseMethod("plotFit")
 } 

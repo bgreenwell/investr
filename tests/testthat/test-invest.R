@@ -56,6 +56,10 @@ test_that("approximate standard error is correct", {
   
 })
 
+# test_that("bootstrap si working correctly", {
+#   
+# })
+
 ## The following tests are for linear calibration with random coefficient models
 ## fit using the lme() function from the nlme package.
 context("Linear calibration with random coefficients")

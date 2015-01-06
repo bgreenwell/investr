@@ -32,3 +32,8 @@ Changes for version 1.2.0
 ====================
 * Cleaned up examples
 * Added bootstrap option to invest
+
+Changes for version 1.2.1
+====================
+* Cleaned up documentation
+* Added AnyNA function for those using older versions of R
