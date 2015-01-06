@@ -5,7 +5,7 @@
 ##' 
 ##' @keywords internal
 AnyNA <- function(x) {
-#   if(getRversion() >= 3.1.0) {
+#   if(getRversion() >= "3.1.0") {
 #     return(anyNA(x))  # use built-in function if available
 #   } else {
 #     return(any(is.na(x)))
