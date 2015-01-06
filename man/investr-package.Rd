@@ -3,17 +3,19 @@
 \alias{investr}
 \docType{package}
 \title{
-Inverse estimation/calibration functions
+Inverse Estimation/Calibration Functions
 }
 \description{
-This package provides functions to facilitate inverse estimation/calibration 
-with linear, nonlinear, and (linear) mixed models.
+Functions to facilitate inverse estimation/calibration in linear,
+    nonlinear, and (linear) mixed models. A generic function is also provided
+    for plotting fitted regression models with or without confidence/prediction
+    bands that may be of use to the general user.
 }
 \details{
 \tabular{ll}{
 Package: \tab investr\cr
 Type: \tab Package\cr
-Version: \tab 1.1.1\cr
+Version: \tab 1.2.0.9000\cr
 Date: \tab 2014-04-18\cr
 License: \tab GPL (>= 2)\cr
 }
