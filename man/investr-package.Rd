@@ -7,9 +7,9 @@ Inverse Estimation/Calibration Functions
 }
 \description{
 Functions to facilitate inverse estimation/calibration in linear,
-    nonlinear, and (linear) mixed models. A generic function is also provided
-    for plotting fitted regression models with or without confidence/prediction
-    bands that may be of use to the general user.
+    nonlinear, generalized linear, and (linear) mixed models. A generic function 
+    is also provided for plotting fitted regression models with or without 
+    confidence/prediction bands that may be of use to the general user.
 }
 \details{
 \tabular{ll}{

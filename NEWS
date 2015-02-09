@@ -37,3 +37,7 @@ Changes for version 1.2.1
 ====================
 * Cleaned up documentation
 * Added AnyNA function for those using older versions of R
+
+Changes for version 1.2.2
+====================
+* invest now accepts objects of class 'glm' (experimental)
