@@ -763,6 +763,9 @@ invest.glm <- function(object, p, interval = c("inversion", "Wald", "none"),
                        level = 0.95, lower, upper, data,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
   
+#   fam <- family(object)$family
+#   pred_type <- if (fam == "binomial") "link" else "response"
+  
   ## Preliminary checks
   if (!(p >= 0 && p <= 1)) {
     stop("p should be between 0 and 1.")
