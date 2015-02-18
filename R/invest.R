@@ -759,19 +759,12 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @rdname calibrate
 ##' @export
 ##' @method calibrate glm
-invest.glm <- function(object, x0, interval = c("inversion", "Wald", "none"), 
+invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                        level = 0.95, lower, upper, data, linkinv = FALSE,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
   
-#   fam <- family(object)$family
-#   pred_type <- if (fam == "binomial") "link" else "response"
-  
-#   ## Preliminary checks
-#   if (!(p >= 0 && p <= 1)) {
-#     stop("p should be between 0 and 1.")
-#   }
-  
-  trans <- if (linkinv) family(object)$linkinv else I
+  ## NOTE: Currently, this function only works for the case 
+  ##       mean.response = TRUE. 
   
   ## Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -784,9 +777,10 @@ invest.glm <- function(object, x0, interval = c("inversion", "Wald", "none"),
   
   ## Perform all calculation on the link scale and then convert back to response
   ## scale if linkinv = TRUE.
+  trans <- if (linkinv) family(object)$linkinv else I
   
   ## Calculate point estimate by inverting fitted model
-  eta <- family(object)$linkfun(x0)
+  eta <- family(object)$linkfun(y0)
   x0.est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname), type = "link") - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
@@ -867,7 +861,7 @@ invest.glm <- function(object, x0, interval = c("inversion", "Wald", "none"),
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
     
     ## Store results in a list
-    res <- list("estimate" = rans(x0.est), 
+    res <- list("estimate" = trans(x0.est), 
                 "lower" = trans(x0.est - crit * se), 
                 "upper" = trans(x0.est + crit * se), 
                 "se" = se,  ## FIXME: How should this get transformed?

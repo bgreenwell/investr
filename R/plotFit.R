@@ -384,3 +384,60 @@ plotFit.nls <- function(object,
        } else NULL, ...)
   
 }
+
+##' @rdname plotFit
+##' @export
+##' @method plotFit lm
+plotFit.glm <- function(object, link = FALSE,
+                        data, ..., extend.range = FALSE, hide = TRUE, 
+                        col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
+                        xlab, ylab, xlim, ylim) 
+{
+  
+  ## Preliminary (extract data, variable names, etc.)
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (length(yname) != 1) stop("Only one dependent variable allowed.")
+  xvals <- .data[, xname]
+  yvals <- with(.data, eval(formula(object)[[2]]))
+  
+  ## Plot limits, labels, etc.
+  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  xgrid <- if (extend.range) {  # the x values at which to evaluate
+    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+             length = n))
+  } else {
+    list(seq(from = xlim[1], to = xlim[2], length = n))
+  }
+  names(xgrid) <- xname
+  if (missing(xlab)) xlab <- xname  # default label for x-axis
+  if (missing(ylab)) ylab <- yname  # default label for y-axis
+  
+  ## Maximum and minimum of fitted values
+  fitvals <- predict(object, newdata = xgrid, 
+                     type = if (link) "link" else "response")
+  fit.ymin <- min(fitvals)
+  fit.ymax <- max(fitvals)
+    
+  ## Automatic limits for y-axis
+  if (missing(ylim)) {
+      ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
+  }
+  
+  ## Plot data, mean response, etc.
+  plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+       panel.first = if (hide) {  # draw points last
+         ## Draw (hidden) fitted response curve
+         lines(xgrid[[1]], fitvals, 
+               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+       } else NULL,
+       panel.last = if(!hide) {  # draw points first
+         ## Draw fitted response curve
+         lines(xgrid[[1]], fitvals, 
+               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+       } else NULL, ...)
+  
+}
