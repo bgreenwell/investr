@@ -12,7 +12,7 @@ invest(object, ...)
 
 \method{invest}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, data, boot = FALSE,
-  type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
   progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
@@ -22,7 +22,7 @@ invest(object, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, data, boot = FALSE,
-  type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
   progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
@@ -54,12 +54,13 @@ this is always \code{TRUE}.}
 \item{data}{An optional data frame. This is required if \code{object$data}
 is \code{NULL}.}
 
-\item{boot}{Logical indicating whether to carry out a bootstrap simulation
-instead. This can only be used with \code{"lm"} and \code{"nls"}
-objects.}
+\item{boot}{Logical indicating whether to carry out a bootstrap
+simulation instead. This can only be used with \code{"lm"}
+and \code{"nls"} objects.}
 
-\item{type}{Character string specifying the type of bootstrap,
-\code{"parametric"} or \code{"nonparametric"}.}
+\item{boot_type}{Character string specifying the type of bootstrap to use.
+Current options are \code{"parametric"} and
+\code{"nonparametric"}.}
 
 \item{nsim}{Positive integer specifying the number of bootstrap simulations;
 the bootstrap B (or R).}

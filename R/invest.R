@@ -22,13 +22,14 @@
 ##'                      this is always \code{TRUE}.
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
-##' @param boot Logical indicating whether to carry out a bootstrap simulation 
-##'             instead. This can only be used with \code{"lm"} and \code{"nls"}
-##'             objects.
+##' @param boot Logical indicating whether to carry out a bootstrap 
+##'             simulation instead. This can only be used with \code{"lm"} 
+##'             and \code{"nls"} objects.
 ##' @param nsim Positive integer specifying the number of bootstrap simulations; 
 ##'             the bootstrap B (or R).
-##' @param type Character string specifying the type of bootstrap, 
-##'             \code{"parametric"} or \code{"nonparametric"}.
+##' @param boot_type Character string specifying the type of bootstrap to use. 
+##'                  Current options are \code{"parametric"} and 
+##'                  \code{"nonparametric"}.
 ##' @param seed Optional argument to \code{set.seed}.
 ##' @param progress Logical indicating whether to display a text-based progress
 ##'                 bar during the bootstrap simulation.
@@ -118,7 +119,7 @@ invest <- function(object, ...) {
 ##' @method invest lm
 invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                       level = 0.95, mean.response = FALSE, data, boot = FALSE,
-                      type = c("parametric", "nonparametric"), nsim = 1, 
+                      boot_type = c("parametric", "nonparametric"), nsim = 1, 
                       seed = NULL, progress = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
                       adjust = c("none", "Bonferroni"), k,  ...) {
@@ -186,8 +187,8 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     ## Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
-    type <- match.arg(type)
-    if (type == "parametric") {  
+    boot_type <- match.arg(boot_type)
+    if (boot_type == "parametric") {  
       ss <- simulate(object, nsim = nsim)
     } else {
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
@@ -211,7 +212,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
         if (mean.response) {  # regulation
           y0.star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
-          if (type == "parametric") {
+          if (boot_type == "parametric") {
             y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
           } else {
             y0.star <- y0 + sample(res, size = length(y0), replace = TRUE)
@@ -483,7 +484,7 @@ invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @method invest nls
 invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
                        level = 0.95, mean.response = FALSE, data, boot = FALSE,
-                       type = c("parametric", "nonparametric"), nsim = 1, 
+                       boot_type = c("parametric", "nonparametric"), nsim = 1, 
                        seed = NULL, progress = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        adjust = c("none", "Bonferroni"), k, ...) {
@@ -561,8 +562,8 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
     ## Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
-    type <- match.arg(type)
-    if (type == "parametric") {  
+    boot_type <- match.arg(boot_type)
+    if (boot_type == "parametric") {  
       ss <- simulate(object, nsim = nsim)
     } else {
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
@@ -586,7 +587,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
         if (mean.response) {  # regulation
           y0.star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
-          if (type == "parametric") {
+          if (boot_type == "parametric") {
             y0.star <- y0 + rnorm(length(y0), sd = Sigma(object))
           } else {
             y0.star <- y0 + sample(res, size = length(y0), replace = TRUE)
