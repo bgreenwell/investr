@@ -388,7 +388,7 @@ plotFit.nls <- function(object,
 ##' @rdname plotFit
 ##' @export
 ##' @method plotFit lm
-plotFit.glm <- function(object, link = FALSE,
+plotFit.glm <- function(object, type = c("response", "link"),
                         data, ..., extend.range = FALSE, hide = TRUE, 
                         col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
                         xlab, ylab, xlim, ylim) 
@@ -400,9 +400,26 @@ plotFit.glm <- function(object, link = FALSE,
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
-  yvals <- with(.data, eval(formula(object)[[2]]))
+  
+  ## NOTE:
+  ##
+  ## For binomial and quasibinomial families the response can also be 
+  ## specified as a factor (when the first level denotes failure and all others 
+  ## success) or as a two-column matrix with the columns giving the numbers of 
+  ## successes and failures.
+  if (family(object)$family %in% c("binomial", "quasibinomial")) {
+    if (length(yname) == 1) {
+      yvals <- with(.data, eval(formula(object)[[2]]))
+    } else {
+      ymat <- .data[, yname]
+      yvals <- ymat[, 1] / ymat[, 2]
+    }
+  } else {
+    if (length(yname) != 1) stop("Only one dependent variable allowed.")
+    yvals <- with(.data, eval(formula(object)[[2]]))
+  }
+  
   
   ## Plot limits, labels, etc.
   if (missing(xlim)) xlim <- range(xvals)  # default plot domain
@@ -414,11 +431,11 @@ plotFit.glm <- function(object, link = FALSE,
   }
   names(xgrid) <- xname
   if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
+  if (missing(ylab)) ylab <- "Probability"  # default label for y-axis
   
   ## Maximum and minimum of fitted values
-  fitvals <- predict(object, newdata = xgrid, 
-                     type = if (link) "link" else "response")
+  type <- match.arg(type)
+  fitvals <- predict(object, newdata = xgrid, type = type)
   fit.ymin <- min(fitvals)
   fit.ymax <- max(fitvals)
     

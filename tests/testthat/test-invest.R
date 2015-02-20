@@ -56,9 +56,23 @@ test_that("approximate standard error is correct", {
   
 })
 
-# test_that("bootstrap si working correctly", {
-#   
-# })
+## The following tests are for linear calibration with generalized linear models
+## (GzLMs) fit using the glm() function from the stats package.
+context("Inverse estimation with GzLMs")
+
+test_that("inversion method works", {
+  
+  beetle <- data.frame(
+    x = c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839),
+    n = c(59, 60, 62, 56, 63, 59, 62, 60),
+    y = c(6, 13, 18, 28, 52, 53, 61, 60)
+  )
+  beetle_glm <- glm(cbind(y, n-y) ~ x, data = beetle, family = "binomial")
+  mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
+  wald_se <- invest(beetle_glm, y0 = 0.5, interval = "Wald")$se
+  expect_true(all.equal(attr(mass_se, "SE")[1], wald_se, tol = 1e-05)) 
+  
+})
 
 ## The following tests are for linear calibration with random coefficient models
 ## fit using the lme() function from the nlme package.
