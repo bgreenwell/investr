@@ -3,7 +3,12 @@
 ##' Plots fitted model for an object of class \code{"lm"} or \code{"nls"} with 
 ##' the option of adding a confidence and/or prediction band. 
 ##'
-##' @param object An object that inherits from class \code{"lm"} or \code{"nls"}.
+##' @param object An object that inherits from class \code{"lm"}, \code{"glm"}, 
+##'               or \code{"nls"}.
+##' @param type The type of prediction required. The default is on the scale of 
+##'             the response variable; the alternative \code{"link"} is on the 
+##'             scale of the linear predictor. This option is only used when
+##'             plotting \code{"glm"} objects.
 ##' @param interval A character string indicating if a prediction band, 
 ##'   confidence band, both, or none should be plotted.
 ##' @param level The desired confidence level.
@@ -387,7 +392,7 @@ plotFit.nls <- function(object,
 
 ##' @rdname plotFit
 ##' @export
-##' @method plotFit lm
+##' @method plotFit glm
 plotFit.glm <- function(object, type = c("response", "link"),
                         data, ..., extend.range = FALSE, hide = TRUE, 
                         col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 

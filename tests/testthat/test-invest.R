@@ -1,6 +1,6 @@
 ## The following tests are for calibration with linear regression models fit 
 ## using the lm() function.
-context("Linear calibration")
+context("Inverse estimation with linear models")
 
 test_that("invest() and calibrate() produce the same results", {
   
@@ -25,7 +25,7 @@ test_that("invest() and calibrate() produce the same results", {
 
 ## The following tests are for calibration with nonlinear regression models fit
 ## using the nls() function.
-context("Nonlinear calibration")
+context("Inverse estimation with nonlinear models")
 
 test_that("approximate standard error is correct", {
   
@@ -58,7 +58,7 @@ test_that("approximate standard error is correct", {
 
 ## The following tests are for linear calibration with generalized linear models
 ## (GzLMs) fit using the glm() function from the stats package.
-context("Inverse estimation with GzLMs")
+context("Inverse estimation with generalized linear models")
 
 test_that("inversion method works", {
   
@@ -68,15 +68,15 @@ test_that("inversion method works", {
     y = c(6, 13, 18, 28, 52, 53, 61, 60)
   )
   beetle_glm <- glm(cbind(y, n-y) ~ x, data = beetle, family = "binomial")
-  mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
+#   mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
   wald_se <- invest(beetle_glm, y0 = 0.5, interval = "Wald")$se
-  expect_true(all.equal(attr(mass_se, "SE")[1], wald_se, tol = 1e-05)) 
+  expect_true(all.equal(0.003858052, wald_se, tol = 1e-05)) 
   
 })
 
 ## The following tests are for linear calibration with random coefficient models
 ## fit using the lme() function from the nlme package.
-context("Linear calibration with random coefficients")
+context("Inverse estimation with linear mixed-effects models")
 
 test_that("inversion method works", {
 

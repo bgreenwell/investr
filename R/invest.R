@@ -8,17 +8,18 @@
 ##' @rdname invest
 ##' @export
 ##' 
-##' @param object An object that inherits from class \code{"lm"}, \code{"nls"}, 
-##'               or \code{"lme"}.
+##' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
+##'               \code{"nls"}, or \code{"lme"}.
 ##' @param y0 The value of the observed response(s) or specified value of the 
-##'           mean response.
+##'           mean response. For \code{"glm"} objects, \code{y0} should be on 
+##'           scale of the response variable.
 ##' @param interval The type of interval required.
-##' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-##'              the interval to be calculated. 
+##' @param level A numeric scalar between 0 and 1 giving the confidence level 
+##'              for the interval to be calculated. 
 ##' @param mean.response Logical indicating whether confidence intervals should
-##'                      correspond to an individual response (\code{FALSE}) or a 
-##'                      mean response
-##'        (\code{TRUE}).
+##'                      correspond to an individual response (\code{FALSE}) or 
+##'                      a mean response (\code{TRUE}). For \code{glm} objects,
+##'                      this is always \code{TRUE}.
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
 ##' @param boot Logical indicating whether to carry out a bootstrap simulation.
@@ -32,11 +33,11 @@
 ##' @param lower The lower endpoint of the interval to be searched.
 ##' @param upper The upper endpoint of the interval to be searched.
 ##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-##'           Only used when \code{object} inherits from class \code{"lme"}. Defaults to
-##'           \code{qnorm((1+level)/2)}.
+##'           Only used when \code{object} inherits from class \code{"lme"}. 
+##'           Defaults to \code{qnorm((1+level)/2)}.
 ##' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-##'           Only used when \code{object} inherits from class \code{"lme"}. Defaults to
-##'           \code{qnorm((1-level)/2)}.
+##'           Only used when \code{object} inherits from class \code{"lme"}. 
+##'           Defaults to \code{qnorm((1-level)/2)}.
 ##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
 ##'            minimum of 1e-10.
 ##' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
@@ -44,8 +45,9 @@
 ##'               the critical value used in calculating the confidence interval.
 ##'               This is useful for when the calibration curve is to be used 
 ##'               multiple, say k, times.
-##' @param k The number times the calibration curve is to be used for computing a 
-##'          confidence interval. Only needed when \code{adjust = "Bonferroni"}.
+##' @param k The number times the calibration curve is to be used for computing 
+##'          a confidence interval. Only needed when 
+##'          \code{adjust = "Bonferroni"}.
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
 ##' @return If \code{boot = FALSE}, then an object of class \code{"calibrate"} 
@@ -349,6 +351,122 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                 "lower" = x0.est - crit * se, 
                 "upper" = x0.est + crit * se, 
                 "se" = se,
+                "interval" = interval)
+  }
+  
+  ## Assign class label and return results
+  class(res) <- "calibrate"
+  res
+  
+}
+
+##' @rdname invest
+##' @export
+##' @method invest glm
+invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
+                       level = 0.95, lower, upper, data,
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
+  
+  ## NOTE: Currently, this function only works for the case 
+  ##       mean.response = TRUE. 
+  
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Calculations should be done on the "link" scale!
+  eta <- family(object)$linkfun(y0)
+  
+  ## Calculate point estimate by inverting fitted model
+  x0.est <- try(uniroot(function(x) {
+    predict(object, newdata = makeData(x, xname), type = "link") - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
+  ## Return point estimate only
+  interval <- match.arg(interval)
+  if (interval == "none") return(x0.est)
+  
+  ## Critical value
+  crit <- qnorm((level + 1) / 2)  # quantile from standard normal
+  
+  ## Inversion interval
+  ##
+  ## Based on exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by 
+  ## Alan Agresti.
+  if (interval == "inversion") { 
+    
+    covmat <- vcov(object)
+    
+    ## Inversion function
+    inversionFun <- function(x) {
+      pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE,
+                      type = "link")
+      ((eta - pred$fit) ^ 2) / (pred$se.fit ^ 2) - crit^2
+    }
+    
+    ## Compute lower and upper confidence limits (i.e., the roots of the 
+    ## inversion function)
+    lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), tol = tol, 
+                       maxiter = maxiter)$root, silent = TRUE)
+    
+    ## Provide (informative) error message if confidence limits not found
+    if (inherits(lwr, "try-error")) {
+      stop(paste("Lower confidence limit not found in the search interval (", 
+                 lower, ", ", upper, 
+                 "). ", "Try tweaking the values of lower and upper. ", 
+                 "Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
+    if (inherits(upr, "try-error")) {
+      stop(paste("Upper confidence limit not found in the search interval (", 
+                 lower, ", ", upper, 
+                 "). ", "Try tweaking the values of lower and upper. ", 
+                 "Use plotFit for guidance.", sep = ""), 
+           call. = FALSE)
+    }
+    
+    ## Store results in a list
+    res <- list("estimate" = x0.est, 
+                "lower" = lwr, 
+                "upper" = upr, 
+                "interval" = interval)
+    
+  }
+  
+  ## Wald interval -------------------------------------------------------------
+  if (interval == "Wald") { 
+    
+    ## Function of parameters whose gradient is required
+    object.copy <- object # FIXME: Is a copy really needed?
+    dmFun <- function(params) {
+      object.copy$coefficients <- params
+      z <- eta
+      uniroot(function(x) { 
+        predict(object.copy, newdata = makeData(x, xname), type = "link") - z
+      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
+    }
+    
+    ## Variance-covariane matrix
+    params <- coef(object)
+    covmat <- vcov(object)
+    
+    ## Calculate gradient, and return standard error
+    gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
+    se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
+    
+    ## Store results in a list
+    res <- list("estimate" = x0.est, 
+                "lower" = x0.est - crit * se, 
+                "upper" = x0.est + crit * se, 
+                "se" = se,  ## FIXME: How should this get transformed?
                 "interval" = interval)
   }
   
@@ -749,124 +867,6 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
                 "interval" = interval)
     
   } 
-  
-  ## Assign class label and return results
-  class(res) <- "calibrate"
-  res
-  
-}
-
-##' @rdname calibrate
-##' @export
-##' @method calibrate glm
-invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
-                       level = 0.95, lower, upper, data, linkinv = FALSE,
-                       tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
-  
-  ## NOTE: Currently, this function only works for the case 
-  ##       mean.response = TRUE. 
-  
-  ## Extract data, variable names, etc.
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
-  
-  ## Perform all calculation on the link scale and then convert back to response
-  ## scale if linkinv = TRUE.
-  trans <- if (linkinv) family(object)$linkinv else I
-  
-  ## Calculate point estimate by inverting fitted model
-  eta <- family(object)$linkfun(y0)
-  x0.est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname), type = "link") - eta
-  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-  silent = TRUE)
-  
-  ## Return point estimate only
-  interval <- match.arg(interval)
-  if (interval == "none") return(x0.est)
-  
-  ## Critical value
-  crit <- qnorm((level + 1) / 2)  # quantile from standard normal
-  
-  ## Inversion interval
-  ##
-  ## Based on exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by 
-  ## Alan Agresti.
-  if (interval == "inversion") { 
-    
-    covmat <- vcov(object)
-    
-    ## Inversion function
-    inversionFun <- function(x) {
-      pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE,
-                      type = "link")
-      ((eta - pred$fit) ^ 2) / (pred$se.fit ^ 2) - crit^2
-    }
-    
-    ## Compute lower and upper confidence limits (i.e., the roots of the 
-    ## inversion function)
-    lwr <- try(uniroot(inversionFun, interval = c(lower, x0.est), tol = tol, 
-                       maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(inversionFun, interval = c(x0.est, upper), tol = tol, 
-                       maxiter = maxiter)$root, silent = TRUE)
-    
-    ## Provide (informative) error message if confidence limits not found
-    if (inherits(lwr, "try-error")) {
-      stop(paste("Lower confidence limit not found in the search interval (", 
-                 lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper. ", 
-                 "Use plotFit for guidance.", sep = ""), 
-           call. = FALSE)
-    }
-    if (inherits(upr, "try-error")) {
-      stop(paste("Upper confidence limit not found in the search interval (", 
-                 lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper. ", 
-                 "Use plotFit for guidance.", sep = ""), 
-           call. = FALSE)
-    }
-    
-    ## Store results in a list
-    res <- list("estimate" = trans(x0.est), 
-                "lower" = trans(lwr), 
-                "upper" = trans(upr), 
-                "interval" = interval)
-    
-  }
-  
-  ## Wald interval -------------------------------------------------------------
-  if (interval == "Wald") { 
-    
-    ## Function of parameters whose gradient is required
-    object.copy <- object # FIXME: Is a copy really needed?
-    dmFun <- function(params) {
-      object.copy$coefficients <- params
-      z <- eta
-      uniroot(function(x) { 
-        predict(object.copy, newdata = makeData(x, xname), type = "link") - z
-      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
-    }
-    
-    ## Variance-covariane matrix
-    params <- coef(object)
-    covmat <- vcov(object)
-    
-    ## Calculate gradient, and return standard error
-    gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
-    se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
-    
-    ## Store results in a list
-    res <- list("estimate" = trans(x0.est), 
-                "lower" = trans(x0.est - crit * se), 
-                "upper" = trans(x0.est + crit * se), 
-                "se" = se,  ## FIXME: How should this get transformed?
-                "interval" = interval)
-  }
   
   ## Assign class label and return results
   class(res) <- "calibrate"
