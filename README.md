@@ -4,6 +4,13 @@ Inverse estimation, also referred to as the calibration problem, is a classical 
 
 A detailed introduction to investr has been published in The R Journal: "investr: An R Package for Inverse Estimation", http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf. You can track development at https://github.com/w108bmg/investr. To report bugs or issues, contact the main author directly or submit them to https://github.com/w108bmg/investr/issues. 
 
+As of right now, `investr` supports (univariate) inverse estimation with objects of class:
+
+* `lm` --- linear models
+* `glm` --- generalized linear models
+* `nls` --- nonlinear least-squares models
+* `lme` --- linear mixed-effects models (fit using the `nlme` package)
+
 ## Installation
 The package is currently listed on CRAN and can easily be installed:
 ```S
