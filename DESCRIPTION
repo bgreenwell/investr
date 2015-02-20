@@ -1,11 +1,11 @@
 Package: investr
 Type: Package
 Title: Inverse Estimation/Calibration Functions
-Version: 1.2.2.9000
+Version: 1.3.0.9000
 Author: Brandon M. Greenwell
 Maintainer: Brandon M. Greenwell <greenwell.brandon@gmail.com>
 Description: Functions to facilitate inverse estimation/calibration in linear,
-    nonlinear, generalized linear, and (linear) mixed models. A generic function 
+    generalized linear, nonlinear, and (linear) mixed models. A generic function 
     is also provided for plotting fitted regression models with or without 
     confidence/prediction bands that may be of use to the general user.
 Depends:
