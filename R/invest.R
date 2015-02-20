@@ -22,7 +22,9 @@
 ##'                      this is always \code{TRUE}.
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
-##' @param boot Logical indicating whether to carry out a bootstrap simulation.
+##' @param boot Logical indicating whether to carry out a bootstrap simulation 
+##'             instead. This can only be used with \code{"lm"} and \code{"nls"}
+##'             objects.
 ##' @param nsim Positive integer specifying the number of bootstrap simulations; 
 ##'             the bootstrap B (or R).
 ##' @param type Character string specifying the type of bootstrap, 
