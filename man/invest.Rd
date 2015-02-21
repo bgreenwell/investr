@@ -17,8 +17,9 @@ invest(object, ...)
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{glm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, lower, upper, data, tol = .Machine$double.eps^0.25,
-  maxiter = 1000, ...)
+  level = 0.95, lower, upper, data, boot = FALSE,
+  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  progress = FALSE, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, data, boot = FALSE,

@@ -161,7 +161,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
          call. = FALSE)
   }
   
-  ## Parametric bootstrap ------------------------------------------------------
+  ## Bootstrap -----------------------------------------------------------------
   if (boot) {
     
     ## Sanity check
@@ -329,7 +329,6 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-#         predict(object.copy, makeData(object.copy, x)) - z
         predict(object.copy, newdata = makeData(x, xname)) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
@@ -368,6 +367,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @method invest glm
 invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                        level = 0.95, lower, upper, data,
+                       boot = FALSE, 
+                       boot_type = c("parametric", "nonparametric"), nsim = 1, 
+                       seed = NULL, progress = FALSE,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
   
   ## NOTE: Currently, this function only works for the case 
@@ -390,6 +392,107 @@ invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     predict(object, newdata = makeData(x, xname), type = "link") - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
+  
+  ## Provide (informative) error message if point estimate is not found
+  if (inherits(x0.est, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower, 
+               ", ", upper, "). ", 
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
+  
+#   ## Bootstrap -----------------------------------------------------------------
+#   if (boot) {
+#     
+#     ## Sanity check
+#     stopifnot((nsim <- as.integer(nsim[1])) > 0)
+#     
+#     ## Set up progress bar (if requested)
+#     if (progress) { 
+#       pb <- txtProgressBar(min = 0, max = nsim, style = 3)
+#     }
+#     
+#     ## Initialize random number generator
+#     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
+#       runif(1)
+#     if (is.null(seed)) 
+#       RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+#     else {
+#       R.seed <- get(".Random.seed", envir = .GlobalEnv)
+#       set.seed(seed)
+#       RNGstate <- structure(seed, kind = as.list(RNGkind()))
+#       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+#     }
+#     
+#     ## Simulate new response vectors
+#     boot_type <- match.arg(boot_type)
+#     if (boot_type == "parametric") {  
+#       ss <- simulate(object, nsim = nsim)
+#     } else {
+#       stop("Nonparametric bootstrap is not available for 'glm' objects.")
+#     }
+#     
+#     ## Function to calculate inverse estimate
+#     x0Fun <- function(i) {
+#       
+#       ## Update model using simulated response data
+#       y_boot <- ss[[i]]
+# #       if (is.matrix(y_boot)) colnames(y_boot) <- c("boot_succ", "boot_fail")
+#       boot.data <- eval(object$call$data)
+#       boot.data[, yname] <- y_boot
+#       new_fit <- glm(formula(object), data = boot.data, family = "binomial")
+#       boot.object <- tryCatch(update(object, cbind(y, n - y) ~ x, data = boot.data),
+#                               error = function(e) NULL)
+#       ## FIXME: Object is not updating like it should!
+# #       print(boot.object)
+#       
+#       ## If updating the model fails, then return value is NA
+#       if (is.null(boot.object)) {
+#         ret <- NA
+#       } else {
+#         ## Calculate point estimate
+#         ret <- tryCatch(uniroot(function(x) {
+#           predict(boot.object, newdata = makeData(x, xname), type = "link") - eta
+#         }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+#         error = function(e) NA)
+#       }
+#       
+#       ## Update progress bar
+#       if (progress) { 
+#         setTxtProgressBar(pb, i) 
+#       }
+#             
+#       ## Return estimate
+#       ret
+# 
+#     }
+#     
+#     ## Calculate bootstrap replicates
+#     x0.star <- sapply(seq_len(nsim), x0Fun)
+#     
+#     ## Check for errors and return the runs that did not fail
+#     if (AnyNA(x0.star)) {
+#       num_fail <- sum(is.na(x0.star))
+#       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
+#               ")")
+#       x0.star <- na.omit(x0.star)  # remove runs that failed
+#       attributes(x0.star) <- NULL  # remove attributes
+#     } else {
+#       num_fail <- NULL
+#     }
+#     
+#     ## Create and return a bootCal object (essentially a list that can later be 
+#     ## converted to an object of class boot)
+#     res <- list(original  = x0.est,  # original estimate
+#                 bootreps  = x0.star,  # bootstrap replicates
+#                 nsim      = nsim,  # number of simulations
+#                 level     = level)  # desired confidence level
+#     class(res) = "bootCal"
+#     attr(res, "bootFail") <- num_fail
+#     return(res)
+#     
+#   }
   
   ## Return point estimate only
   interval <- match.arg(interval)
@@ -536,7 +639,7 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
          call. = FALSE)
   }
   
-  ## Parametric bootstrap ------------------------------------------------------
+  ## Bootstrap -----------------------------------------------------------------
   if (boot) {
     
     ## Sanity check
