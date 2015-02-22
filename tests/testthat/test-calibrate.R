@@ -1,6 +1,6 @@
 ## The following tests are for calibration with simple linear regression models 
 ## fit using the lm() function.
-context("Calibration and regulation in the simple linear regression model")
+context("Inverse estimation in the simple linear regression model")
 
 test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
     

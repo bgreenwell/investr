@@ -5,15 +5,15 @@ context("Inverse estimation with linear models")
 test_that("invest() and calibrate() produce the same results", {
   
   ## Crystal weight example from Graybill and Iyer (1996, p. 434)
-  crystal.lm <- lm(weight ~ time, data = crystal)
-  res1.cal <- calibrate(crystal.lm, y0 = 5)
-  res2.cal <- calibrate(crystal.lm, y0 = 5, mean.response = TRUE)
-  res3.cal <- calibrate(crystal.lm, y0 = 5, interval = "Wald")
-  res4.cal <- calibrate(crystal.lm, y0 = 5, interval = "Wald", mean.response = TRUE)
-  res1.inv <-    invest(crystal.lm, y0 = 5)
-  res2.inv <-    invest(crystal.lm, y0 = 5, mean.response = TRUE)
-  res3.inv <-    invest(crystal.lm, y0 = 5, interval = "Wald")
-  res4.inv <-    invest(crystal.lm, y0 = 5, interval = "Wald", mean.response = TRUE)
+  crystal_lm <- lm(weight ~ time, data = crystal)
+  res1.cal <- calibrate(crystal_lm, y0 = 5)
+  res2.cal <- calibrate(crystal_lm, y0 = 5, mean.response = TRUE)
+  res3.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald")
+  res4.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
+  res1.inv <-    invest(crystal_lm, y0 = 5)
+  res2.inv <-    invest(crystal_lm, y0 = 5, mean.response = TRUE)
+  res3.inv <-    invest(crystal_lm, y0 = 5, interval = "Wald")
+  res4.inv <-    invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
   
   ## Expectations
   expect_true(all.equal(res1.cal, res1.inv, tol = 1e-05))
@@ -60,17 +60,65 @@ test_that("approximate standard error is correct", {
 ## (GzLMs) fit using the glm() function from the stats package.
 context("Inverse estimation with generalized linear models")
 
-test_that("inversion method works", {
+test_that("inversion and Wald methods work", {
   
+  ## Dobson's beetle data
   beetle <- data.frame(
     x = c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839),
     n = c(59, 60, 62, 56, 63, 59, 62, 60),
     y = c(6, 13, 18, 28, 52, 53, 61, 60)
   )
   beetle_glm <- glm(cbind(y, n-y) ~ x, data = beetle, family = "binomial")
-#   mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
+  
+  ##
+  ## Page 207 from Categorical Data Analysis, 2nd Edition, by Alan Agresti.
+  ##
+  
+  ## Inversion interval
+  res <- invest(beetle_glm, y0 = 0.5, interval = "inversion", tol = 1e-10)
+  a <- unname(coef(beetle_glm)[1])
+  b <- unname(coef(beetle_glm)[2])
+  var_a <- vcov(beetle_glm)[1, 1]
+  var_b <- vcov(beetle_glm)[2, 2]
+  cov_ab <- vcov(beetle_glm)[1, 2]
+  fun <- function(x, p = 0.5) {
+    abs(a + b*x - boot::logit(p)) / sqrt(var_a + x^2*var_b + 2*x*cov_ab) - 
+      qnorm(0.975)
+  }
+  lwr <- uniroot(fun, lower = 1.76, upper = 1.77, tol = 1e-10)$root
+  upr <- uniroot(fun, lower = 1.77, upper = 1.79, tol = 1e-10)$root
+  expect_true(all.equal(res$lower, lwr))
+  expect_true(all.equal(res$upper, upr))
+  
+  ##
+  ## Check Taylor series approximation of standard error using MASS::dose.p
+  ##
+  
+  ## Wald interval
+  #   mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
   wald_se <- invest(beetle_glm, y0 = 0.5, interval = "Wald")$se
   expect_true(all.equal(0.003858052, wald_se, tol = 1e-05)) 
+
+})
+
+test_that("invest.glm with Gaussian family matches invest.lm", {
+  
+  ## Using glm
+  gauss_glm <- glm(weight ~ time, data = crystal, family = gaussian)
+  gauss_glm_inversion <- invest(gauss_glm, y0 = 5, interval = "inversion")
+  gauss_glm_wald <- invest(gauss_glm, y0 = 5, interval = "Wald")
+  
+  ## Using lm
+  gauss_lm <- glm(weight ~ time, data = crystal)
+  gauss_lm_inversion <- invest(gauss_lm, y0 = 5, interval = "inversion")
+  gauss_lm_wald <- invest(gauss_lm, y0 = 5, interval = "Wald")
+  
+  ## Results should match
+  expect_true(all.equal(gauss_glm_inversion$lower, gauss_lm_inversion$lower))
+  expect_true(all.equal(gauss_glm_inversion$upper, gauss_lm_inversion$upper))
+  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
+  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
+  expect_true(all.equal(gauss_glm_wald$se, gauss_lm_wald$se))
   
 })
 
