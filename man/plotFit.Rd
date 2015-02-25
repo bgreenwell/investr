@@ -27,8 +27,11 @@ plotFit(object, ...)
   1 else 3, lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1,
   n = 500, xlab, ylab, xlim, ylim)
 
-\method{plotFit}{glm}(object, type = c("response", "link"), data, ...,
-  extend.range = FALSE, hide = TRUE, col.fit = "black", lty.fit = 1,
+\method{plotFit}{glm}(object, type = c("response", "link"),
+  interval = c("none", "confidence"), level = 0.95, data, ...,
+  shade = FALSE, extend.range = FALSE, hide = TRUE, col.conf = if
+  (shade) grey(0.9) else "black", border.conf = col.conf, col.fit = "black",
+  lty.conf = if (shade) 1 else 2, lty.fit = 1, lwd.conf = 1,
   lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim)
 }
 \arguments{

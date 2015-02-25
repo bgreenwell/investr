@@ -82,7 +82,7 @@ test_that("inversion and Wald methods work", {
   var_b <- vcov(beetle_glm)[2, 2]
   cov_ab <- vcov(beetle_glm)[1, 2]
   fun <- function(x, p = 0.5) {
-    abs(a + b*x - boot::logit(p)) / sqrt(var_a + x^2*var_b + 2*x*cov_ab) - 
+    abs(a + b*x - qlogis(p)) / sqrt(var_a + x^2*var_b + 2*x*cov_ab) - 
       qnorm(0.975)
   }
   lwr <- uniroot(fun, lower = 1.76, upper = 1.77, tol = 1e-10)$root

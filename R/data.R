@@ -56,3 +56,23 @@ NULL
 ##' S-PLUS and R Examples}. Springer. 
 ##' 
 NULL 
+
+##' Dobson's Beetle Data
+##' 
+##' The data give the number of flour beetles killed after five hour exposure 
+##' to the insecticide carbon disulphide at eight different concentrations.
+##' 
+##' \itemize{
+##'   \item \code{ldose} Log dose of carbon disulphide.
+##'   \item \code{y} Number of beetles subjected to insecticide.
+##'   \item \code{n} Number of beetles killed.
+##' }
+##' @docType data
+##' @keywords datasets
+##' @format A data frame with 8 rows and 3 variables
+##' @name beetle  
+##' @source 
+##' A. Dobson, \emph{An Introduction to Generalized Linear Models}, Chapman & 
+##' Hall/CRC, 2002.
+##'
+NULL 

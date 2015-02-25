@@ -17,9 +17,8 @@ invest(object, ...)
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
 \method{invest}{glm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, lower, upper, data, boot = FALSE,
-  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
-  progress = FALSE, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
+  level = 0.95, lower, upper, data, tol = .Machine$double.eps^0.25,
+  maxiter = 1000, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, data, boot = FALSE,
@@ -125,7 +124,22 @@ response. See the references listed below for more details.
 }
 \examples{
 ##
-## Nasturtium example (nonlinear regression with replication)
+## Dobson's beetle data (generalized linear model)
+##
+
+## Complementary log-log model
+mod <- glm(cbind(y, n-y) ~ ldose, data = beetle,
+           family = binomial(link = "cloglog"))
+plotFit(mod, pch = 21, bg = "dodgerblue2", cex = 1.2, lwd = 2,
+        xlab = "Log dose of carbon disulphide",
+        interval = "confidence", shade = TRUE)
+
+## Approximate 95\% confidence intervals and standard error for LD50
+invest(mod, y0 = 0.5)
+invest(mod, y0 = 0.5, interval = "Wald")
+
+##
+## Nasturtium example (nonlinear least-squares with replication)
 ##
 
 ## Log-logistic model
