@@ -10,25 +10,25 @@
 \usage{
 invest(object, ...)
 
-\method{invest}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, boot = FALSE,
-  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+\method{invest}{lm}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
+  boot_type = c("parametric", "nonparametric"), nsim = 999, seed = NULL,
   progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
   maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
 
-\method{invest}{glm}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, lower, upper, data, tol = .Machine$double.eps^0.25,
-  maxiter = 1000, ...)
-
-\method{invest}{nls}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, boot = FALSE,
-  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
-  progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
-  maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
-
-\method{invest}{lme}(object, y0, interval = c("inversion", "Wald", "none"),
-  level = 0.95, mean.response = FALSE, data, lower, upper, q1, q2,
+\method{invest}{glm}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, lower, upper, data,
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
+
+\method{invest}{nls}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
+  boot_type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
+  progress = FALSE, lower, upper, tol = .Machine$double.eps^0.25,
+  maxiter = 1000, adjust = c("none", "Bonferroni"), k, ...)
+
+\method{invest}{lme}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, mean.response = FALSE, data, lower,
+  upper, q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
@@ -54,13 +54,9 @@ this is always \code{TRUE}.}
 \item{data}{An optional data frame. This is required if \code{object$data}
 is \code{NULL}.}
 
-\item{boot}{Logical indicating whether to carry out a bootstrap
-simulation instead. This can only be used with \code{"lm"}
-and \code{"nls"} objects.}
-
-\item{boot_type}{Character string specifying the type of bootstrap to use.
-Current options are \code{"parametric"} and
-\code{"nonparametric"}.}
+\item{boot_type}{Character string specifying the type of bootstrap to use
+when \code{interval = "percentile"}. Options are
+\code{"parametric"} and \code{"nonparametric"}.}
 
 \item{nsim}{Positive integer specifying the number of bootstrap simulations;
 the bootstrap B (or R).}
@@ -103,17 +99,16 @@ If \code{boot = FALSE}, then an object of class \code{"calibrate"}
     \item \code{estimate} The estimate of x0.
     \item \code{lwr} The lower confidence limit for x0.
     \item \code{upr} The upper confidence limit for x0.
-    \item \code{se} An estimate of the standard error (Wald interval only).
+    \item \code{se} An estimate of the standard error (Wald and percentile
+                    intervals only).
+    \item \code{bias} The bootstrap estimate of bias (percentile interval
+                      only).
+    \item \code{bootreps} Vector of bootstrap replicates (percentile
+                      interval only).
+    \item \code{nsim} The number of bootstrap replicates (percentile
+                      interval only).
     \item \code{interval} The method used for calculating \code{lower} and
           \code{upper} (only used by \code{print} method).
-  }
-        Otherwise, an object of class \code{"bootCal"} containing the
-        following components:
-  \itemize{
-    \item \code{original} The estimate of x0.
-    \item \code{bootreps} The lower confidence limit for x0.
-    \item \code{nsim} The number of bootstrap replicates.
-    \item \code{level} The desired confidence level.
   }
 }
 \description{
@@ -130,9 +125,10 @@ response. See the references listed below for more details.
 ## Complementary log-log model
 mod <- glm(cbind(y, n-y) ~ ldose, data = beetle,
            family = binomial(link = "cloglog"))
-plotFit(mod, pch = 21, bg = "dodgerblue2", cex = 1.2, lwd = 2,
+plotFit(mod, pch = 19, cex = 1.2, lwd = 2,
         xlab = "Log dose of carbon disulphide",
-        interval = "confidence", shade = TRUE)
+        interval = "confidence", shade = TRUE,
+        col.conf = "lightskyblue")
 
 ## Approximate 95\% confidence intervals and standard error for LD50
 invest(mod, y0 = 0.5)
@@ -154,8 +150,8 @@ invest(mod, y0 = c(309, 296, 419), interval = "Wald")
 
 ## Bootstrap calibration intervals. In general, nsim should be as large as
 ## reasonably possible (say, nsim = 9999).
-boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 999,
-              seed = 101)
+boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile",
+              nsim = 999, seed = 101)
 boo  # print bootstrap summary
 plot(boo)  # plot results
 }

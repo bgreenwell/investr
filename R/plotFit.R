@@ -97,8 +97,7 @@ plotFit.lm <- function(object,
                        col.fit = "black", lty.conf = if (shade) 1 else 2, 
                        lty.pred = if (shade) 1 else 3, lty.fit = 1, 
                        lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                       xlab, ylab, xlim, ylim) 
-{
+                       xlab, ylab, xlim, ylim) {
   
   ## Preliminary (extract data, variable names, etc.)
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -252,8 +251,7 @@ plotFit.nls <- function(object,
                         col.fit = "black", lty.conf = if (shade) 1 else 2, 
                         lty.pred = if (shade) 1 else 3, lty.fit = 1, 
                         lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                        xlab, ylab, xlim, ylim)
-{
+                        xlab, ylab, xlim, ylim) {
   
   ## Preliminary (extract variable information, etc.)
   .data  <- if (!missing(data)) data else eval(object$call$data, 

@@ -22,14 +22,11 @@
 ##'                      this is always \code{TRUE}.
 ##' @param data An optional data frame. This is required if \code{object$data} 
 ##'             is \code{NULL}.
-##' @param boot Logical indicating whether to carry out a bootstrap 
-##'             simulation instead. This can only be used with \code{"lm"} 
-##'             and \code{"nls"} objects.
 ##' @param nsim Positive integer specifying the number of bootstrap simulations; 
 ##'             the bootstrap B (or R).
-##' @param boot_type Character string specifying the type of bootstrap to use. 
-##'                  Current options are \code{"parametric"} and 
-##'                  \code{"nonparametric"}.
+##' @param boot_type Character string specifying the type of bootstrap to use 
+##'                  when \code{interval = "percentile"}. Options are 
+##'                  \code{"parametric"} and \code{"nonparametric"}.
 ##' @param seed Optional argument to \code{set.seed}.
 ##' @param progress Logical indicating whether to display a text-based progress
 ##'                 bar during the bootstrap simulation.
@@ -59,17 +56,16 @@
 ##'     \item \code{estimate} The estimate of x0.
 ##'     \item \code{lwr} The lower confidence limit for x0.
 ##'     \item \code{upr} The upper confidence limit for x0.
-##'     \item \code{se} An estimate of the standard error (Wald interval only).
+##'     \item \code{se} An estimate of the standard error (Wald and percentile 
+##'                     intervals only).
+##'     \item \code{bias} The bootstrap estimate of bias (percentile interval 
+##'                       only).
+##'     \item \code{bootreps} Vector of bootstrap replicates (percentile 
+##'                       interval only).
+##'     \item \code{nsim} The number of bootstrap replicates (percentile 
+##'                       interval only).
 ##'     \item \code{interval} The method used for calculating \code{lower} and 
 ##'           \code{upper} (only used by \code{print} method).
-##'   }
-##'         Otherwise, an object of class \code{"bootCal"} containing the 
-##'         following components:
-##'   \itemize{
-##'     \item \code{original} The estimate of x0.
-##'     \item \code{bootreps} The lower confidence limit for x0.
-##'     \item \code{nsim} The number of bootstrap replicates.
-##'     \item \code{level} The desired confidence level.
 ##'   }
 ##' @references
 ##' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
@@ -122,8 +118,8 @@
 ##' 
 ##' ## Bootstrap calibration intervals. In general, nsim should be as large as 
 ##' ## reasonably possible (say, nsim = 9999).
-##' boo <- invest(mod, y0 = c(309, 296, 419), boot = TRUE, nsim = 999, 
-##'               seed = 101)
+##' boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
+##'               nsim = 999, seed = 101)
 ##' boo  # print bootstrap summary
 ##' plot(boo)  # plot results
 invest <- function(object, ...) {
@@ -133,9 +129,10 @@ invest <- function(object, ...) {
 ##' @rdname invest
 ##' @export
 ##' @method invest lm
-invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
-                      level = 0.95, mean.response = FALSE, data, boot = FALSE,
-                      boot_type = c("parametric", "nonparametric"), nsim = 1, 
+invest.lm <- function(object, y0, 
+                      interval = c("inversion", "Wald", "percentile", "none"), 
+                      level = 0.95, mean.response = FALSE, data, 
+                      boot_type = c("parametric", "nonparametric"), nsim = 999, 
                       seed = NULL, progress = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
                       adjust = c("none", "Bonferroni"), k,  ...) {
@@ -177,8 +174,12 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
          call. = FALSE)
   }
   
-  ## Bootstrap -----------------------------------------------------------------
-  if (boot) {
+  ## Return point estimate only
+  interval <- match.arg(interval)
+  if (interval == "none") return(x0_est)
+  
+  ## Bootstrap intervals -------------------------------------------------------
+  if (interval == "parametric") {
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
@@ -210,7 +211,7 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
     }
     
-    ## Function to calculate inverse estimate
+    ## Bootstrap function
     x0Fun <- function(i) {
       
       ## Update model using simulated response data
@@ -266,21 +267,25 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
       num_fail <- NULL
     }
     
+    ## Percentile interval
+    perc <- unname(quantile(x0_star, probs = c((1-level)/2, (1+level)/2)))
+        
     ## Create and return a bootCal object (essentially a list that can later be 
     ## converted to an object of class boot)
-    res <- list(original  = x0_est,  # original estimate
-                bootreps  = x0_star,  # bootstrap replicates
-                nsim      = nsim,  # number of simulations
-                level     = level)  # desired confidence level
-    class(res) = "bootCal"
+    res <- list("estimate" = x0_est,   # original estimate
+                "lower"    = perc[1],  # lower percentile
+                "upper"    = perc[2],  # upper percentile
+                "se"       = sd(x0_star),  # standard error
+                "bias"     = mean(x0_star) - x0_est,  # estimated bias
+                "bootreps" = x0_star,  # bootstrap replicates
+                "nsim"     = nsim,     # number of simulations
+                "level"    = level,    # desired confidence level
+                "interval" = interval)  # type of interval requested
+    class(res) = c("calibrate", "bootCal")
     attr(res, "bootFail") <- num_fail
     return(res)
      
   }
-  
-  ## Return point estimate only
-  interval <- match.arg(interval)
-  if (interval == "none") return(x0_est)
   
   ## Critical value for confidence interval computations
   adjust <- match.arg(adjust)
@@ -381,11 +386,9 @@ invest.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @rdname invest
 ##' @export
 ##' @method invest glm
-invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
+invest.glm <- function(object, y0, 
+                       interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, lower, upper, data,
-#                        boot = FALSE, 
-#                        boot_type = c("parametric", "nonparametric"), nsim = 1, 
-#                        seed = NULL, progress = FALSE,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
   
   ## NOTE: Currently, this function only works for the case 
@@ -417,101 +420,14 @@ invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"),
          call. = FALSE)
   }
   
-#   ## Bootstrap -----------------------------------------------------------------
-#   if (boot) {
-#     
-#     ## Sanity check
-#     stopifnot((nsim <- as.integer(nsim[1])) > 0)
-#     
-#     ## Set up progress bar (if requested)
-#     if (progress) { 
-#       pb <- txtProgressBar(min = 0, max = nsim, style = 3)
-#     }
-#     
-#     ## Initialize random number generator
-#     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
-#       runif(1)
-#     if (is.null(seed)) 
-#       RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-#     else {
-#       R.seed <- get(".Random.seed", envir = .GlobalEnv)
-#       set.seed(seed)
-#       RNGstate <- structure(seed, kind = as.list(RNGkind()))
-#       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
-#     }
-#     
-#     ## Simulate new response vectors
-#     boot_type <- match.arg(boot_type)
-#     if (boot_type == "parametric") {  
-#       ss <- simulate(object, nsim = nsim)
-#     } else {
-#       stop("Nonparametric bootstrap is not available for 'glm' objects.")
-#     }
-#     
-#     ## Function to calculate inverse estimate
-#     x0Fun <- function(i) {
-#       
-#       ## Update model using simulated response data
-#       y_boot <- ss[[i]]
-# #       if (is.matrix(y_boot)) colnames(y_boot) <- c("boot_succ", "boot_fail")
-#       boot_data <- eval(object$call$data)
-#       boot_data[, yname] <- y_boot
-#       new_fit <- glm(formula(object), data = boot_data, family = "binomial")
-#       boot_object <- tryCatch(update(object, cbind(y, n - y) ~ x, data = boot_data),
-#                               error = function(e) NULL)
-#       ## FIXME: Object is not updating like it should!
-# #       print(boot_object)
-#       
-#       ## If updating the model fails, then return value is NA
-#       if (is.null(boot_object)) {
-#         ret <- NA
-#       } else {
-#         ## Calculate point estimate
-#         ret <- tryCatch(uniroot(function(x) {
-#           predict(boot_object, newdata = makeData(x, xname), type = "link") - eta
-#         }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-#         error = function(e) NA)
-#       }
-#       
-#       ## Update progress bar
-#       if (progress) { 
-#         setTxtProgressBar(pb, i) 
-#       }
-#             
-#       ## Return estimate
-#       ret
-# 
-#     }
-#     
-#     ## Calculate bootstrap replicates
-#     x0_star <- sapply(seq_len(nsim), x0Fun)
-#     
-#     ## Check for errors and return the runs that did not fail
-#     if (AnyNA(x0_star)) {
-#       num_fail <- sum(is.na(x0_star))
-#       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
-#               ")")
-#       x0_star <- na.omit(x0_star)  # remove runs that failed
-#       attributes(x0_star) <- NULL  # remove attributes
-#     } else {
-#       num_fail <- NULL
-#     }
-#     
-#     ## Create and return a bootCal object (essentially a list that can later be 
-#     ## converted to an object of class boot)
-#     res <- list(original  = x0_est,  # original estimate
-#                 bootreps  = x0_star,  # bootstrap replicates
-#                 nsim      = nsim,  # number of simulations
-#                 level     = level)  # desired confidence level
-#     class(res) = "bootCal"
-#     attr(res, "bootFail") <- num_fail
-#     return(res)
-#     
-#   }
-  
   ## Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
+  
+  ## Stop and print error if user requested bootstrap intervals
+  if (interval == "percentile") {
+    stop("Bootstrap intervals not available for 'glm' objects.", call. = FALSE)
+  }
   
   ## Critical value
   crit <- qnorm((level + 1) / 2)  # quantile from standard normal
@@ -600,8 +516,9 @@ invest.glm <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @rdname invest
 ##' @export
 ##' @method invest nls
-invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),  
-                       level = 0.95, mean.response = FALSE, data, boot = FALSE,
+invest.nls <- function(object, y0, 
+                       interval = c("inversion", "Wald", "percentile", "none"),  
+                       level = 0.95, mean.response = FALSE, data, 
                        boot_type = c("parametric", "nonparametric"), nsim = 1, 
                        seed = NULL, progress = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
@@ -631,14 +548,6 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
   p <- length(coef(object))  # number of parameters
   var_pooled <- Sigma(object)^2  # residual variance
   
-  ## Critical value for confidence interval computations
-  adjust <- match.arg(adjust)
-  crit <- if (adjust == "Bonferroni" && m == 1) {
-            qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
-          } else {
-            qt((level + 1) / 2, n+m-p-1)  # no adjustment
-          }
-
   ## Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname)) - eta
@@ -654,8 +563,12 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
          call. = FALSE)
   }
   
+  ## Return point estimate only
+  interval <- match.arg(interval)
+  if (interval == "none") return(x0_est)
+  
   ## Bootstrap -----------------------------------------------------------------
-  if (boot) {
+  if (interval == "percentile") {
     
     ## Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
@@ -743,22 +656,34 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
       num_fail <- NULL
     }
 
+    ## Percentile interval
+    perc <- unname(quantile(x0_star, probs = c((1-level)/2, (1+level)/2)))
+    
     ## Create and return a bootCal object (essentially a list that can later be 
     ## converted to an object of class boot)
-    res <- list(original  = x0_est,  # original estimate
-                bootreps  = x0_star,  # bootstrap replicates
-                nsim      = nsim,  # number of simulations
-                level     = level)  # desired confidence level
-    class(res) = "bootCal"
+    res <- list("estimate" = x0_est,   # original estimate
+                "lower"    = perc[1],  # lower percentile
+                "upper"    = perc[2],  # upper percentile
+                "se"       = sd(x0_star),  # standard error
+                "bias"     = mean(x0_star) - x0_est,  # estimated bias
+                "bootreps" = x0_star,  # bootstrap replicates
+                "nsim"     = nsim,     # number of simulations
+                "level"    = level,    # desired confidence level
+                "interval" = interval)  # type of interval requested
+    class(res) = c("calibrate", "bootCal")
     attr(res, "bootFail") <- num_fail
     return(res)
 
   }
   
-  ## Return point estimate only
-  interval <- match.arg(interval)
-  if (interval == "none") return(x0_est)
-  
+  ## Critical value for confidence interval computations
+  adjust <- match.arg(adjust)
+  crit <- if (adjust == "Bonferroni" && m == 1) {
+    qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
+  } else {
+    qt((level + 1) / 2, n+m-p-1)  # no adjustment
+  }
+
   ## Inversion interval --------------------------------------------------------
   if (interval == "inversion") {
     
@@ -849,7 +774,8 @@ invest.nls <- function(object, y0, interval = c("inversion", "Wald", "none"),
 ##' @rdname invest
 ##' @export
 ##' @method invest lme
-invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),  
+invest.lme <- function(object, y0, 
+                       interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, mean.response = FALSE, data, lower, upper, 
                        q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        ...) 
@@ -896,6 +822,11 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
   
+  ## Stop and print error if user requested bootstrap intervals
+  if (interval == "percentile") {
+    stop("Bootstrap intervals not available for 'lme' objects.", call. = FALSE)
+  }
+
   ## Estimate variance of new response
   if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0_est, xname))
   
@@ -995,19 +926,6 @@ invest.lme <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
 }
 
-##' @keywords internal
-print.bootCal <- function(x, digits = 4, ...) { 
-  ci <- round(quantile(x$bootreps, probs = c((1-x$level)/2, (1+x$level)/2)),
-              digits = digits)
-  names(ci) <- c("lower", "upper")
-  op <- c("estimate" = x$original, 
-          "se"       = sd(x$bootreps), 
-          "bias"     = mean(x$bootreps) - x$original)
-  print(round(op, digits = digits))
-  cat("\n", "Percentile bootstrap interval: (", ci[1], ",", ci[2], ")", "\n")
-  invisible(x)
-} 
-
 ##' Plots of the Output of a Bootstrap Calibration Simulation
 ##' 
 ##' This takes a bootstrap calibration object and produces plots for the 
@@ -1023,7 +941,7 @@ print.bootCal <- function(x, digits = 4, ...) {
 plot.bootCal <- function(x, ...) {
   
   t <- x$bootreps  # bootstrap replicates
-  t0 <- x$original  # original estimate
+  t0 <- x$estimate  # original estimate
   
   ## Calculate number of histogram breaks (better than default)
   if (!is.null(t0)) {

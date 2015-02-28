@@ -86,18 +86,15 @@ invest(log_fit, y0 = c(309, 296, 419), interval = "Wald")
 #   2.2639   1.6889   2.8388   0.2847
 ```
 
-The intervals both rely on large sample results and normality. In practice, it the bootstrap may be more reliable:
+The intervals both rely on large sample results and normality. In practice, the bootstrap may be more reliable:
 ```r
-## Bootstrap calibration intervals. In general, nsim should be as large as 
-## reasonably possible (say, nsim = 9999).
-boo <- invest(log_fit, y0 = c(309, 296, 419), boot = TRUE, nsim = 999, 
-              seed = 101)
+## Bootstrap calibration intervals (may take a few seconds)
+boo <- invest(log_fit, y0 = c(309, 296, 419), interval = "percentile", 
+              nsim = 9999, seed = 101, progress = TRUE)
 boo  # print bootstrap summary
 
-# estimate       se     bias 
-#   2.2639   0.2909   0.0320 
-#
-#  Percentile bootstrap interval: ( 1.8006 , 2.9336 )
+# estimate    lower    upper       se     bias 
+#   2.2639   1.7890   2.9380   0.2947   0.0281
 
 plot(boo)  # plot results
 ```

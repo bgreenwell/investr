@@ -17,7 +17,6 @@ S3method(plotFit, lm)
 S3method(plotFit, nls) 
 S3method(plotFit, glm)  # new (experimental) 
 S3method(print, calibrate)
-S3method(print, bootCal)
 S3method(plot, bootCal)
 
 ## Recommended packages

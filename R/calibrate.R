@@ -242,5 +242,6 @@ calibrate.lm <- function(object, ...) {
 print.calibrate <- function(x, digits = 4, ...) {
   if (x$interval == "inversion") print(round(unlist(x[1:3]), digits))
   if (x$interval == "Wald") print(round(unlist(x[1:4]), digits))
+  if (x$interval == "percentile") print(round(unlist(x[1:5]), digits))
   invisible(x)
 } 
