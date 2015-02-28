@@ -28,7 +28,7 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
 
 ### Estimating the 50% lethal dose in binomial regression
 
-In binomial regression, the estimated lethal dose corresponding to a specifi probability $p$ of death is often referred to as $LD_p$. `invest` obtains an estimate of $LD_p$ by inverting the fitted mean response on the link scale. Similarly, by default, a confidence interval for $LD_p$ is obtained by inverting a confidence interval for the response on the link scale.
+In binomial regression, the estimated lethal dose corresponding to a specif probability $p$ of death is often referred to as $LD_p$. `invest` obtains an estimate of $LD_p$ by inverting the fitted mean response on the link scale. Similarly, by default, a confidence interval for $LD_p$ is obtained by inverting a confidence interval for the response on the link scale.
 ```r
 library(investr)
 
@@ -46,7 +46,6 @@ invest(binom_fit, y0 = 0.5)
 
 # estimate    lower    upper 
 #   1.7788   1.7702   1.7862
-
 ```
 
 To obtain an estimated standard error, we can use the Wald method instead:
@@ -60,16 +59,20 @@ invest(binom_fit, y0 = 0.5, interval = "Wald")
 MASS::dose.p(binom_fit, p = 0.5)
 ```
 
-### Bioassays of nasturtium
+### Nonlinear calibration --- bioassay on nasturtium
 
+The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
+log-logistic model describes the data well:
 ```r
-
 ## Log-logistic model
 log_fit <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
                data = nasturtium)
 plotFit(log_fit, lwd.fit = 2)
-           
+```
+
+Three new replicates of the response (309, 296, 419) at an unknown concentration of interest ($x_0$) are measured. It is desired to estimate $x_0$.
+```r      
 ## Inversion method
 invest(log_fit, y0 = c(309, 296, 419), interval = "inversion")
 
@@ -83,7 +86,7 @@ invest(log_fit, y0 = c(309, 296, 419), interval = "Wald")
 #   2.2639   1.6889   2.8388   0.2847
 ```
 
-The intervals both rely on large sample results and normality. In practice, it the bootstrap may be more reliabile:
+The intervals both rely on large sample results and normality. In practice, it the bootstrap may be more reliable:
 ```r
 ## Bootstrap calibration intervals. In general, nsim should be as large as 
 ## reasonably possible (say, nsim = 9999).
@@ -97,5 +100,4 @@ boo  # print bootstrap summary
 #  Percentile bootstrap interval: ( 1.8006 , 2.9336 )
 
 plot(boo)  # plot results
-
 ```
