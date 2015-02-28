@@ -432,6 +432,11 @@ plotFit.glm <- function(object, type = c("response", "link"),
     yvals <- with(.data, eval(formula(object)[[2]]))
   }
   
+  ## FIXME: Produce -Inf/Inf for binomial model for yvals = 0/1
+  type <- match.arg(type)
+  if (type == "link") yvals <- family(object)$linkfun(yvals)
+  
+  
   ## Plot limits, labels, etc.
   if (missing(xlim)) xlim <- range(xvals)  # default plot domain
   xgrid <- if (extend.range) {  # the x values at which to evaluate
@@ -442,36 +447,44 @@ plotFit.glm <- function(object, type = c("response", "link"),
   }
   names(xgrid) <- xname
   if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- "Probability"  # default label for y-axis
-  
-  ## Maximum and minimum of fitted values
-  interval = match.arg(interval)
-  type <- match.arg(type)
-  if (interval == "none") {
-    fitvals <- unname(predict(object, newdata = xgrid, type = type))
-    fit.ymin <- min(fitvals)
-    fit.ymax <- max(fitvals)
+  if (missing(ylab)) {
+    ylab <- paste0("Prediction (", type, " scale)")  # default label for y-axis
   }
   
   ## Confidence interval for mean response
+  interval = match.arg(interval)
   if (interval == "confidence") {
+    
+    ## Mean response and pointwise confidence intervals
     conf <- predict(object, newdata = xgrid, type = "link", se.fit = TRUE)
     lwr_link <- conf$fit - conf$se.fit * qnorm((level+1) / 2)
     upr_link <- conf$fit + conf$se.fit * qnorm((level+1) / 2)
-    conf.lwr <- if (type == "link") lwr_link else family(object)$linkinv(lwr_link)
-    conf.upr <- if (type == "link") upr_link else family(object)$linkinv(upr_link)
-    conf.ymin <- min(conf.lwr)
-    conf.ymax <- max(conf.upr)
-  }
-  
-  ## Automatic limits for y-axis
-  if (missing(ylim)) {
-    if (interval == "confidence") {
-      ylim <- c(min(c(conf.ymin, yvals)), max(c(conf.ymax, yvals)))
-    } 
-    if (interval == "none") {
-      ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
+    
+    if (type == "response") {
+      mean_resp <- family(object)$linkinv(conf$fit)
+      lwr_conf <- family(object)$linkinv(lwr_link)
+      upr_conf <- family(object)$linkinv(upr_link)
+    } else {
+      mean_resp <- conf$fit
+      lwr_conf <- lwr_link
+      upr_conf <- upr_link
     }
+
+    ## Determine default ylim for plot
+    if (missing(ylim)) {
+      ylim <- c(min(c(min(lwr_conf), yvals)), max(c(max(upr_conf), yvals)))
+    }
+    
+  } else {
+    
+    ## Mean response
+    mean_resp <- unname(predict(object, newdata = xgrid, type = type))
+    
+    ## Determine default ylim for plot
+    if (missing(ylim)) {
+      ylim <- c(min(c(min(mean_resp), yvals)), max(c(max(mean_resp), yvals)))
+    }
+    
   }
   
   ## Plot data, mean response, etc.
@@ -480,45 +493,43 @@ plotFit.glm <- function(object, type = c("response", "link"),
          if (shade) {
            ## Draw (hidden) shaded confidence band
            if (interval == "confidence") {
-             polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(lwr_conf, rev(upr_conf)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            ## Draw (hidden) unshaded confidence band
            if (interval == "confidence") {
-             lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             lines(xgrid[[1]], lwr_conf, col = col.conf, lty = lty.conf, 
                    lwd = lwd.conf)
-             lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             lines(xgrid[[1]], upr_conf, col = col.conf, lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          ## Draw (hidden) fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid,
-                                                    type = type)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)
+         lines(xgrid[[1]], mean_resp, lty = lty.fit, lwd = lwd.fit, 
+               col = col.fit)
        } else NULL,
        panel.last = if(!hide) {
          if (shade) {
            ## Draw shaded confidence band
            if (interval == "confidence") {
-             polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(lwr_conf, rev(upr_conf)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            ## Draw unshaded confidence band
            if (interval == "confidence") {
-             lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             lines(xgrid[[1]], lwr_conf, col = col.conf, lty = lty.conf, 
                    lwd = lwd.conf)
-             lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             lines(xgrid[[1]], upr_conf, col = col.conf, lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          ## Draw fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid,
-                                                    type = type)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)
+         lines(xgrid[[1]], mean_resp, lty = lty.fit, lwd = lwd.fit, 
+               col = col.fit)
        } else NULL, ...)
   
 }

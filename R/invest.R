@@ -97,9 +97,10 @@
 ##' ## Complementary log-log model
 ##' mod <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
 ##'            family = binomial(link = "cloglog"))
-##' plotFit(mod, pch = 21, bg = "dodgerblue2", cex = 1.2, lwd = 2,
+##' plotFit(mod, pch = 19, cex = 1.2, lwd = 2, 
 ##'         xlab = "Log dose of carbon disulphide",
-##'         interval = "confidence", shade = TRUE)
+##'         interval = "confidence", shade = TRUE, 
+##'         col.conf = "lightskyblue")
 ##' 
 ##' ## Approximate 95% confidence intervals and standard error for LD50
 ##' invest(mod, y0 = 0.5)
