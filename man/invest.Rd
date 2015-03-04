@@ -93,8 +93,14 @@ Only used when \code{object} inherits from class \code{"lme"}.
 Defaults to \code{qnorm((1-level)/2)}.}
 }
 \value{
-If \code{boot = FALSE}, then an object of class \code{"calibrate"}
-        containing the following components:
+\code{invest} returns an object of class \code{"calibrate"} or, if
+        \code{interval = "percentile"}, of class
+        \code{c("calibrate", "bootCal")}. The generic function \code{plot}
+        can be used to plot the output of the bootstrap simulation when
+        \code{interval = "percentile"}.
+
+        An object of class \code{"calibrate"} contains the following
+        components:
   \itemize{
     \item \code{estimate} The estimate of x0.
     \item \code{lwr} The lower confidence limit for x0.
@@ -104,7 +110,7 @@ If \code{boot = FALSE}, then an object of class \code{"calibrate"}
     \item \code{bias} The bootstrap estimate of bias (percentile interval
                       only).
     \item \code{bootreps} Vector of bootstrap replicates (percentile
-                      interval only).
+                          interval only).
     \item \code{nsim} The number of bootstrap replicates (percentile
                       interval only).
     \item \code{interval} The method used for calculating \code{lower} and

@@ -24,7 +24,7 @@
 ##'             is \code{NULL}.
 ##' @param nsim Positive integer specifying the number of bootstrap simulations; 
 ##'             the bootstrap B (or R).
-##' @param boot_type Character string specifying the type of bootstrap to use 
+##' @param boot.type Character string specifying the type of bootstrap to use 
 ##'                  when \code{interval = "percentile"}. Options are 
 ##'                  \code{"parametric"} and \code{"nonparametric"}.
 ##' @param seed Optional argument to \code{set.seed}.
@@ -50,8 +50,14 @@
 ##'          \code{adjust = "Bonferroni"}.
 ##' @param ... Additional optional arguments. At present, no optional arguments 
 ##'            are used.
-##' @return If \code{boot = FALSE}, then an object of class \code{"calibrate"} 
-##'         containing the following components:
+##' @return \code{invest} returns an object of class \code{"calibrate"} or, if
+##'         \code{interval = "percentile"}, of class 
+##'         \code{c("calibrate", "bootCal")}. The generic function \code{plot} 
+##'         can be used to plot the output of the bootstrap simulation when 
+##'         \code{interval = "percentile"}.
+##'         
+##'         An object of class \code{"calibrate"} contains the following 
+##'         components:
 ##'   \itemize{
 ##'     \item \code{estimate} The estimate of x0.
 ##'     \item \code{lwr} The lower confidence limit for x0.
@@ -61,12 +67,13 @@
 ##'     \item \code{bias} The bootstrap estimate of bias (percentile interval 
 ##'                       only).
 ##'     \item \code{bootreps} Vector of bootstrap replicates (percentile 
-##'                       interval only).
+##'                           interval only).
 ##'     \item \code{nsim} The number of bootstrap replicates (percentile 
 ##'                       interval only).
 ##'     \item \code{interval} The method used for calculating \code{lower} and 
 ##'           \code{upper} (only used by \code{print} method).
 ##'   }
+##'
 ##' @references
 ##' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
 ##' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
@@ -132,7 +139,7 @@ invest <- function(object, ...) {
 invest.lm <- function(object, y0, 
                       interval = c("inversion", "Wald", "percentile", "none"), 
                       level = 0.95, mean.response = FALSE, data, 
-                      boot_type = c("parametric", "nonparametric"), nsim = 999, 
+                      boot.type = c("parametric", "nonparametric"), nsim = 999, 
                       seed = NULL, progress = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
                       adjust = c("none", "Bonferroni"), k,  ...) {
@@ -204,8 +211,8 @@ invest.lm <- function(object, y0,
     ## Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
-    boot_type <- match.arg(boot_type)
-    if (boot_type == "parametric") {  
+    boot.type <- match.arg(boot.type)
+    if (boot.type == "parametric") {  
       ss <- simulate(object, nsim = nsim)
     } else {
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
@@ -229,7 +236,7 @@ invest.lm <- function(object, y0,
         if (mean.response) {  # regulation
           y0_star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
-          if (boot_type == "parametric") {
+          if (boot.type == "parametric") {
             y0_star <- y0 + rnorm(length(y0), sd = Sigma(object))
           } else {
             y0_star <- y0 + sample(res, size = length(y0), replace = TRUE)
@@ -519,7 +526,7 @@ invest.glm <- function(object, y0,
 invest.nls <- function(object, y0, 
                        interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, mean.response = FALSE, data, 
-                       boot_type = c("parametric", "nonparametric"), nsim = 1, 
+                       boot.type = c("parametric", "nonparametric"), nsim = 1, 
                        seed = NULL, progress = FALSE, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        adjust = c("none", "Bonferroni"), k, ...) {
@@ -593,8 +600,8 @@ invest.nls <- function(object, y0,
     ## Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
-    boot_type <- match.arg(boot_type)
-    if (boot_type == "parametric") {  
+    boot.type <- match.arg(boot.type)
+    if (boot.type == "parametric") {  
       ss <- simulate(object, nsim = nsim)
     } else {
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
@@ -618,7 +625,7 @@ invest.nls <- function(object, y0,
         if (mean.response) {  # regulation
           y0_star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
-          if (boot_type == "parametric") {
+          if (boot.type == "parametric") {
             y0_star <- y0 + rnorm(length(y0), sd = Sigma(object))
           } else {
             y0_star <- y0 + sample(res, size = length(y0), replace = TRUE)
