@@ -508,7 +508,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
          lines(xgrid[[1]], mean_resp, lty = lty.fit, lwd = lwd.fit, 
                col = col.fit)
        } else NULL,
-       panel.last = if(!hide) {
+       panel.last = if (!hide) {
          if (shade) {
            ## Draw shaded confidence band
            if (interval == "confidence") {
