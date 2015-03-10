@@ -9,11 +9,13 @@ Description: Functions to facilitate inverse estimation/calibration in linear,
     is also provided for plotting fitted regression models with or without 
     confidence/prediction bands that may be of use to the general user.
 Depends:
+    base,
     graphics,
     stats
 Suggests:
     testthat
 Imports:
+    MASS,
     nlme
 Date: 2014-04-18
 License: GPL (>= 2)

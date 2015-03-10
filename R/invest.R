@@ -933,6 +933,82 @@ invest.lme <- function(object, y0,
   
 }
 
+##' @rdname invest
+##' @export
+##' @method invest rlm
+invest.rlm <- function(object, y0, mean.response = FALSE, data, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       ...) {
+  
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Set up for inverse estimation
+  m <- length(y0)  # number of unknowns 
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
+  eta <- mean(y0)  # mean unknown
+  
+  ## Calculate point estimate by inverting fitted model
+  x0_est <- try(uniroot(function(x) {
+    predict(object, newdata = makeData(x, xname)) - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
+  ## Provide (informative) error message if point estimate is not found
+  if (inherits(x0_est, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower, 
+               ", ", upper, "). ", 
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
+  
+}
+
+##' @rdname invest
+##' @export
+##' @method invest lqs
+invest.lqs <- function(object, y0, data, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       ...) {
+
+  ## Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  ## Set up for inverse estimation
+  m <- length(y0)  # number of unknowns 
+  if(mean.response && m > 1) stop("Only one mean response value allowed.")
+  eta <- mean(y0)  # mean unknown
+  
+  ## Calculate point estimate by inverting fitted model
+  x0_est <- try(uniroot(function(x) {
+    predict(object, newdata = makeData(x, xname)) - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
+  ## Provide (informative) error message if point estimate is not found
+  if (inherits(x0_est, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower, 
+               ", ", upper, "). ", 
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
+
+}
+
 ##' Plots of the Output of a Bootstrap Calibration Simulation
 ##' 
 ##' This takes a bootstrap calibration object and produces plots for the 

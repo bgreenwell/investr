@@ -4,7 +4,9 @@
 \alias{plotFit}
 \alias{plotFit.glm}
 \alias{plotFit.lm}
+\alias{plotFit.lqs}
 \alias{plotFit.nls}
+\alias{plotFit.rlm}
 \title{Plotting Confidence/Prediction Bands}
 \usage{
 plotFit(object, ...)
@@ -33,6 +35,14 @@ plotFit(object, ...)
   (shade) grey(0.9) else "black", border.conf = col.conf, col.fit = "black",
   lty.conf = if (shade) 1 else 2, lty.fit = 1, lwd.conf = 1,
   lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim)
+
+\method{plotFit}{rlm}(object, data, ..., extend.range = FALSE, hide = TRUE,
+  col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, xlab, ylab,
+  xlim, ylim)
+
+\method{plotFit}{lqs}(object, data, ..., extend.range = FALSE, hide = TRUE,
+  col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, xlab, ylab,
+  xlim, ylim)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
