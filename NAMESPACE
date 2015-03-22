@@ -20,10 +20,11 @@ S3method(plotFit, nls)
 S3method(plotFit, glm)  # new (experimental) 
 S3method(plotFit, rlm)  # new (experimental) 
 S3method(plotFit, lqs)  # new (experimental) 
-S3method(print, calibrate)
+S3method(print, invest)
 S3method(plot, bootCal)
 
 ## Recommended packages
+importFrom(MASS, lqs, rlm)
 importFrom(nlme, fixef, asOneFormula, getVarCov)
 
 

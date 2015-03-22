@@ -79,7 +79,7 @@ test_that("approximate standard error is correct", {
                              #parameterNames = c("b0", "b1"))$SE
 
   ## Expectations
-  expect_that(round(crystal.cal$se, 5), equals(round(se.cal, 5))) # small diff
-  expect_that(crystal.reg$se, equals(se.reg))
+  expect_that(crystal.cal$se, equals(se.cal, tol = 1e-04)) # small diff
+  expect_that(crystal.reg$se, equals(se.reg, tol = 1e-04))
   
 })

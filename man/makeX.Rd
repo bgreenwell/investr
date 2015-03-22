@@ -2,13 +2,16 @@
 % Please edit documentation in R/utilities.R
 \name{makeX}
 \alias{makeX}
-\title{Construct design matrix for fixed effects}
+\alias{makeZ}
+\title{Design Matrix for Fixed and Random Effects}
 \usage{
 makeX(object, newdata)
+
+makeZ(object, newdata)
 }
 \description{
-Create a fixed effects design matrix from \code{newdata} based on a fitted
-model. (For internal use only.)
+Construct the fixed or random effects design matrix from a fitted model using
+\code{newdata}. (For internal use only.)
 }
 \keyword{internal}
 

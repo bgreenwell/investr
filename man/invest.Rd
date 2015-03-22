@@ -32,10 +32,10 @@ invest(object, ...)
   "percentile", "none"), level = 0.95, mean.response = FALSE, data, lower,
   upper, q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 
-\method{invest}{rlm}(object, y0, mean.response = FALSE, data, lower, upper,
+\method{invest}{lqs}(object, y0, data, lower, upper,
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 
-\method{invest}{lqs}(object, y0, data, lower, upper,
+\method{invest}{rlm}(object, y0, mean.response = FALSE, data, lower, upper,
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
@@ -101,13 +101,13 @@ Only used when \code{object} inherits from class \code{"lme"}.
 Defaults to \code{qnorm((1-level)/2)}.}
 }
 \value{
-\code{invest} returns an object of class \code{"calibrate"} or, if
+\code{invest} returns an object of class \code{"invest"} or, if
         \code{interval = "percentile"}, of class
-        \code{c("calibrate", "bootCal")}. The generic function \code{plot}
+        \code{c("invest", "bootCal")}. The generic function \code{plot}
         can be used to plot the output of the bootstrap simulation when
         \code{interval = "percentile"}.
 
-        An object of class \code{"calibrate"} contains the following
+        An object of class \code{"invest"} contains the following
         components:
   \itemize{
     \item \code{estimate} The estimate of x0.
@@ -132,11 +132,11 @@ value of the response (or vector thereof) or specified value of the mean
 response. See the references listed below for more details.
 }
 \examples{
-##
-## Dobson's beetle data (generalized linear model)
-##
+#
+# Dobson's beetle data (generalized linear model)
+#
 
-## Complementary log-log model
+# Complementary log-log model
 mod <- glm(cbind(y, n-y) ~ ldose, data = beetle,
            family = binomial(link = "cloglog"))
 plotFit(mod, pch = 19, cex = 1.2, lwd = 2,
@@ -144,26 +144,26 @@ plotFit(mod, pch = 19, cex = 1.2, lwd = 2,
         interval = "confidence", shade = TRUE,
         col.conf = "lightskyblue")
 
-## Approximate 95\% confidence intervals and standard error for LD50
+# Approximate 95\% confidence intervals and standard error for LD50
 invest(mod, y0 = 0.5)
 invest(mod, y0 = 0.5, interval = "Wald")
 
-##
-## Nasturtium example (nonlinear least-squares with replication)
-##
+#
+# Nasturtium example (nonlinear least-squares with replication)
+#
 
-## Log-logistic model
+# Log-logistic model
 mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
            start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
            data = nasturtium)
 plotFit(mod, lwd.fit = 2)
 
-## Compute approximate 95\% calibration intervals
+# Compute approximate 95\% calibration intervals
 invest(mod, y0 = c(309, 296, 419), interval = "inversion")
 invest(mod, y0 = c(309, 296, 419), interval = "Wald")
 
-## Bootstrap calibration intervals. In general, nsim should be as large as
-## reasonably possible (say, nsim = 9999).
+# Bootstrap calibration intervals. In general, nsim should be as large as
+# reasonably possible (say, nsim = 9999).
 boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile",
               nsim = 999, seed = 101)
 boo  # print bootstrap summary

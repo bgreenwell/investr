@@ -1,141 +1,142 @@
-##' Calibration for Linear and Nonlinear Regression Models.
-##' 
-##' The function \code{invest} computes the inverse estimate and a condfidence 
-##' interval for the unknown predictor value that corresponds to an observed 
-##' value of the response (or vector thereof) or specified value of the mean 
-##' response. See the references listed below for more details. 
-##' 
-##' @rdname invest
-##' @export
-##' 
-##' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
-##'               \code{"nls"}, or \code{"lme"}.
-##' @param y0 The value of the observed response(s) or specified value of the 
-##'           mean response. For \code{"glm"} objects, \code{y0} should be on 
-##'           scale of the response variable.
-##' @param interval The type of interval required.
-##' @param level A numeric scalar between 0 and 1 giving the confidence level 
-##'              for the interval to be calculated. 
-##' @param mean.response Logical indicating whether confidence intervals should
-##'                      correspond to an individual response (\code{FALSE}) or 
-##'                      a mean response (\code{TRUE}). For \code{glm} objects,
-##'                      this is always \code{TRUE}.
-##' @param data An optional data frame. This is required if \code{object$data} 
-##'             is \code{NULL}.
-##' @param nsim Positive integer specifying the number of bootstrap simulations; 
-##'             the bootstrap B (or R).
-##' @param boot.type Character string specifying the type of bootstrap to use 
-##'                  when \code{interval = "percentile"}. Options are 
-##'                  \code{"parametric"} and \code{"nonparametric"}.
-##' @param seed Optional argument to \code{set.seed}.
-##' @param progress Logical indicating whether to display a text-based progress
-##'                 bar during the bootstrap simulation.
-##' @param lower The lower endpoint of the interval to be searched.
-##' @param upper The upper endpoint of the interval to be searched.
-##' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-##'           Only used when \code{object} inherits from class \code{"lme"}. 
-##'           Defaults to \code{qnorm((1+level)/2)}.
-##' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-##'           Only used when \code{object} inherits from class \code{"lme"}. 
-##'           Defaults to \code{qnorm((1-level)/2)}.
-##' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
-##'            minimum of 1e-10.
-##' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
-##' @param adjust A logical value indicating if an adjustment should be made to
-##'               the critical value used in calculating the confidence interval.
-##'               This is useful for when the calibration curve is to be used 
-##'               multiple, say k, times.
-##' @param k The number times the calibration curve is to be used for computing 
-##'          a confidence interval. Only needed when 
-##'          \code{adjust = "Bonferroni"}.
-##' @param ... Additional optional arguments. At present, no optional arguments 
-##'            are used.
-##' @return \code{invest} returns an object of class \code{"calibrate"} or, if
-##'         \code{interval = "percentile"}, of class 
-##'         \code{c("calibrate", "bootCal")}. The generic function \code{plot} 
-##'         can be used to plot the output of the bootstrap simulation when 
-##'         \code{interval = "percentile"}.
-##'         
-##'         An object of class \code{"calibrate"} contains the following 
-##'         components:
-##'   \itemize{
-##'     \item \code{estimate} The estimate of x0.
-##'     \item \code{lwr} The lower confidence limit for x0.
-##'     \item \code{upr} The upper confidence limit for x0.
-##'     \item \code{se} An estimate of the standard error (Wald and percentile 
-##'                     intervals only).
-##'     \item \code{bias} The bootstrap estimate of bias (percentile interval 
-##'                       only).
-##'     \item \code{bootreps} Vector of bootstrap replicates (percentile 
-##'                           interval only).
-##'     \item \code{nsim} The number of bootstrap replicates (percentile 
-##'                       interval only).
-##'     \item \code{interval} The method used for calculating \code{lower} and 
-##'           \code{upper} (only used by \code{print} method).
-##'   }
-##'
-##' @references
-##' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
-##' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
-##' URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
-##'
-##' Graybill, F. A., and Iyer, H. K. (1994).
-##' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
-##'
-##' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
-##' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer. 
-##' 
-##' Seber, G. A. F., and Wild, C. J. (1989)
-##' \emph{Nonlinear regression}. Wiley.
-##' 
-##' Oman, Samuel D. (1998).
-##' Calibration with Random Slopes.
-##' \emph{Biometrics} \bold{85}(2): 439--449.
-##' doi:10.1093/biomet/85.2.439.
-##' @examples
-##' ##
-##' ## Dobson's beetle data (generalized linear model)
-##' ##
-##' 
-##' ## Complementary log-log model
-##' mod <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
-##'            family = binomial(link = "cloglog"))
-##' plotFit(mod, pch = 19, cex = 1.2, lwd = 2, 
-##'         xlab = "Log dose of carbon disulphide",
-##'         interval = "confidence", shade = TRUE, 
-##'         col.conf = "lightskyblue")
-##' 
-##' ## Approximate 95% confidence intervals and standard error for LD50
-##' invest(mod, y0 = 0.5)
-##' invest(mod, y0 = 0.5, interval = "Wald")
-##' 
-##' ##
-##' ## Nasturtium example (nonlinear least-squares with replication)
-##' ##
-##' 
-##' ## Log-logistic model
-##' mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
-##'            start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
-##'            data = nasturtium)
-##' plotFit(mod, lwd.fit = 2)
-##'            
-##' ## Compute approximate 95% calibration intervals
-##' invest(mod, y0 = c(309, 296, 419), interval = "inversion")
-##' invest(mod, y0 = c(309, 296, 419), interval = "Wald")  
-##' 
-##' ## Bootstrap calibration intervals. In general, nsim should be as large as 
-##' ## reasonably possible (say, nsim = 9999).
-##' boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
-##'               nsim = 999, seed = 101)
-##' boo  # print bootstrap summary
-##' plot(boo)  # plot results
+#' Calibration for Linear and Nonlinear Regression Models.
+#' 
+#' The function \code{invest} computes the inverse estimate and a condfidence 
+#' interval for the unknown predictor value that corresponds to an observed 
+#' value of the response (or vector thereof) or specified value of the mean 
+#' response. See the references listed below for more details. 
+#' 
+#' @rdname invest
+#' @export
+#' 
+#' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
+#'               \code{"nls"}, or \code{"lme"}.
+#' @param y0 The value of the observed response(s) or specified value of the 
+#'           mean response. For \code{"glm"} objects, \code{y0} should be on 
+#'           scale of the response variable.
+#' @param interval The type of interval required.
+#' @param level A numeric scalar between 0 and 1 giving the confidence level 
+#'              for the interval to be calculated. 
+#' @param mean.response Logical indicating whether confidence intervals should
+#'                      correspond to an individual response (\code{FALSE}) or 
+#'                      a mean response (\code{TRUE}). For \code{glm} objects,
+#'                      this is always \code{TRUE}.
+#' @param data An optional data frame. This is required if \code{object$data} 
+#'             is \code{NULL}.
+#' @param nsim Positive integer specifying the number of bootstrap simulations; 
+#'             the bootstrap B (or R).
+#' @param boot.type Character string specifying the type of bootstrap to use 
+#'                  when \code{interval = "percentile"}. Options are 
+#'                  \code{"parametric"} and \code{"nonparametric"}.
+#' @param seed Optional argument to \code{set.seed}.
+#' @param progress Logical indicating whether to display a text-based progress
+#'                 bar during the bootstrap simulation.
+#' @param lower The lower endpoint of the interval to be searched.
+#' @param upper The upper endpoint of the interval to be searched.
+#' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
+#'           Only used when \code{object} inherits from class \code{"lme"}. 
+#'           Defaults to \code{qnorm((1+level)/2)}.
+#' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
+#'           Only used when \code{object} inherits from class \code{"lme"}. 
+#'           Defaults to \code{qnorm((1-level)/2)}.
+#' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
+#'            minimum of 1e-10.
+#' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
+#' @param adjust A logical value indicating if an adjustment should be made to
+#'               the critical value used in calculating the confidence interval.
+#'               This is useful for when the calibration curve is to be used 
+#'               multiple, say k, times.
+#' @param k The number times the calibration curve is to be used for computing 
+#'          a confidence interval. Only needed when 
+#'          \code{adjust = "Bonferroni"}.
+#' @param ... Additional optional arguments. At present, no optional arguments 
+#'            are used.
+#' @return \code{invest} returns an object of class \code{"invest"} or, if
+#'         \code{interval = "percentile"}, of class 
+#'         \code{c("invest", "bootCal")}. The generic function \code{plot} 
+#'         can be used to plot the output of the bootstrap simulation when 
+#'         \code{interval = "percentile"}.
+#'         
+#'         An object of class \code{"invest"} contains the following 
+#'         components:
+#'   \itemize{
+#'     \item \code{estimate} The estimate of x0.
+#'     \item \code{lwr} The lower confidence limit for x0.
+#'     \item \code{upr} The upper confidence limit for x0.
+#'     \item \code{se} An estimate of the standard error (Wald and percentile 
+#'                     intervals only).
+#'     \item \code{bias} The bootstrap estimate of bias (percentile interval 
+#'                       only).
+#'     \item \code{bootreps} Vector of bootstrap replicates (percentile 
+#'                           interval only).
+#'     \item \code{nsim} The number of bootstrap replicates (percentile 
+#'                       interval only).
+#'     \item \code{interval} The method used for calculating \code{lower} and 
+#'           \code{upper} (only used by \code{print} method).
+#'   }
+#'
+#' @references
+#' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
+#' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
+#' URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
+#'
+#' Graybill, F. A., and Iyer, H. K. (1994).
+#' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
+#'
+#' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
+#' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer. 
+#' 
+#' Seber, G. A. F., and Wild, C. J. (1989)
+#' \emph{Nonlinear regression}. Wiley.
+#' 
+#' Oman, Samuel D. (1998).
+#' Calibration with Random Slopes.
+#' \emph{Biometrics} \bold{85}(2): 439--449.
+#' doi:10.1093/biomet/85.2.439.
+#' @examples
+#' #
+#' # Dobson's beetle data (generalized linear model)
+#' #
+#' 
+#' # Complementary log-log model
+#' mod <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
+#'            family = binomial(link = "cloglog"))
+#' plotFit(mod, pch = 19, cex = 1.2, lwd = 2, 
+#'         xlab = "Log dose of carbon disulphide",
+#'         interval = "confidence", shade = TRUE, 
+#'         col.conf = "lightskyblue")
+#' 
+#' # Approximate 95% confidence intervals and standard error for LD50
+#' invest(mod, y0 = 0.5)
+#' invest(mod, y0 = 0.5, interval = "Wald")
+#' 
+#' #
+#' # Nasturtium example (nonlinear least-squares with replication)
+#' #
+#' 
+#' # Log-logistic model
+#' mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+#'            start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+#'            data = nasturtium)
+#' plotFit(mod, lwd.fit = 2)
+#'            
+#' # Compute approximate 95% calibration intervals
+#' invest(mod, y0 = c(309, 296, 419), interval = "inversion")
+#' invest(mod, y0 = c(309, 296, 419), interval = "Wald")  
+#' 
+#' # Bootstrap calibration intervals. In general, nsim should be as large as 
+#' # reasonably possible (say, nsim = 9999).
+#' boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
+#'               nsim = 999, seed = 101)
+#' boo  # print bootstrap summary
+#' plot(boo)  # plot results
 invest <- function(object, ...) {
   UseMethod("invest")
 } 
 
-##' @rdname invest
-##' @export
-##' @method invest lm
+
+#' @rdname invest
+#' @export
+#' @method invest lm
 invest.lm <- function(object, y0, 
                       interval = c("inversion", "Wald", "percentile", "none"), 
                       level = 0.95, mean.response = FALSE, data, 
@@ -144,7 +145,7 @@ invest.lm <- function(object, y0,
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
                       adjust = c("none", "Bonferroni"), k,  ...) {
   
-  ## Extract data, variable names, etc.
+  # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
@@ -153,7 +154,7 @@ invest.lm <- function(object, y0,
   if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  ## Set up for inverse estimation
+  # Set up for inverse estimation
   m <- length(y0)  # number of unknowns 
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean unknown
@@ -166,13 +167,13 @@ invest.lm <- function(object, y0,
   var_pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
   rat <- var_pooled / var1  # right variance?
   
-  ## Calculate point estimate by inverting fitted model
+  # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname)) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
-  ## Provide (informative) error message if point estimate is not found
+  # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
     stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
@@ -181,22 +182,22 @@ invest.lm <- function(object, y0,
          call. = FALSE)
   }
   
-  ## Return point estimate only
+  # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
   
-  ## Bootstrap intervals -------------------------------------------------------
+  # Bootstrap intervals -------------------------------------------------------
   if (interval == "parametric") {
     
-    ## Sanity check
+    # Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
     
-    ## Set up progress bar (if requested)
+    # Set up progress bar (if requested)
     if (progress) { 
       pb <- txtProgressBar(min = 0, max = nsim, style = 3)
     }
     
-    ## Initialize random number generator
+    # Initialize random number generator
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
       runif(1)
     if (is.null(seed)) 
@@ -208,7 +209,7 @@ invest.lm <- function(object, y0,
       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
     
-    ## Simulate new response vectors
+    # Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
     boot.type <- match.arg(boot.type)
@@ -218,21 +219,21 @@ invest.lm <- function(object, y0,
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
     }
     
-    ## Bootstrap function
+    # Bootstrap function
     x0Fun <- function(i) {
       
-      ## Update model using simulated response data
+      # Update model using simulated response data
       boot_data <- eval(object$call$data)  # copy data
       boot_data[, yname] <- ss[[i]]  # simulated response vector
       boot_object <- tryCatch(update(object, data = boot_data),
                               error = function(e) NULL)
       
-      ## If updating the model fails, then return value is NA
+      # If updating the model fails, then return value is NA
       if (is.null(boot_object)) {
         ret <- NA
       } else {
         
-        ## Simulate new response (different from simulated response vector)
+        # Simulate new response (different from simulated response vector)
         if (mean.response) {  # regulation
           y0_star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
@@ -243,27 +244,27 @@ invest.lm <- function(object, y0,
           }
         }
         
-        ## Calculate point estimate
+        # Calculate point estimate
         ret <- tryCatch(uniroot(function(x) {
           predict(boot_object, newdata = makeData(x, xname)) - mean(y0_star)
         }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
         error = function(e) NA)
       }
       
-      ## Update progress bar
+      # Update progress bar
       if (progress) { 
         setTxtProgressBar(pb, i) 
       }
       
-      ## Return estimate
+      # Return estimate
       ret
       
     }
     
-    ## Calculate bootstrap replicates
+    # Calculate bootstrap replicates
     x0_star <- sapply(seq_len(nsim), x0Fun)
     
-    ## Check for errors and return the runs that did not fail
+    # Check for errors and return the runs that did not fail
     if (AnyNA(x0_star)) {
       num_fail <- sum(is.na(x0_star))
       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
@@ -274,11 +275,11 @@ invest.lm <- function(object, y0,
       num_fail <- NULL
     }
     
-    ## Percentile interval
+    # Percentile interval
     perc <- unname(quantile(x0_star, probs = c((1-level)/2, (1+level)/2)))
         
-    ## Create and return a bootCal object (essentially a list that can later be 
-    ## converted to an object of class boot)
+    # Create and return a bootCal object (essentially a list that can later be 
+    # converted to an object of class boot)
     res <- list("estimate" = x0_est,   # original estimate
                 "lower"    = perc[1],  # lower percentile
                 "upper"    = perc[2],  # upper percentile
@@ -288,13 +289,13 @@ invest.lm <- function(object, y0,
                 "nsim"     = nsim,     # number of simulations
                 "level"    = level,    # desired confidence level
                 "interval" = interval)  # type of interval requested
-    class(res) = c("calibrate", "bootCal")
+    class(res) = c("invest", "bootCal")
     attr(res, "bootFail") <- num_fail
     return(res)
      
   }
   
-  ## Critical value for confidence interval computations
+  # Critical value for confidence interval computations
   adjust <- match.arg(adjust)
   crit <- if (adjust == "Bonferroni" && m == 1) {
             qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
@@ -302,10 +303,10 @@ invest.lm <- function(object, y0,
             qt((level+1) / 2, n+m-p-1)  # no adjustment
           }
   
-  ## inversion interval --------------------------------------------------------
+  # inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
     
-    ## Inversion function
+    # Inversion function
     inversionFun <- function(x) {
       pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else var_pooled/m + 
@@ -313,14 +314,14 @@ invest.lm <- function(object, y0,
       (eta - pred$fit)^2/denom - crit^2
     }
     
-    ## Compute lower and upper confidence limits (i.e., the roots of the 
-    ## inversion function)
+    # Compute lower and upper confidence limits (i.e., the roots of the 
+    # inversion function)
     lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     upr <- try(uniroot(inversionFun, interval = c(x0_est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     
-    ## Provide (informative) error message if confidence limits not found
+    # Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
@@ -336,17 +337,17 @@ invest.lm <- function(object, y0,
            call. = FALSE)
     }
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = lwr, 
                 "upper" = upr, 
                 "interval" = interval)
   } 
   
-  ## Wald interval -------------------------------------------------------------
+  # Wald interval -------------------------------------------------------------
   if (interval == "Wald") { 
     
-    ## Function of parameters whose gradient is required
+    # Function of parameters whose gradient is required
     object_copy <- object # FIXME: Is a copy really needed?
     dmFun <- function(params) {
       if (mean.response) {
@@ -361,7 +362,7 @@ invest.lm <- function(object, y0,
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
-    ## Variance-covariane matrix
+    # Variance-covariane matrix
     if (mean.response) {
       params <- coef(object)
       covmat <- vcov(object)
@@ -372,11 +373,11 @@ invest.lm <- function(object, y0,
       covmat[1:p, 1:p] <- vcov(object)
     }
     
-    ## Calculate gradient, and return standard error
+    # Calculate gradient, and return standard error
     gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = x0_est - crit * se, 
                 "upper" = x0_est + crit * se, 
@@ -384,24 +385,25 @@ invest.lm <- function(object, y0,
                 "interval" = interval)
   }
   
-  ## Assign class label and return results
-  class(res) <- "calibrate"
+  # Assign class label and return results
+  class(res) <- "invest"
   res
   
 }
 
-##' @rdname invest
-##' @export
-##' @method invest glm
+
+#' @rdname invest
+#' @export
+#' @method invest glm
 invest.glm <- function(object, y0, 
                        interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, lower, upper, data,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, ...) {
   
-  ## NOTE: Currently, this function only works for the case 
-  ##       mean.response = TRUE. 
+  # NOTE: Currently, this function only works for the case 
+  #       mean.response = TRUE. 
   
-  ## Extract data, variable names, etc.
+  # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
@@ -409,16 +411,16 @@ invest.glm <- function(object, y0,
   if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  ## Calculations should be done on the "link" scale!
+  # Calculations should be done on the "link" scale!
   eta <- family(object)$linkfun(y0)
   
-  ## Calculate point estimate by inverting fitted model
+  # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname), type = "link") - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
-  ## Provide (informative) error message if point estimate is not found
+  # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
     stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
@@ -427,41 +429,41 @@ invest.glm <- function(object, y0,
          call. = FALSE)
   }
   
-  ## Return point estimate only
+  # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
   
-  ## Stop and print error if user requested bootstrap intervals
+  # Stop and print error if user requested bootstrap intervals
   if (interval == "percentile") {
     stop("Bootstrap intervals not available for 'glm' objects.", call. = FALSE)
   }
   
-  ## Critical value
+  # Critical value
   crit <- qnorm((level + 1) / 2)  # quantile from standard normal
   
-  ## Inversion interval
-  ##
-  ## Based on exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by 
-  ## Alan Agresti.
+  # Inversion interval
+  #
+  # Based on exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by 
+  # Alan Agresti.
   if (interval == "inversion") { 
     
     covmat <- vcov(object)
     
-    ## Inversion function
+    # Inversion function
     inversionFun <- function(x) {
       pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE,
                       type = "link")
       ((eta - pred$fit) ^ 2) / (pred$se.fit ^ 2) - crit^2
     }
     
-    ## Compute lower and upper confidence limits (i.e., the roots of the 
-    ## inversion function)
+    # Compute lower and upper confidence limits (i.e., the roots of the 
+    # inversion function)
     lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     upr <- try(uniroot(inversionFun, interval = c(x0_est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     
-    ## Provide (informative) error message if confidence limits not found
+    # Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
@@ -477,7 +479,7 @@ invest.glm <- function(object, y0,
            call. = FALSE)
     }
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = lwr, 
                 "upper" = upr, 
@@ -485,10 +487,10 @@ invest.glm <- function(object, y0,
     
   }
   
-  ## Wald interval -------------------------------------------------------------
+  # Wald interval -------------------------------------------------------------
   if (interval == "Wald") { 
     
-    ## Function of parameters whose gradient is required
+    # Function of parameters whose gradient is required
     object_copy <- object # FIXME: Is a copy really needed?
     dmFun <- function(params) {
       object_copy$coefficients <- params
@@ -498,31 +500,32 @@ invest.glm <- function(object, y0,
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
-    ## Variance-covariane matrix
+    # Variance-covariane matrix
     params <- coef(object)
     covmat <- vcov(object)
     
-    ## Calculate gradient, and return standard error
+    # Calculate gradient, and return standard error
     gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = x0_est - crit * se, 
                 "upper" = x0_est + crit * se, 
-                "se" = se,  ## FIXME: How should this get transformed?
+                "se" = se,  # FIXME: How should this get transformed?
                 "interval" = interval)
   }
   
-  ## Assign class label and return results
-  class(res) <- "calibrate"
+  # Assign class label and return results
+  class(res) <- "invest"
   res
   
 }
 
-##' @rdname invest
-##' @export
-##' @method invest nls
+
+#' @rdname invest
+#' @export
+#' @method invest nls
 invest.nls <- function(object, y0, 
                        interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, mean.response = FALSE, data, 
@@ -531,14 +534,14 @@ invest.nls <- function(object, y0,
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        adjust = c("none", "Bonferroni"), k, ...) {
   
-  ## No support for the Golub-Pereyra algorithm for partially linear 
-  ## least-squares models
+  # No support for the Golub-Pereyra algorithm for partially linear 
+  # least-squares models
   if (object$call$algorithm == "plinear") {
     stop(paste("The Golub-Pereyra algorithm for partially linear least-squares 
                models is currently not supported."))
   }
   
-  ## Extract data, variable names, etc.
+  # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
@@ -547,7 +550,7 @@ invest.nls <- function(object, y0,
   if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  ## Set up for inverse estimation
+  # Set up for inverse estimation
   m <- length(y0)  # number of unknowns 
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean response
@@ -555,13 +558,13 @@ invest.nls <- function(object, y0,
   p <- length(coef(object))  # number of parameters
   var_pooled <- Sigma(object)^2  # residual variance
   
-  ## Calculate point estimate by inverting fitted model
+  # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname)) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
-  ## Provide (informative) error message if point estimate is not found
+  # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
     stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
@@ -570,22 +573,22 @@ invest.nls <- function(object, y0,
          call. = FALSE)
   }
   
-  ## Return point estimate only
+  # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
   
-  ## Bootstrap -----------------------------------------------------------------
+  # Bootstrap -----------------------------------------------------------------
   if (interval == "percentile") {
     
-    ## Sanity check
+    # Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
     
-    ## Set up progress bar (if requested)
+    # Set up progress bar (if requested)
     if (progress) { 
       pb <- txtProgressBar(min = 0, max = nsim, style = 3)
     }
     
-    ## Initialize random number generator
+    # Initialize random number generator
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
       runif(1)
     if (is.null(seed)) 
@@ -597,7 +600,7 @@ invest.nls <- function(object, y0,
       on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
     
-    ## Simulate new response vectors
+    # Simulate new response vectors
     ftd <- fitted(object)  # fitted values
     res <- residuals(object) # redisuals
     boot.type <- match.arg(boot.type)
@@ -607,21 +610,21 @@ invest.nls <- function(object, y0,
       ss <- replicate(nsim, ftd + sample(res, replace = TRUE), simplify = FALSE)
     }
     
-    ## Function to calculate inverse estimate
+    # Function to calculate inverse estimate
     x0Fun <- function(i) {
       
-      ## Update model using simulated response data
+      # Update model using simulated response data
       boot_data <- eval(object$call$data)  # copy data
       boot_data[, yname] <- ss[[i]]  # simulated response vector
       boot_object <- tryCatch(update(object, data = boot_data),
                               error = function(e) NULL)
       
-      ## If updating the model fails, then return value is NA
+      # If updating the model fails, then return value is NA
       if (is.null(boot_object)) {
         ret <- NA
       } else {
         
-        ## Simulate new response (different from simulated response vector)
+        # Simulate new response (different from simulated response vector)
         if (mean.response) {  # regulation
           y0_star <- y0  # hold constant in bootstrap replications
         } else {  # calibration
@@ -632,27 +635,27 @@ invest.nls <- function(object, y0,
           }
         }
         
-        ## Calculate point estimate
+        # Calculate point estimate
         ret <- tryCatch(uniroot(function(x) {
             predict(boot_object, newdata = makeData(x, xname)) - mean(y0_star)
           }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
           error = function(e) NA)
       }
       
-      ## Update progress bar
+      # Update progress bar
       if (progress) { 
         setTxtProgressBar(pb, i) 
       }
       
-      ## Return estimate
+      # Return estimate
       ret
       
     }
     
-    ## Calculate bootstrap replicates
+    # Calculate bootstrap replicates
     x0_star <- sapply(seq_len(nsim), x0Fun)
     
-    ## Check for errors and return the runs that did not fail
+    # Check for errors and return the runs that did not fail
     if (AnyNA(x0_star)) {
       num_fail <- sum(is.na(x0_star))
       warning("some bootstrap runs failed (", num_fail, "/", nsim, 
@@ -663,11 +666,11 @@ invest.nls <- function(object, y0,
       num_fail <- NULL
     }
 
-    ## Percentile interval
+    # Percentile interval
     perc <- unname(quantile(x0_star, probs = c((1-level)/2, (1+level)/2)))
     
-    ## Create and return a bootCal object (essentially a list that can later be 
-    ## converted to an object of class boot)
+    # Create and return a bootCal object (essentially a list that can later be 
+    # converted to an object of class boot)
     res <- list("estimate" = x0_est,   # original estimate
                 "lower"    = perc[1],  # lower percentile
                 "upper"    = perc[2],  # upper percentile
@@ -677,13 +680,13 @@ invest.nls <- function(object, y0,
                 "nsim"     = nsim,     # number of simulations
                 "level"    = level,    # desired confidence level
                 "interval" = interval)  # type of interval requested
-    class(res) = c("calibrate", "bootCal")
+    class(res) = c("invest", "bootCal")
     attr(res, "bootFail") <- num_fail
     return(res)
 
   }
   
-  ## Critical value for confidence interval computations
+  # Critical value for confidence interval computations
   adjust <- match.arg(adjust)
   crit <- if (adjust == "Bonferroni" && m == 1) {
     qt((level + 2*k - 1) / (2*k), n+m-p-1)  # Bonferroni adjustment
@@ -691,24 +694,24 @@ invest.nls <- function(object, y0,
     qt((level + 1) / 2, n+m-p-1)  # no adjustment
   }
 
-  ## Inversion interval --------------------------------------------------------
+  # Inversion interval --------------------------------------------------------
   if (interval == "inversion") {
     
-    ## Inversion function
+    # Inversion function
     inversionFun <- function(x) {
-      pred <- predict2(object, newdata = makeData(x, xname)) 
+      pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE) 
       denom <- if (mean.response) pred$se.fit^2 else (var_pooled/m + pred$se.fit^2)
       (eta - pred$fit)^2/denom - crit^2
     }
     
-    ## Compute lower and upper confidence limits (i.e., the roots of the 
-    ## inversion function)
+    # Compute lower and upper confidence limits (i.e., the roots of the 
+    # inversion function)
     lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     upr <- try(uniroot(inversionFun, interval = c(x0_est, upper), tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     
-    ## Provide (informative) error message if confidence limits not found
+    # Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
@@ -724,7 +727,7 @@ invest.nls <- function(object, y0,
            call. = FALSE)
     }
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = lwr, 
                 "upper" = upr, 
@@ -734,7 +737,7 @@ invest.nls <- function(object, y0,
   # Wald interval --------------------------------------------------------------
   if (interval == "Wald") { 
     
-    ## Function of parameters whose gradient is required
+    # Function of parameters whose gradient is required
     object_copy <- object # FIXME: Is a copy really needed?
     dmFun <- function(params) {
       if (mean.response) {
@@ -749,7 +752,7 @@ invest.nls <- function(object, y0,
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
-    ## Variance-covariance matrix
+    # Variance-covariance matrix
     if (mean.response) {
       params <- coef(object)
       covmat <- vcov(object)
@@ -760,11 +763,11 @@ invest.nls <- function(object, y0,
       covmat[1:p, 1:p] <- vcov(object)
     }
     
-    ## Calculate gradient, and return standard error
+    # Calculate gradient, and return standard error
     gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = x0_est - crit * se, 
                 "upper" = x0_est + crit * se, 
@@ -772,15 +775,16 @@ invest.nls <- function(object, y0,
                 "interval" = interval)
   }
   
-  ## Assign class label and return results
-  class(res) <- "calibrate"
+  # Assign class label and return results
+  class(res) <- "invest"
   res
   
 }
 
-##' @rdname invest
-##' @export
-##' @method invest lme
+
+#' @rdname invest
+#' @export
+#' @method invest lme
 invest.lme <- function(object, y0, 
                        interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, mean.response = FALSE, data, lower, upper, 
@@ -788,7 +792,7 @@ invest.lme <- function(object, y0,
                        ...) 
 {
   
-  ## Extract data, variable names, etc.
+  # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else object$data
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
@@ -796,7 +800,7 @@ invest.lme <- function(object, y0,
   if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  ## Set up for inverse estimation
+  # Set up for inverse estimation
 #   if(m > 1) stop("Only one response value allowed.")
   m <- length(y0)
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
@@ -806,17 +810,17 @@ invest.lme <- function(object, y0,
   p <- length(fixef(object))
 #   res.var <- Sigma(object)^2  # residual variance
   
-  ## Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
+  # Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
   if (missing(q1)) q1 <- qnorm((1-level) / 2)
   if (missing(q2)) q2 <- qnorm((1+level) / 2)
   
-  ## Calculate point estimate by inverting fitted model
+  # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     predict(object, newdata = makeData(x, xname), level = 0) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
-  ## Provide (informative) error message if point estimate is not found
+  # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
     stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
@@ -825,24 +829,24 @@ invest.lme <- function(object, y0,
          call. = FALSE)
   }
   
-  ## Return point estimate only
+  # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") return(x0_est)
   
-  ## Stop and print error if user requested bootstrap intervals
+  # Stop and print error if user requested bootstrap intervals
   if (interval == "percentile") {
     stop("Bootstrap intervals not available for 'lme' objects.", call. = FALSE)
   }
 
-  ## Estimate variance of new response
+  # Estimate variance of new response
   if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0_est, xname))
   
-  ## Inversion interval --------------------------------------------------------
+  # Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
     
-    ## Inversion function
+    # Inversion function
     inversionFun <- function(x, bound = c("lower", "upper")) {
-      pred <- predict2(object, newdata = makeData(x, xname), se.fit = TRUE)
+      pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
       bound <- match.arg(bound)
       if (bound == "upper") {
@@ -852,8 +856,8 @@ invest.lme <- function(object, y0,
       }
     }
     
-    ## Compute lower and upper confidence limits (i.e., the roots of the 
-    ## inversion function)
+    # Compute lower and upper confidence limits (i.e., the roots of the 
+    # inversion function)
     lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), 
                        bound = "lower", tol = tol, maxiter = maxiter)$root, 
                silent = TRUE)
@@ -861,7 +865,7 @@ invest.lme <- function(object, y0,
                        bound = "upper", tol = tol, maxiter = maxiter)$root, 
                silent = TRUE)
     
-    ## Provide (informative) error message if confidence limits not found
+    # Provide (informative) error message if confidence limits not found
     if (inherits(lwr, "try-error")) {
       stop(paste("Lower confidence limit not found in the search interval (", 
                  lower, ", ", upper, 
@@ -877,7 +881,7 @@ invest.lme <- function(object, y0,
            call. = FALSE)
     }
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = lwr, 
                 "upper" = upr, 
@@ -885,10 +889,10 @@ invest.lme <- function(object, y0,
     
   }
   
-  ## Wald interval -------------------------------------------------------------
+  # Wald interval -------------------------------------------------------------
   if (interval == "Wald") { 
     
-    ## Function of parameters whose gradient is required
+    # Function of parameters whose gradient is required
     dmFun <- function(params) {
       fun <- function(x) {
         X <- model.matrix(eval(object$call$fixed)[-2], 
@@ -903,7 +907,7 @@ invest.lme <- function(object, y0,
               maxiter = maxiter)$root
     }
     
-    ## Variance-covariance matrix
+    # Variance-covariance matrix
     if (mean.response) {
       params <- fixef(object)
       covmat <- vcov(object)
@@ -914,11 +918,11 @@ invest.lme <- function(object, y0,
       covmat[1:p, 1:p] <- vcov(object)
     }
     
-    ## Calculate gradient, and return standard error
+    # Calculate gradient, and return standard error
     gv <- attr(numericDeriv(quote(dmFun(params)), "params"), "gradient")
     se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
     
-    ## Store results in a list
+    # Store results in a list
     res <- list("estimate" = x0_est, 
                 "lower" = x0_est - q2 * se, 
                 "upper" = x0_est + q2 * se,
@@ -927,58 +931,21 @@ invest.lme <- function(object, y0,
     
   } 
   
-  ## Assign class label and return results
-  class(res) <- "calibrate"
+  # Assign class label and return results
+  class(res) <- "invest"
   res
   
 }
 
-##' @rdname invest
-##' @export
-##' @method invest rlm
-invest.rlm <- function(object, y0, mean.response = FALSE, data, lower, upper, 
-                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
-                       ...) {
-  
-  ## Extract data, variable names, etc.
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
-  
-  ## Set up for inverse estimation
-  m <- length(y0)  # number of unknowns 
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
-  eta <- mean(y0)  # mean unknown
-  
-  ## Calculate point estimate by inverting fitted model
-  x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname)) - eta
-  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-  silent = TRUE)
-  
-  ## Provide (informative) error message if point estimate is not found
-  if (inherits(x0_est, "try-error")) {
-    stop(paste("Point estimate not found in the search interval (", lower, 
-               ", ", upper, "). ", 
-               "Try tweaking the values of lower and upper. ",
-               "Use plotFit for guidance.", sep = ""), 
-         call. = FALSE)
-  }
-  
-}
 
-##' @rdname invest
-##' @export
-##' @method invest lqs
+#' @rdname invest
+#' @export
+#' @method invest lqs
 invest.lqs <- function(object, y0, data, lower, upper, 
                        tol = .Machine$double.eps^0.25, maxiter = 1000, 
                        ...) {
 
-  ## Extract data, variable names, etc.
+  # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
@@ -987,18 +954,13 @@ invest.lqs <- function(object, y0, data, lower, upper,
   if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
   if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  ## Set up for inverse estimation
-  m <- length(y0)  # number of unknowns 
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
-  eta <- mean(y0)  # mean unknown
-  
-  ## Calculate point estimate by inverting fitted model
+  # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname)) - eta
+    predict(object, newdata = makeData(x, xname)) - mean(y0)
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
-  ## Provide (informative) error message if point estimate is not found
+  # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
     stop(paste("Point estimate not found in the search interval (", lower, 
                ", ", upper, "). ", 
@@ -1009,24 +971,68 @@ invest.lqs <- function(object, y0, data, lower, upper,
 
 }
 
-##' Plots of the Output of a Bootstrap Calibration Simulation
-##' 
-##' This takes a bootstrap calibration object and produces plots for the 
-##' bootstrap replicates of the inverse estimate.
-##' 
-##' @rdname plot.bootCal
-##' @export
-##' @method plot bootCal
-##' 
-##' @param x An object that inherits from class \code{"bootCal"}.
-##' @param ... Additional optional arguments. At present, no optional arguments 
-##'            are used.
+
+#' @rdname invest
+#' @export
+#' @method invest rlm
+invest.rlm <- function(object, y0, mean.response = FALSE, data, lower, upper, 
+                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
+                       ...) {
+  
+  # Extract data, variable names, etc.
+  .data  <- if (!missing(data)) data else eval(object$call$data, 
+                                               envir = parent.frame())
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  
+  # Calculate point estimate by inverting fitted model
+  x0_est <- try(uniroot(function(x) {
+    predict(object, newdata = makeData(x, xname)) - mean(y0)
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
+  # Provide (informative) error message if point estimate is not found
+  if (inherits(x0_est, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower, 
+               ", ", upper, "). ", 
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  }
+  
+}
+
+
+#' @keywords internal
+print.invest <- function(x, digits = 4, ...) {
+  if (x$interval == "inversion") print(round(unlist(x[1:3]), digits))
+  if (x$interval == "Wald") print(round(unlist(x[1:4]), digits))
+  if (x$interval == "percentile") print(round(unlist(x[1:5]), digits))
+  invisible(x)
+} 
+
+
+#' Plots of the Output of a Bootstrap Calibration Simulation
+#' 
+#' This takes a bootstrap calibration object and produces plots for the 
+#' bootstrap replicates of the inverse estimate.
+#' 
+#' @rdname plot.bootCal
+#' @export
+#' @method plot bootCal
+#' 
+#' @param x An object that inherits from class \code{"bootCal"}.
+#' @param ... Additional optional arguments. At present, no optional arguments 
+#'            are used.
 plot.bootCal <- function(x, ...) {
   
   t <- x$bootreps  # bootstrap replicates
   t0 <- x$estimate  # original estimate
   
-  ## Calculate number of histogram breaks (better than default)
+  # Calculate number of histogram breaks (better than default)
   if (!is.null(t0)) {
     nclass <- min(max(ceiling(length(t)/25), 10), 100)
     rg <- range(t)
@@ -1041,7 +1047,7 @@ plot.bootCal <- function(x, ...) {
     bks <- t0 + (-n1:n2) * lc
   }
   
-  ## Plots
+  # Plots
   par(mfrow = c(1, 2))
   hist(t, breaks = bks, probability = TRUE, main = "",
        xlab = "Bootstrap replicate")

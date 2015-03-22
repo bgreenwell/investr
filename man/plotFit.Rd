@@ -134,15 +134,15 @@ Confidence/prediction bands for nonlinear regression (i.e., objects of class
 from the \code{nlstools} package.
 }
 \examples{
-##
-## A nonlinear regression example
-##
+#
+# A nonlinear regression example
+#
 data(Puromycin, package = "datasets")
 Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
                 start = c(Vm = 200, K = 0.05))
 plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE,
-        col.conf = "darkgrey", col.pred = "lightgrey")
+        col.conf = "skyblue4", col.pred = "lightskyblue2")
 }
 \references{
 Bates, D. M., and Watts, D. G. (2007)

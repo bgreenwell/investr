@@ -61,7 +61,7 @@ used in the fitting process.}
 contain \code{NA}s.}
 }
 \value{
-An object of class \code{"calibrate"} containing the following
+An object of class \code{"invest"} containing the following
         components:
 \itemize{
   \item \code{estimate} The estimate of x0.
@@ -85,11 +85,11 @@ simple linear regression model with normal errors, closed-form expressions
 exist which are utilized by the function \code{calibrate}.
 }
 \examples{
-##
-## Arsenic example (simple linear regression with replication)
-##
+#
+# Arsenic example (simple linear regression with replication)
+#
 
-## Inverting a prediction interval for an individual response
+# Inverting a prediction interval for an individual response
 arsenic.lm <- lm(measured ~ actual, data = arsenic)
 plotFit(arsenic.lm, interval = "prediction", shade = TRUE,
         col.pred = "lightblue")
@@ -99,11 +99,11 @@ segments(cal$estimate, 3, cal$estimate, par()$usr[3])
 arrows(cal$lower, 3, cal$lower, par()$usr[3])
 arrows(cal$upper, 3, cal$upper, par()$usr[3])
 
-##
-## Crystal weight example (simple linear regression)
-##
+#
+# Crystal weight example (simple linear regression)
+#
 
-## Inverting a confidence interval for the mean response
+# Inverting a confidence interval for the mean response
 crystal.lm <- lm(weight ~ time, data = crystal)
 plotFit(crystal.lm, interval = "confidence", shade = TRUE,
         col.conf = "lightblue")
@@ -114,7 +114,7 @@ segments(cal$estimate, 8, cal$estimate, par()$usr[3])
 arrows(cal$lower, 8, cal$lower, par()$usr[3])
 arrows(cal$upper, 8, cal$upper, par()$usr[3])
 
-## Wald interval and approximate standard error based on the delta method
+# Wald interval and approximate standard error based on the delta method
 calibrate(crystal.lm, y0 = 8, interval = "Wald", mean.response = TRUE)
 }
 \references{

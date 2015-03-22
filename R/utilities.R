@@ -1,9 +1,9 @@
-##' 'Not Available' / Missing Values
-##' 
-##' A simple version of the newer \code{anyNA} function which essentially
-##' implements any(is.na(x)).
-##' 
-##' @keywords internal
+#' 'Not Available' / Missing Values
+#' 
+#' A simple version of the newer \code{anyNA} function which essentially
+#' implements any(is.na(x)).
+#' 
+#' @keywords internal
 AnyNA <- function(x) {
 #   if(getRversion() >= "3.1.0") {
 #     return(anyNA(x))  # use built-in function if available
@@ -13,12 +13,12 @@ AnyNA <- function(x) {
   any(is.na(x))
 }
   
-##' Extract residual standard error
-##' 
-##' Extract residual standard error from a fitted model. (For internal use 
-##' only.)
-##' 
-##' @keywords internal
+#' Extract residual standard error
+#' 
+#' Extract residual standard error from a fitted model. (For internal use 
+#' only.)
+#' 
+#' @keywords internal
 Sigma <- function(object, ...) {
   UseMethod("Sigma")
 } 
@@ -26,23 +26,30 @@ Sigma.lm <- function(object, ...) summary(object)$sigma
 Sigma.nls <- function(object, ...) summary(object)$sigma
 Sigma.lme <- function(object, ...) object$sigma
 
-##' Make new data frame
-##' 
-##' Create a new data frame from a specified x value that has the same structure 
-##' as the data frame used to create \code{object}. (For internal use only.)
-##' 
-##' @keywords internal
+#' Make new data frame
+#' 
+#' Create a new data frame from a specified x value that has the same structure 
+#' as the data frame used to create \code{object}. (For internal use only.)
+#' 
+#' @keywords internal
 makeData <- function(x, label) {
   setNames(data.frame(x), label)
 }
 
-##' Construct design matrix for random effects
-##'
-##' Create a random effects design matrix from \code{newdata} based on a fitted 
-##' model. (For internal use only.)
-##' 
-##' @rdname makeZ
-##' @keywords internal
+
+#' Design Matrix for Fixed and Random Effects
+#'
+#' Construct the fixed or random effects design matrix from a fitted model using 
+#' \code{newdata}. (For internal use only.)
+#' 
+#' @keywords internal
+makeX <- function(object, newdata) {
+  model.matrix(eval(object$call$fixed)[-2], data = newdata)
+}
+
+
+#' @rdname makeX
+#' @keywords internal
 makeZ <- function(object, newdata) {
   Q <- object$dims$Q  # number of grouping levels
   mCall <- object$call  # list containing image of the nlme call
@@ -55,22 +62,12 @@ makeZ <- function(object, newdata) {
   model.matrix(reSt, dataMix)
 }
 
-##' Construct design matrix for fixed effects
-##'
-##' Create a fixed effects design matrix from \code{newdata} based on a fitted 
-##' model. (For internal use only.)
-##' 
-##' @keywords internal
-makeX <- function(object, newdata) {
-  model.matrix(eval(object$call$fixed)[-2], data = newdata)
-}
-
-##' Evaluate response variance
-##'
-##' Evaluate response variance at a given value of the predictor variable. (For 
-##' internal use only.)
-##' 
-##' @keywords internal
+#' Evaluate response variance
+#'
+#' Evaluate response variance at a given value of the predictor variable. (For 
+#' internal use only.)
+#' 
+#' @keywords internal
 varY <- function(object, newdata) {
   Zmat <- makeZ(object, newdata)  # random effects design matrix
   Gmat <- getVarCov(object)  # random effects variance-covariance matrix

@@ -1,7 +1,7 @@
-##' @keywords internal
+#' @keywords internal
 simulate.nls <- function (object, nsim = 1, seed = NULL, ...) {
   
-  ## Initialize random number generator
+  # Initialize random number generator
   if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
     runif(1)
   if (is.null(seed)) 
@@ -13,7 +13,7 @@ simulate.nls <- function (object, nsim = 1, seed = NULL, ...) {
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
   }
   
-  ## Simulate new response values
+  # Simulate new response values
   ftd <- fitted(object)  # fitted values
   nm <- names(ftd)  # row names
   n <- length(ftd)  # number of observations
@@ -24,7 +24,7 @@ simulate.nls <- function (object, nsim = 1, seed = NULL, ...) {
   }
   val <- ftd + rnorm(ntot, sd = sqrt(vars))  # simulated response values
   
-  ## Return simulated response values with appropriate dimension, class, etc.
+  # Return simulated response values with appropriate dimension, class, etc.
   if (!is.list(val)) {
     dim(val) <- c(n, nsim)  # assign dimensions (should b n-by-nsim)
     val <- as.data.frame(val)  # convert to data frame
