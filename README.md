@@ -6,10 +6,10 @@ A detailed introduction to investr has been published in The R Journal: "investr
 
 As of right now, `investr` supports (univariate) inverse estimation with objects of class:
 
-* `lm` --- linear models
-* `glm` --- generalized linear models
-* `nls` --- nonlinear least-squares models
-* `lme` --- linear mixed-effects models (fit using the `nlme` package)
+* `lm` - linear models
+* `glm` - generalized linear models
+* `nls` - nonlinear least-squares models
+* `lme` - linear mixed-effects models (fit using the `nlme` package)
 
 ## Installation
 The package is currently listed on CRAN and can easily be installed:
@@ -26,7 +26,7 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
 
 ## Examples
 
-### Estimating the 50% lethal dose in binomial regression
+### Dobson's Beetle Data
 
 In binomial regression, the estimated lethal dose corresponding to a specif probability $p$ of death is often referred to as $LD_p$. `invest` obtains an estimate of $LD_p$ by inverting the fitted mean response on the link scale. Similarly, by default, a confidence interval for $LD_p$ is obtained by inverting a confidence interval for the response on the link scale.
 ```r
@@ -55,11 +55,14 @@ invest(binom_fit, y0 = 0.5, interval = "Wald")
 # estimate    lower    upper       se 
 #   1.7788   1.7709   1.7866   0.0040
 
-## Compare to 
+## The MASS package function dose.p works too 
 MASS::dose.p(binom_fit, p = 0.5)
+
+#              Dose         SE
+# p = 0.5: 1.778753 0.00400654
 ```
 
-### Nonlinear calibration --- bioassay on nasturtium
+### Bioassay on Nasturtium
 
 The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
 log-logistic model describes the data well:
