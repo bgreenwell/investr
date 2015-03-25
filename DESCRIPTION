@@ -16,8 +16,8 @@ Suggests:
     testthat
 Imports:
     nlme
-Date: 2014-04-18
+Date: 2015-03-25
 License: GPL (>= 2)
-URL: https://github.com/w108bmg/investr
+URL: https://github.com/bgreenwell/investr
 LazyLoad: true
 LazyData: true
