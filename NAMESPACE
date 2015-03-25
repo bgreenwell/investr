@@ -13,8 +13,6 @@ S3method(invest, lm)
 S3method(invest, nls) 
 S3method(invest, glm)  # new (experimental) 
 S3method(invest, lme)  # new (experimental)  
-S3method(invest, rlm)  # new (experimental)  
-S3method(invest, lqs)  # new (experimental)  
 S3method(plotFit, lm)    
 S3method(plotFit, nls) 
 S3method(plotFit, glm)  # new (experimental) 
@@ -24,7 +22,6 @@ S3method(print, invest)
 S3method(plot, bootCal)
 
 ## Recommended packages
-importFrom(MASS, lqs, rlm)
 importFrom(nlme, fixef, asOneFormula, getVarCov)
 
 

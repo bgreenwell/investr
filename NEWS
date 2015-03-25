@@ -6,18 +6,18 @@ Changes for version 1.0
 * Fixed roxygen documentation
 
 Changes for version 1.0.1
-====================
+=========================
 * A few minor bug fixes
 * Slightly better documentation
 
 Changes for version 1.1.0
-====================
+=========================
 * invest now accepts objects of class 'lme' (experimental)
 * A few minor bug fixes and code improvements
 * Added more tests
 
 Changes for version 1.1.1
-====================
+=========================
 * Updated citation file
 * Minor code changes
 * plotFit should now plot models with transformed responses correctly
@@ -25,19 +25,20 @@ Changes for version 1.1.1
 * Added more tests
 
 Changes for version 1.1.2
-====================
+=========================
 * Changed tests to satisfy CRAN check
 
 Changes for version 1.2.0
-====================
+=========================
 * Cleaned up examples
 * Added bootstrap option to invest
 
 Changes for version 1.2.1
-====================
+=========================
 * Cleaned up documentation
 * Added AnyNA function for those using older versions of R
 
 Changes for version 1.3.0
-====================
+=========================
 * invest now accepts objects of class 'glm' (experimental)
+* functions calibrate and invest now return an object of class "invest"

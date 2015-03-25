@@ -5,9 +5,7 @@
 \alias{invest.glm}
 \alias{invest.lm}
 \alias{invest.lme}
-\alias{invest.lqs}
 \alias{invest.nls}
-\alias{invest.rlm}
 \title{Calibration for Linear and Nonlinear Regression Models.}
 \usage{
 invest(object, ...)
@@ -31,12 +29,6 @@ invest(object, ...)
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald",
   "percentile", "none"), level = 0.95, mean.response = FALSE, data, lower,
   upper, q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
-
-\method{invest}{lqs}(object, y0, data, lower, upper,
-  tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
-
-\method{invest}{rlm}(object, y0, mean.response = FALSE, data, lower, upper,
-  tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
