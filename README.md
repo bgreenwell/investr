@@ -17,7 +17,7 @@ The package is currently listed on CRAN and can easily be installed:
   ## Install from CRAN
   install.packages("investr", dep = TRUE)
 ```
-The package is also part of the [ChemPhys task view](http://cran.r-project.org/web/views/ChemPhys.html) --- a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
+The package is also part of the [ChemPhys task view](http://cran.r-project.org/web/views/ChemPhys.html), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```r
   ## Install the ChemPhys task view
   install.packages("ctv")
