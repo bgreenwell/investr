@@ -103,3 +103,4 @@ boo  # print bootstrap summary
 
 plot(boo)  # plot results
 ```
+![Alt text](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_boot.png)
