@@ -73,7 +73,7 @@ log_fit <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                data = nasturtium)
 plotFit(log_fit, lwd.fit = 2)
 ```
-![Alt text](https://github.com/bgreenwell/investr/blob/master/nasturtium_plotFit?raw=true)
+![Alt text](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_plotFit.png)
 
 Three new replicates of the response (309, 296, 419) at an unknown concentration of interest ($x_0$) are measured. It is desired to estimate $x_0$.
 ```r      
