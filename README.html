@@ -72,71 +72,73 @@ img {
 <li><code>nls</code> - nonlinear least-squares models</li>
 <li><code>lme</code> - linear mixed-effects models (fit using the <code>nlme</code> package)</li>
 </ul>
-<div id="installation" class="section level2">
-<h2>Installation</h2>
+</div>
+<div id="installation" class="section level1">
+<h1>Installation</h1>
 <p>The package is currently listed on CRAN and can easily be installed:</p>
-<pre class="r"><code>  ## Install from CRAN
+<pre class="r"><code>  # Install from CRAN
   install.packages(&quot;investr&quot;, dep = TRUE)</code></pre>
 <p>The package is also part of the <a href="http://cran.r-project.org/web/views/ChemPhys.html">ChemPhys task view</a>, a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including <code>investr</code>) using the <code>ctv</code> package (Zeileis, 2005):</p>
-<pre class="r"><code>  ## Install the ChemPhys task view
+<pre class="r"><code>  # Install the ChemPhys task view
   install.packages(&quot;ctv&quot;)
   ctv::install.views(&quot;ChemPhys&quot;)</code></pre>
 </div>
-<div id="examples" class="section level2">
-<h2>Examples</h2>
-<div id="dobsons-beetle-data" class="section level3">
-<h3>Dobson’s Beetle Data</h3>
-<p>In binomial regression, the estimated lethal dose corresponding to a specif probability <span class="math">\(p\)</span> of death is often referred to as <span class="math">\(LD_p\)</span>. <code>invest</code> obtains an estimate of <span class="math">\(LD_p\)</span> by inverting the fitted mean response on the link scale. Similarly, by default, a confidence interval for <span class="math">\(LD_p\)</span> is obtained by inverting a confidence interval for the response on the link scale.</p>
+<div id="examples" class="section level1">
+<h1>Examples</h1>
+<div id="dobsons-beetle-data" class="section level2">
+<h2>Dobson’s Beetle Data</h2>
+<p>In binomial regression, the estimated lethal dose corresponding to a specif probability <span class="math">\(p\)</span> of death is often referred to as <span class="math">\(LD_p\)</span>. <code>invest</code> obtains an estimate of <span class="math">\(LD_p\)</span> by inverting the fitted mean response on the link scale. Similarly, a confidence interval for <span class="math">\(LD_p\)</span> can be obtained by inverting a confidence interval for the mean response on the link scale.</p>
 <pre class="r"><code>library(investr)
 
-## Dobson's beetle data
+# Dobson's beetle data
 head(beetle)
 
-## Binomial regression
+# Binomial regression
 binom_fit &lt;- glm(cbind(y, n-y) ~ ldose, data = beetle, 
                  family = binomial(link = &quot;cloglog&quot;))
 plotFit(binom_fit, lwd.fit = 2, cex = 1.2, pch = 21, bg = &quot;lightskyblue&quot;, 
         lwd = 2)
 
-## Estimate the 50% lethal dose
+# Estimate the 50% lethal dose
 invest(binom_fit, y0 = 0.5)
 
 # estimate    lower    upper 
 #   1.7788   1.7702   1.7862</code></pre>
-<p>To obtain an estimated standard error, we can use the Wald method instead:</p>
+<p>To obtain an estimate of the standard error, we can use the Wald method:</p>
 <pre class="r"><code>invest(binom_fit, y0 = 0.5, interval = &quot;Wald&quot;)
 
 # estimate    lower    upper       se 
 #   1.7788   1.7709   1.7866   0.0040
 
-## The MASS package function dose.p works too 
+# The MASS package function dose.p works too 
 MASS::dose.p(binom_fit, p = 0.5)
 
 #              Dose         SE
 # p = 0.5: 1.778753 0.00400654</code></pre>
 </div>
-<div id="bioassay-on-nasturtium" class="section level3">
-<h3>Bioassay on Nasturtium</h3>
+<div id="bioassay-on-nasturtium" class="section level2">
+<h2>Bioassay on Nasturtium</h2>
 <p>The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame <code>nasturtium</code> and are loaded with the package. A simple log-logistic model describes the data well:</p>
-<pre class="r"><code>## Log-logistic model
+<pre class="r"><code># Log-logistic model
 log_fit &lt;- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
                data = nasturtium)
 plotFit(log_fit, lwd.fit = 2)</code></pre>
+<p>[nasturtium_plotFit]</p>
 <p>Three new replicates of the response (309, 296, 419) at an unknown concentration of interest (<span class="math">\(x_0\)</span>) are measured. It is desired to estimate <span class="math">\(x_0\)</span>.</p>
-<pre class="r"><code>## Inversion method
+<pre class="r"><code># Inversion method
 invest(log_fit, y0 = c(309, 296, 419), interval = &quot;inversion&quot;)
 
 # estimate    lower    upper 
 #   2.2639   1.7722   2.9694
 
-## Wald method
+# Wald method
 invest(log_fit, y0 = c(309, 296, 419), interval = &quot;Wald&quot;)  
 
 # estimate    lower    upper       se 
 #   2.2639   1.6889   2.8388   0.2847</code></pre>
 <p>The intervals both rely on large sample results and normality. In practice, the bootstrap may be more reliable:</p>
-<pre class="r"><code>## Bootstrap calibration intervals (may take a few seconds)
+<pre class="r"><code># Bootstrap calibration intervals (may take a few seconds)
 boo &lt;- invest(log_fit, y0 = c(309, 296, 419), interval = &quot;percentile&quot;, 
               nsim = 9999, seed = 101, progress = TRUE)
 boo  # print bootstrap summary
@@ -145,7 +147,6 @@ boo  # print bootstrap summary
 #   2.2639   1.7890   2.9380   0.2947   0.0281
 
 plot(boo)  # plot results</code></pre>
-</div>
 </div>
 </div>
 
