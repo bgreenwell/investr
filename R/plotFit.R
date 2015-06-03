@@ -99,9 +99,20 @@ plotFit.lm <- function(object,
                        lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
                        xlab, ylab, xlim, ylim) {
   
-  # Preliminary (extract data, variable names, etc.)
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(object$call$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied though the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
@@ -253,9 +264,20 @@ plotFit.nls <- function(object,
                         lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
                         xlab, ylab, xlim, ylim) {
   
-  # Preliminary (extract variable information, etc.)
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(object$call$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied though the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
@@ -404,9 +426,20 @@ plotFit.glm <- function(object, type = c("response", "link"),
                         lty.fit = 1, lwd.conf = 1, lwd.fit = 1, n = 500, 
                         xlab, ylab, xlim, ylim) {
   
-  # Preliminary (extract data, variable names, etc.)
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(object$call$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied though the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
@@ -540,9 +573,20 @@ plotFit.rlm <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
                         col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
                         xlab, ylab, xlim, ylim) {
   
-  # Preliminary (extract data, variable names, etc.)
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(object$call$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied though the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
@@ -590,9 +634,20 @@ plotFit.lqs <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
                         col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
                         xlab, ylab, xlim, ylim) {
   
-  # Preliminary (extract data, variable names, etc.)
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(object$call$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied though the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
   xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
