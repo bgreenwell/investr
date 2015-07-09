@@ -121,7 +121,7 @@ plotFit.lm <- function(object,
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
   xgrid <- if (extend.range) {  # the x values at which to evaluate
     list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
              length = n))
@@ -145,8 +145,8 @@ plotFit.lm <- function(object,
   if (interval == "confidence" || interval == "both") {
     conf <- predFit(object, newdata = xgrid, interval = "confidence", 
                      level = level, adjust = adjust, k = k)
-    conf.lwr <- conf$lwr
-    conf.upr <- conf$upr
+    conf.lwr <- conf[, "lwr"]
+    conf.upr <- conf[, "upr"]
     conf.ymin <- min(conf.lwr)
     conf.ymax <- max(conf.upr)
   }
@@ -155,8 +155,8 @@ plotFit.lm <- function(object,
   if (interval == "prediction" || interval == "both") {
     pred <- predFit(object, newdata = xgrid, interval = "prediction", 
                      level = level, adjust = adjust, k = k)
-    pred.lwr <- pred$lwr
-    pred.upr <- pred$upr
+    pred.lwr <- pred[, "lwr"]
+    pred.upr <- pred[, "upr"]
     pred.ymin <- min(pred.lwr)
     pred.ymax <- max(pred.upr)
   }
@@ -286,7 +286,7 @@ plotFit.nls <- function(object,
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
   xgrid <- if (extend.range) {  # set up plotting grid
     list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
              length = n))
@@ -300,7 +300,7 @@ plotFit.nls <- function(object,
   # Maximum and minimum of fitted values
   interval = match.arg(interval)
   if (interval == "none") {
-    fitvals <- predFit(object, newdata = xgrid)$fit
+    fitvals <- predFit(object, newdata = xgrid)[, "fit"]
     fit.ymin <- min(fitvals)
     fit.ymax <- max(fitvals)
   }
@@ -310,8 +310,8 @@ plotFit.nls <- function(object,
   if (interval == "confidence" || interval == "both") {
     conf <- predFit(object, newdata = xgrid, interval = "confidence", 
                      level = level, adjust = adjust, k = k)
-    conf.lwr <- conf$lwr
-    conf.upr <- conf$upr
+    conf.lwr <- conf[, "lwr"]
+    conf.upr <- conf[, "upr"]
     conf.ymin <- min(conf.lwr)
     conf.ymax <- max(conf.upr)
   }
@@ -320,8 +320,8 @@ plotFit.nls <- function(object,
   if (interval == "prediction" || interval == "both") {
     pred <- predFit(object, newdata = xgrid, interval = "prediction", 
                      level = level, adjust = adjust, k = k)
-    pred.lwr <- pred$lwr
-    pred.upr <- pred$upr
+    pred.lwr <- pred[, "lwr"]
+    pred.upr <- pred[, "upr"]
     pred.ymin <- min(pred.lwr)
     pred.ymax <- max(pred.upr)
   }
@@ -469,7 +469,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   
   
   # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
   xgrid <- if (extend.range) {  # the x values at which to evaluate
     list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
              length = n))
@@ -595,7 +595,7 @@ plotFit.rlm <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
   xgrid <- if (extend.range) {  # the x values at which to evaluate
     list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
              length = n))
@@ -656,7 +656,7 @@ plotFit.lqs <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   yvals <- with(.data, eval(formula(object)[[2]]))
   
   # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default plot domain
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
   xgrid <- if (extend.range) {  # the x values at which to evaluate
     list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
              length = n))

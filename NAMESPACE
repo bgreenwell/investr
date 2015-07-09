@@ -2,7 +2,8 @@
 export(
   calibrate,
   invest,
-  plotFit
+  plotFit,
+  predFit
 )    
 
 ## Methods
@@ -18,6 +19,9 @@ S3method(plotFit, nls)
 S3method(plotFit, glm)  # new (experimental) 
 S3method(plotFit, rlm)  # new (experimental) 
 S3method(plotFit, lqs)  # new (experimental) 
+S3method(predFit, lm)    
+S3method(predFit, nls) 
+S3method(predFit, lme)
 S3method(print, invest)
 S3method(plot, bootCal)
 

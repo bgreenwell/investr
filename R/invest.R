@@ -700,8 +700,12 @@ invest.nls <- function(object, y0,
     # Inversion function
     inversionFun <- function(x) {
       pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE) 
-      denom <- if (mean.response) pred$se.fit^2 else (var_pooled/m + pred$se.fit^2)
-      (eta - pred$fit)^2/denom - crit^2
+      denom <- if (mean.response) {
+                 pred[, "se.fit"]^2 
+               } else {
+                 var_pooled/m + pred[, "se.fit"]^2
+               }
+      (eta - pred[, "fit"])^2/denom - crit^2
     }
     
     # Compute lower and upper confidence limits (i.e., the roots of the 
@@ -847,12 +851,16 @@ invest.lme <- function(object, y0,
     # Inversion function
     inversionFun <- function(x, bound = c("lower", "upper")) {
       pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE)
-      denom <- if (mean.response) pred$se.fit else sqrt(var.y0 + pred$se.fit^2)
+      denom <- if (mean.response) {
+                 pred[, "se.fit"] 
+               } else {
+                 sqrt(var.y0 + pred[, "se.fit"]^2)
+               }
       bound <- match.arg(bound)
       if (bound == "upper") {
-        (eta - pred$fit)/denom - q1
+        (eta - pred[, "fit"])/denom - q1
       } else {
-        (eta - pred$fit)/denom - q2
+        (eta - pred[, "fit"])/denom - q2
       }
     }
     

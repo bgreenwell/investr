@@ -183,7 +183,9 @@ calibrate.default <- function(object, y0,
       }
       
     }
-    res <- list("estimate" = x0.mle, "lower" = lwr, "upper" = upr, 
+    res <- list("estimate" = x0.mle, 
+                "lower"    = lwr, 
+                "upper"    = upr, 
                 "interval" = interval)
   
   }
@@ -199,8 +201,11 @@ calibrate.default <- function(object, y0,
     }
 
     # Store results in a list
-    res <- list("estimate" = x0.mle, "lower" = x0.mle - crit * se,
-                "upper" = x0.mle + crit * se, "se" = se, "interval" = interval)
+    res <- list("estimate" = x0.mle, 
+                "lower"    = x0.mle - crit * se,
+                "upper"    = x0.mle + crit * se, 
+                "se"       = se, 
+                "interval" = interval)
     
   } 
   

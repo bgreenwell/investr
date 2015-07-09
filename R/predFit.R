@@ -3,14 +3,31 @@
 #' Generic prediction method for various types of fitted models. (For internal 
 #' use only.)
 #' 
-#' @keywords internal
+#' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
+#'               \code{"nls"}, or \code{"lme"}.
+#' @param newdata An optional data frame in which to look for variables with 
+#'   which to predict. If omitted, the fitted values are used.      
+#' @param se.fit A logical vaue indicating if standard errors are required.
+#' @param interval Type of interval to be calculated. Can be one of "none" 
+#'   (default), "confidence", or "prediction".
+#' @param level A numeric scalar between 0 and 1 giving the confidence level for 
+#'   the intervals (if any) to be calculated. Default is 0.95.
+#' @param adjust A logical value indicating if an adjustment should be made to
+#'   the critical value used in calculating the confidence interval. This is 
+#'   useful for when the calibration curve is to be used multiple, say k, times.
+#' @param k The number times the calibration curve is to be used for computing 
+#'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
+#' @param ... Additional optional arguments. At present, no optional arguments 
+#'   are used.
+#' @export
 predFit <- function(object, ...) {
   UseMethod("predFit")
 } 
 
 
 #' @rdname predFit
-#' @keywords internal
+#' @method predFit lm
+#' @export
 predFit.lm <- function(object, newdata, se.fit = TRUE,
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
@@ -23,25 +40,29 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
   } else {
     as.data.frame(newdata) 
   } 
+  if (is.null(newdata)) {
+    stop("No data available for predictions.", call. = FALSE)
+  }
 
   # Predicted values and, if requested (default), standard errors
-  pred <- predict(object, newdata = newdata, se.fit = se.fit)  # FIXME: suppressWarnings
+  pred <- predict(object, newdata = newdata, se.fit = se.fit)  
+  # FIXME: suppressWarnings
   
   # Compute results
   interval <- match.arg(interval)
   if (interval == "none") {
     
-    res <- pred  
+    res <- pred  # nothing else to add!
     
   } else { 
     
     # Critical value for interval computations
     adjust <- match.arg(adjust)
-    crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment -------------
+    crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment
       
       qt((level + 2*k - 1) / (2*k), pred$df)
       
-    } else if (adjust == "Scheffe") {  # Scheffe adjustment --------------------
+    } else if (adjust == "Scheffe") {  # Scheffe adjustment
       
       # Working-Hotelling band or adjusted prediction band for k predictions
       if (interval == "confidence") {
@@ -51,7 +72,7 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
         sqrt(k * qf(level, k, pred$df))  # need k for prediction
       }  
       
-    } else {   # no adjustment -------------------------------------------------
+    } else {   # no adjustment
       
       qt((level + 1) / 2, pred$df)    
       
@@ -66,11 +87,17 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
     }
     
-    # Store results in a list
-    res <- list(fit = as.numeric(pred$fit), 
-                lwr = as.numeric(lwr), 
-                upr = as.numeric(upr),
-                se.fit = as.numeric(pred$se.fit))
+#     # Store results in a list
+#     res <- list(fit = as.numeric(pred$fit), 
+#                 lwr = as.numeric(lwr), 
+#                 upr = as.numeric(upr),
+#                 se.fit = as.numeric(pred$se.fit))
+    
+    # Store results in a matrix
+    res <- cbind("fit"    = pred$fit, 
+                 "lwr"    = lwr, 
+                 "upr"    = upr,
+                 "se.fit" = pred$se.fit)
     
   }
   
@@ -81,7 +108,8 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
 
 
 #' @rdname predFit
-#' @keywords internal
+#' @method predFit nls
+#' @export
 predFit.nls <- function(object, newdata, se.fit = TRUE,
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
@@ -100,6 +128,9 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
     eval(object$call$data, envir = parent.frame()) 
   } else {
     as.data.frame(newdata) 
+  }
+  if (is.null(newdata)) {
+    stop("No data available for predictions.", call. = FALSE)
   }
   
   # Name of independent variable
@@ -149,11 +180,11 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
     
     # Adjustment for simultaneous inference
     adjust <- match.arg(adjust)
-    crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment -------------
+    crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment 
                                            
       qt((level + 2*k - 1) / (2*k), df.residual(object))
       
-    } else if (adjust == "Scheffe") {  # Scheffe adjustment --------------------
+    } else if (adjust == "Scheffe") {  # Scheffe adjustment
       
       if (interval == "confidence") {
         p <- length(coef(object))  # number of regression parameters
@@ -162,7 +193,7 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
         sqrt(k * qf((level + 1) / 2, k, df.residual(object))) 
       }     
       
-    } else {  # no adjustment --------------------------------------------------   
+    } else {  # no adjustment   
       
       qt((level + 1) / 2, df.residual(object))   
       
@@ -177,11 +208,17 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # upper limits
     }
     
-    # Store results in a list
-    res <- list(fit = as.numeric(pred$fit), 
-                lwr = as.numeric(lwr), 
-                upr = as.numeric(upr),
-                se.fit = as.numeric(pred$se.fit))
+#     # Store results in a list
+#     res <- list(fit = as.numeric(pred$fit), 
+#                 lwr = as.numeric(lwr), 
+#                 upr = as.numeric(upr),
+#                 se.fit = as.numeric(pred$se.fit))
+
+    # Store results in a matrix
+    res <- cbind("fit"    = pred$fit, 
+                 "lwr"    = lwr, 
+                 "upr"    = upr,
+                 "se.fit" = pred$se.fit)
     
   }
   
@@ -192,7 +229,8 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
 
 
 #' @rdname predFit
-#' @keywords internal
+#' @method predFit lme
+#' @export
 predFit.lme <- function(object, newdata, se.fit = TRUE, ...) {
   
   # Prediction data
@@ -213,7 +251,8 @@ predFit.lme <- function(object, newdata, se.fit = TRUE, ...) {
     Xmat <- makeX(object, newdata)  # fixed-effects design matrix
 #     Xmat <- makeX(object, newdata = makeData(newdata, xname))
     se_fit <- sqrt(diag(Xmat %*% vcov(object) %*% t(Xmat)))
-    list(fit = pred, se.fit = se_fit)
+    # list(fit = pred, se.fit = se_fit)
+    cbind("fit" = pred, "se.fit" = se_fit)
   } else {
     pred
   }
