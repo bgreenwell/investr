@@ -10,12 +10,13 @@ Description: Functions to facilitate inverse estimation/calibration in linear,
     confidence/prediction bands that may be of use to the general user.
 Depends:
     base,
-    graphics,
-    stats
 Suggests:
     testthat
 Imports:
-    nlme
+    graphics,
+    nlme,
+    stats,
+    utils
 Date: 2015-03-25
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/investr

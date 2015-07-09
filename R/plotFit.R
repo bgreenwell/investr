@@ -44,6 +44,9 @@
 #' TRUE.
 #' @param ... Additional optional arguments passed on to \code{plot}.
 #' @rdname plotFit
+#' @importFrom grDevices extendrange
+#' @importFrom stats family formula predict qnorm
+#' @importFrom graphics grey lines plot polygon
 #' @export
 #' @note
 #' By default, the plotted intervals are pointwise intervals. For simultaneous 
@@ -84,8 +87,10 @@ plotFit <- function(object, ...) {
 
 
 #' @rdname plotFit
-#' @export
 #' @method plotFit lm
+#' @importFrom graphics plot
+#' @importFrom stats formula
+#' @export
 plotFit.lm <- function(object, 
                        interval = c("none", "both", "confidence", "prediction"), 
                        level = 0.95, data,
