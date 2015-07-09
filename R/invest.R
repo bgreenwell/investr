@@ -6,6 +6,12 @@
 #' response. See the references listed below for more details. 
 #' 
 #' @rdname invest
+#' 
+#' @importFrom stats coef family fitted formula na.omit numericDeriv 
+#' @importFrom stats model.matrix predict qnorm qt quantile resid residuals 
+#' @importFrom stats rnorm runif sd simulate uniroot update var vcov
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' 
 #' @export
 #' 
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},

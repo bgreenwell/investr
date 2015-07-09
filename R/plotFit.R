@@ -44,9 +44,9 @@
 #' TRUE.
 #' @param ... Additional optional arguments passed on to \code{plot}.
 #' @rdname plotFit
-#' @importFrom grDevices extendrange
+#' @importFrom graphics lines plot polygon
+#' @importFrom grDevices extendrange grey
 #' @importFrom stats family formula predict qnorm
-#' @importFrom graphics grey lines plot polygon
 #' @export
 #' @note
 #' By default, the plotted intervals are pointwise intervals. For simultaneous 
