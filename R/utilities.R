@@ -49,6 +49,7 @@ makeX <- function(object, newdata) {
 
 
 #' @rdname makeX
+#' @importFrom nlme asOneFormula
 #' @importFrom stats formula na.fail model.matrix
 #' @keywords internal
 makeZ <- function(object, newdata) {
@@ -68,6 +69,7 @@ makeZ <- function(object, newdata) {
 #' Evaluate response variance at a given value of the predictor variable. (For 
 #' internal use only.)
 #' 
+#' @importFrom nlme getVarCov
 #' @keywords internal
 varY <- function(object, newdata) {
   Zmat <- makeZ(object, newdata)  # random effects design matrix

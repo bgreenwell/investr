@@ -7,6 +7,7 @@
 #' 
 #' @rdname invest
 #' 
+#' @importFrom nlme fixef
 #' @importFrom stats coef family fitted formula na.omit numericDeriv 
 #' @importFrom stats model.matrix predict qnorm qt quantile resid residuals 
 #' @importFrom stats rnorm runif sd simulate uniroot update var vcov

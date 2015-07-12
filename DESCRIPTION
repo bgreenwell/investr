@@ -17,7 +17,7 @@ Imports:
     nlme,
     stats,
     utils
-Date: 2015-03-25
+Date: 2015-08-12
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/investr
 LazyLoad: true
