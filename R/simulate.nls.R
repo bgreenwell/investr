@@ -1,3 +1,4 @@
+#' @importFrom stats deviance df.residual fitted rnorm runif
 #' @keywords internal
 simulate.nls <- function (object, nsim = 1, seed = NULL, ...) {
   

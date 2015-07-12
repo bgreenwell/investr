@@ -56,6 +56,8 @@
 #' 
 #' @aliases print.calibrate
 #' 
+#' @importFrom stats coef formula lm model.extract model.matrix na.fail qf qt 
+#' @importFrom stats resid var
 #' @export
 #'
 #' @note The function \code{invest} is more general, but based on numerical

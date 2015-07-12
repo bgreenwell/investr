@@ -30,7 +30,7 @@ Sigma.lme <- function(object, ...) object$sigma
 #' 
 #' Create a new data frame from a specified x value that has the same structure 
 #' as the data frame used to create \code{object}. (For internal use only.)
-#' 
+#' @importFrom stats setNames
 #' @keywords internal
 makeData <- function(x, label) {
   setNames(data.frame(x), label)
@@ -49,6 +49,7 @@ makeX <- function(object, newdata) {
 
 
 #' @rdname makeX
+#' @importFrom stats formula na.fail model.matrix
 #' @keywords internal
 makeZ <- function(object, newdata) {
   Q <- object$dims$Q  # number of grouping levels

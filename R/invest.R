@@ -967,6 +967,8 @@ print.invest <- function(x, digits = 4, ...) {
 #' bootstrap replicates of the inverse estimate.
 #' 
 #' @rdname plot.bootCal
+#' @importFrom graphics hist par
+#' @importFrom stats qqline qqnorm
 #' @export
 #' @method plot bootCal
 #' 
