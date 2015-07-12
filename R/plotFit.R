@@ -305,7 +305,7 @@ plotFit.nls <- function(object,
   # Maximum and minimum of fitted values
   interval = match.arg(interval)
   if (interval == "none") {
-    fitvals <- predFit(object, newdata = xgrid)[, "fit"]
+    fitvals <- predFit(object, newdata = xgrid, se.fit = FALSE)
     fit.ymin <- min(fitvals)
     fit.ymax <- max(fitvals)
   }

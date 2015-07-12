@@ -87,12 +87,6 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
     }
     
-#     # Store results in a list
-#     res <- list(fit = as.numeric(pred$fit), 
-#                 lwr = as.numeric(lwr), 
-#                 upr = as.numeric(upr),
-#                 se.fit = as.numeric(pred$se.fit))
-    
     # Store results in a matrix
     res <- cbind("fit"    = pred$fit, 
                  "lwr"    = lwr, 
@@ -208,12 +202,6 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # upper limits
     }
     
-#     # Store results in a list
-#     res <- list(fit = as.numeric(pred$fit), 
-#                 lwr = as.numeric(lwr), 
-#                 upr = as.numeric(upr),
-#                 se.fit = as.numeric(pred$se.fit))
-
     # Store results in a matrix
     res <- cbind("fit"    = pred$fit, 
                  "lwr"    = lwr, 

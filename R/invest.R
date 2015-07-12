@@ -708,11 +708,11 @@ invest.nls <- function(object, y0,
     inversionFun <- function(x) {
       pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE) 
       denom <- if (mean.response) {
-                 pred[, "se.fit"]^2 
+                 pred$se.fit^2 
                } else {
-                 var_pooled/m + pred[, "se.fit"]^2
+                 var_pooled/m + pred$se.fit^2
                }
-      (eta - pred[, "fit"])^2/denom - crit^2
+      (eta - pred$fit)^2/denom - crit^2
     }
     
     # Compute lower and upper confidence limits (i.e., the roots of the 
