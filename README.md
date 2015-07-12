@@ -41,8 +41,11 @@ binom_fit <- glm(cbind(y, n-y) ~ ldose, data = beetle,
 plotFit(binom_fit, lwd.fit = 2, cex = 1.2, pch = 21, bg = "lightskyblue", 
         lwd = 2, xlab = "Log dose", ylab = "Probability")
 
-# Estimate the 50% lethal dose
-invest(binom_fit, y0 = 0.5)
+# Inverse estimation
+invest(binom_fit, y0 = 0.5)   # median lethal dose
+invest(binom_fit, y0 = 0.9)   # 90% lethal dose
+invest(binom_fit, y0 = 0.99)  # 99% lethal dose
+
 
 # estimate    lower    upper 
 #   1.7788   1.7702   1.7862
