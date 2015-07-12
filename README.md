@@ -28,7 +28,7 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
 
 ## Dobson's Beetle Data
 
-In binomial regression, the estimated lethal dose corresponding to a specif probability $p$ of death is often referred to as _LDp_. `invest` obtains an estimate of _LDp_ by inverting the fitted mean response on the link scale. Similarly, a confidence interval for _LDp_ can be obtained by inverting a confidence interval for the mean response on the link scale.
+In binomial regression, the estimated lethal dose corresponding to a specif probability _p_ of death is often referred to as _LDp_. `invest` obtains an estimate of _LDp_ by inverting the fitted mean response on the link scale. Similarly, a confidence interval for _LDp_ can be obtained by inverting a confidence interval for the mean response on the link scale.
 ```r
 library(investr)
 
