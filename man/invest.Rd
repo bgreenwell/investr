@@ -180,12 +180,15 @@ Graybill, F. A., and Iyer, H. K. (1994).
 Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
 \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer.
 
-Seber, G. A. F., and Wild, C. J. (1989)
-\emph{Nonlinear regression}. Wiley.
+Norman, D. R., and Smith H. (2014).
+\emph{Applied Regression Analysis}. John Wiley & Sons.
 
 Oman, Samuel D. (1998).
 Calibration with Random Slopes.
 \emph{Biometrics} \bold{85}(2): 439--449.
 doi:10.1093/biomet/85.2.439.
+
+Seber, G. A. F., and Wild, C. J. (1989)
+\emph{Nonlinear regression}. Wiley.
 }
 
