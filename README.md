@@ -6,7 +6,7 @@ A detailed introduction to investr has been published in The R Journal: "investr
 
 As of right now, `investr` supports (univariate) inverse estimation with objects of class:
 
-* `lm` - linear models
+* `lm` - linear models (multiple predicor variables allowed)
 * `glm` - generalized linear models
 * `nls` - nonlinear least-squares models
 * `lme` - linear mixed-effects models (fit using the `nlme` package)
