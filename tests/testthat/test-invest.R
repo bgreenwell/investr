@@ -113,12 +113,18 @@ test_that("inversion and Wald methods work", {
   budworm <- data.frame(SF, sex, ldose)
   nd <- data.frame(sex = "F")
   budworm.fm <- glm(SF ~ sex + ldose - 1, family = binomial, data = budworm)
-  p.25 <- invest(budworm.fm, y0 = 1/4, x0.name = "ldose", newdata = nd)
-  p.50 <- invest(budworm.fm, y0 = 1/2, x0.name = "ldose", newdata = nd)
-  p.75 <- invest(budworm.fm, y0 = 3/4, x0.name = "ldose", newdata = nd)
-  expect_equal(p.25, 2.231265, tol = 1e-05, check.attributes = FALSE)
-  expect_equal(p.50, 3.263587, tol = 1e-05, check.attributes = FALSE)
-  expect_equal(p.75, 4.295910, tol = 1e-05, check.attributes = FALSE)
+  p.25 <- invest(budworm.fm, y0 = 1/4, x0.name = "ldose", newdata = nd,
+                 interval = "Wald")
+  p.50 <- invest(budworm.fm, y0 = 1/2, x0.name = "ldose", newdata = nd,
+                 interval = "Wald")
+  p.75 <- invest(budworm.fm, y0 = 3/4, x0.name = "ldose", newdata = nd,
+                 interval = "Wald")
+  expect_equal(p.25$estimate, 2.231265, tol = 1e-05)
+  expect_equal(p.50$estimate, 3.263587, tol = 1e-05)
+  expect_equal(p.75$estimate, 4.295910, tol = 1e-05)
+  expect_equal(p.25$se, 0.2499089, tol = 1e-05)
+  expect_equal(p.50$se, 0.2297539, tol = 1e-05)
+  expect_equal(p.75$se, 0.2746874, tol = 1e-05)
   
 })
 

@@ -163,14 +163,6 @@ invest.lm <- function(object, y0,
                                                envir = parent.frame())
   yname <- all.vars(formula(object)[[2]])
   
-  
-  
-  ##############################################################################
-  # Under construction
-  ##############################################################################
-  
-  # FIXME: Need more checks
-  
   # Predictor variable(s)
   multi <- FALSE
   xnames <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
@@ -198,10 +190,7 @@ invest.lm <- function(object, y0,
     x0.name <- xnames
   }
 
-  ##############################################################################
-  
-  
-  
+  # End-points for 'uniroot'  
   if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
   if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
@@ -218,12 +207,6 @@ invest.lm <- function(object, y0,
   var_pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
   rat <- var_pooled / var1  # right variance?
   
-  
-  
-  ##############################################################################
-  # Under construction
-  ##############################################################################
-  
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     nd <- if (multi) {
@@ -234,10 +217,6 @@ invest.lm <- function(object, y0,
     predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
-  
-  ##############################################################################
-  
-  
   
   # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
@@ -250,15 +229,7 @@ invest.lm <- function(object, y0,
   
   # Return point estimate only
   interval <- match.arg(interval)
-  if (interval == "none" || multi) {
-    return(setNames(x0_est, x0.name))
-  }
-  
-  # Stop if multiple predictors
-  if (interval != "none" && multi) {
-    warning(paste("Confidence intervals not yet available for models with", 
-                  "multiple predictor variables.", "Returning point estimate", 
-                  "only."))
+  if (interval == "none") {  # || multi) {
     return(setNames(x0_est, x0.name))
   }
   
@@ -384,7 +355,12 @@ invest.lm <- function(object, y0,
     
     # Inversion function
     inversionFun <- function(x) {
-      pred <- predict(object, newdata = makeData(x, x0.name), se.fit = TRUE)
+      nd <- if (multi) {
+        cbind(newdata, makeData(x, x0.name))  # append newdata
+      } else {
+        makeData(x, x0.name)
+      }
+      pred <- predict(object, newdata = nd, se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else var_pooled/m + 
         rat*pred$se.fit^2
       (eta - pred$fit)^2/denom - crit^2
@@ -434,7 +410,12 @@ invest.lm <- function(object, y0,
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-        predict(object_copy, newdata = makeData(x, x0.name)) - z
+        nd <- if (multi) {
+          cbind(newdata, makeData(x, x0.name))  # append newdata
+        } else {
+          makeData(x, x0.name)
+        }
+        predict(object_copy, newdata = nd) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -483,19 +464,13 @@ invest.glm <- function(object, y0,
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
+  
+  # End-points for 'uniroot'  
   if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
   if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
   # Calculations should be done on the "link" scale!
   eta <- family(object)$linkfun(y0)
-  
-  
-  
-  ##############################################################################
-  # Under construction
-  ##############################################################################
-  
-  # FIXME: Need more checks
   
   # Predictor variable(s)
   multi <- FALSE
@@ -524,15 +499,6 @@ invest.glm <- function(object, y0,
     x0.name <- xnames
   }
   
-  
-  
-  ##############################################################################
-  
-  
-  ##############################################################################
-  # Under construction
-  ##############################################################################
-  
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
     nd <- if (multi) {
@@ -543,10 +509,6 @@ invest.glm <- function(object, y0,
     predict(object, newdata = nd, type = "link") - eta  #  solve yhat(x0) - eta = 0 for x0
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
-  
-  ##############################################################################
-  
-
   
   # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
@@ -559,19 +521,11 @@ invest.glm <- function(object, y0,
   
   # Return point estimate only
   interval <- match.arg(interval)
-  if (interval == "none" || multi) {
+  if (interval == "none") {
     return(setNames(x0_est, x0.name))
   }
   
-  # Stop if multiple predictors
-  if (interval != "none" && multi) {
-    warning(paste("Confidence intervals not yet available for models with", 
-                  "multiple predictor variables.", "Returning point estimate", 
-                  "only."))
-    return(setNames(x0_est, x0.name))
-  }
-  
-  # Stop and print error if user requested bootstrap intervals
+  # Stop and print error if user requests bootstrap intervals
   if (interval == "percentile") {
     stop("Bootstrap intervals not available for 'glm' objects.", call. = FALSE)
   }
@@ -589,8 +543,12 @@ invest.glm <- function(object, y0,
     
     # Inversion function
     inversionFun <- function(x) {
-      pred <- predict(object, newdata = makeData(x, x0.name), se.fit = TRUE,
-                      type = "link")
+      nd <- if (multi) {
+        cbind(newdata, makeData(x, x0.name))  # append newdata
+      } else {
+        makeData(x, x0.name)
+      }
+      pred <- predict(object, newdata = nd, se.fit = TRUE, type = "link")
       ((eta - pred$fit) ^ 2) / (pred$se.fit ^ 2) - crit^2
     }
     
@@ -634,7 +592,12 @@ invest.glm <- function(object, y0,
       object_copy$coefficients <- params
       z <- eta
       uniroot(function(x) { 
-        predict(object_copy, newdata = makeData(x, x0.name), type = "link") - z
+        nd <- if (multi) {
+          cbind(newdata, makeData(x, x0.name))  # append newdata
+        } else {
+          makeData(x, x0.name)
+        }
+        predict(object_copy, newdata = nd, type = "link") - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
