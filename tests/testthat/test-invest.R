@@ -10,10 +10,10 @@ test_that("invest() and calibrate() produce the same results", {
   res2.cal <- calibrate(crystal_lm, y0 = 5, mean.response = TRUE)
   res3.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald")
   res4.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
-  res1.inv <-    invest(crystal_lm, y0 = 5)
-  res2.inv <-    invest(crystal_lm, y0 = 5, mean.response = TRUE)
-  res3.inv <-    invest(crystal_lm, y0 = 5, interval = "Wald")
-  res4.inv <-    invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
+  res1.inv <- invest(crystal_lm, y0 = 5)
+  res2.inv <- invest(crystal_lm, y0 = 5, mean.response = TRUE)
+  res3.inv <- invest(crystal_lm, y0 = 5, interval = "Wald")
+  res4.inv <- invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
   
   # Expectations
   expect_true(all.equal(res1.cal, res1.inv, tol = 1e-05))

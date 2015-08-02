@@ -12,19 +12,22 @@ AnyNA <- function(x) {
 #   }
   any(is.na(x))
 }
-  
-#' Extract residual standard error
+
+
+#' Default Predictor Values
 #' 
-#' Extract residual standard error from a fitted model. (For internal use 
-#' only.)
+#' Sets the default predictor values for \code{invest} when \code{newdata} is
+#' missing.
 #' 
 #' @keywords internal
-Sigma <- function(object, ...) {
-  UseMethod("Sigma")
-} 
-Sigma.lm <- function(object, ...) summary(object)$sigma
-Sigma.nls <- function(object, ...) summary(object)$sigma
-Sigma.lme <- function(object, ...) object$sigma
+getNewData <- function(x) {
+  if (is.null(dim(x))) dim(x) <- c(length(x), 1)
+  res <- apply(x, 2, function(y) {
+    if (is.numeric(y)) mean(y) else y[which.max(table(y))]
+  })
+  as.data.frame(res)
+}
+  
 
 #' Make new data frame
 #' 
@@ -63,6 +66,21 @@ makeZ <- function(object, newdata) {
   dataMix <- do.call("model.frame", mfArgs)
   model.matrix(reSt, dataMix)
 }
+
+
+#' Extract residual standard error
+#' 
+#' Extract residual standard error from a fitted model. (For internal use 
+#' only.)
+#' 
+#' @keywords internal
+Sigma <- function(object, ...) {
+  UseMethod("Sigma")
+} 
+Sigma.lm <- function(object, ...) summary(object)$sigma
+Sigma.nls <- function(object, ...) summary(object)$sigma
+Sigma.lme <- function(object, ...) object$sigma
+
 
 #' Evaluate response variance
 #'

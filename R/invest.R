@@ -27,6 +27,11 @@
 #'                      correspond to an individual response (\code{FALSE}) or 
 #'                      a mean response (\code{TRUE}). For \code{glm} objects,
 #'                      this is always \code{TRUE}.
+#' @param x0.name For multiple linear regression, a character string giving the
+#'   the name of the predictor variable of interest.
+#' @param newdata For multiple linear regression, a \code{data.frame} giving the
+#'   values of interest for all other predictor variables (i.e., those other 
+#'   than \code{x0.name}).
 #' @param data An optional data frame. This is required if \code{object$data} 
 #'             is \code{NULL}.
 #' @param nsim Positive integer specifying the number of bootstrap simulations; 
@@ -146,7 +151,8 @@ invest <- function(object, ...) {
 #' @method invest lm
 invest.lm <- function(object, y0, 
                       interval = c("inversion", "Wald", "percentile", "none"), 
-                      level = 0.95, mean.response = FALSE, data, 
+                      level = 0.95, mean.response = FALSE, 
+                      x0.name, newdata, data, 
                       boot.type = c("parametric", "nonparametric"), nsim = 999, 
                       seed = NULL, progress = FALSE, lower, upper, 
                       tol = .Machine$double.eps^0.25, maxiter = 1000, 
@@ -155,13 +161,51 @@ invest.lm <- function(object, y0,
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
   
-  # Set up for inverse estimation
+  
+  
+  ##############################################################################
+  # Under construction
+  ##############################################################################
+  
+  # FIXME: Need more checks
+  
+  # Predictor variable(s)
+  multi <- FALSE
+  xnames <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  if (length(xnames) != 1) {
+    multi <- TRUE
+    if (missing(x0.name)) {
+      stop("'x0.name' is missing, please select a valid predictor variable")
+    }
+    xnames <- xnames[xnames != x0.name]
+    if (missing(newdata)) {
+      stop("'newdata' must be supplied when multiple predictor variables exist!")
+    }
+    if (!is.data.frame(newdata)) {
+      stop("'newdata' must be a data frame")
+    }
+    if (nrow(newdata) != 1) {
+      stop("'newdata' must have a single row")
+    }
+    if (ncol(newdata) != length(xnames) || !all(xnames %in% names(newdata))) {
+      stop(paste0("'newdata' must contain a column for each predictor variable", 
+                  " used by ", deparse(substitute(object)),
+                  " (except ", x0.name, ")"))
+    }
+  } else {
+    x0.name <- xnames
+  }
+
+  ##############################################################################
+  
+  
+  
+  if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
+  
+  # Define constants
   m <- length(y0)  # number of unknowns 
   if(mean.response && m > 1) stop("Only one mean response value allowed.")
   eta <- mean(y0)  # mean unknown
@@ -174,11 +218,26 @@ invest.lm <- function(object, y0,
   var_pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
   rat <- var_pooled / var1  # right variance?
   
+  
+  
+  ##############################################################################
+  # Under construction
+  ##############################################################################
+  
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname)) - eta
+    nd <- if (multi) {
+            cbind(newdata, makeData(x, x0.name))  # append newdata
+          } else {
+            makeData(x, x0.name)
+          }
+    predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
+  
+  ##############################################################################
+  
+  
   
   # Provide (informative) error message if point estimate is not found
   if (inherits(x0_est, "try-error")) {
@@ -191,7 +250,17 @@ invest.lm <- function(object, y0,
   
   # Return point estimate only
   interval <- match.arg(interval)
-  if (interval == "none") return(x0_est)
+  if (interval == "none" || multi) {
+    return(setNames(x0_est, x0.name))
+  }
+  
+  # Stop if multiple predictors
+  if (interval != "none" && multi) {
+    warning(paste("Confidence intervals not yet available for models with", 
+                  "multiple predictor variables.", "Returning point estimate", 
+                  "only."))
+    return(setNames(x0_est, x0.name))
+  }
   
   # Bootstrap intervals -------------------------------------------------------
   if (interval == "parametric") {
@@ -253,7 +322,7 @@ invest.lm <- function(object, y0,
         
         # Calculate point estimate
         ret <- tryCatch(uniroot(function(x) {
-          predict(boot_object, newdata = makeData(x, xname)) - mean(y0_star)
+          predict(boot_object, newdata = makeData(x, x0.name)) - mean(y0_star)
         }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
         error = function(e) NA)
       }
@@ -315,7 +384,7 @@ invest.lm <- function(object, y0,
     
     # Inversion function
     inversionFun <- function(x) {
-      pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE)
+      pred <- predict(object, newdata = makeData(x, x0.name), se.fit = TRUE)
       denom <- if (mean.response) pred$se.fit^2 else var_pooled/m + 
         rat*pred$se.fit^2
       (eta - pred$fit)^2/denom - crit^2
@@ -365,7 +434,7 @@ invest.lm <- function(object, y0,
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-        predict(object_copy, newdata = makeData(x, xname)) - z
+        predict(object_copy, newdata = makeData(x, x0.name)) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -413,17 +482,17 @@ invest.glm <- function(object, y0,
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  x0.name <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  if (length(x0.name) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
   # Calculations should be done on the "link" scale!
   eta <- family(object)$linkfun(y0)
   
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname), type = "link") - eta
+    predict(object, newdata = makeData(x, x0.name), type = "link") - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -458,7 +527,7 @@ invest.glm <- function(object, y0,
     
     # Inversion function
     inversionFun <- function(x) {
-      pred <- predict(object, newdata = makeData(x, xname), se.fit = TRUE,
+      pred <- predict(object, newdata = makeData(x, x0.name), se.fit = TRUE,
                       type = "link")
       ((eta - pred$fit) ^ 2) / (pred$se.fit ^ 2) - crit^2
     }
@@ -503,7 +572,7 @@ invest.glm <- function(object, y0,
       object_copy$coefficients <- params
       z <- eta
       uniroot(function(x) { 
-        predict(object_copy, newdata = makeData(x, xname), type = "link") - z
+        predict(object_copy, newdata = makeData(x, x0.name), type = "link") - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -551,11 +620,11 @@ invest.nls <- function(object, y0,
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
                                                envir = parent.frame())
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  x0.name <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  if (length(x0.name) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
   # Set up for inverse estimation
   m <- length(y0)  # number of unknowns 
@@ -567,7 +636,7 @@ invest.nls <- function(object, y0,
   
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname)) - eta
+    predict(object, newdata = makeData(x, x0.name)) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -644,7 +713,7 @@ invest.nls <- function(object, y0,
         
         # Calculate point estimate
         ret <- tryCatch(uniroot(function(x) {
-            predict(boot_object, newdata = makeData(x, xname)) - mean(y0_star)
+            predict(boot_object, newdata = makeData(x, x0.name)) - mean(y0_star)
           }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
           error = function(e) NA)
       }
@@ -706,7 +775,7 @@ invest.nls <- function(object, y0,
     
     # Inversion function
     inversionFun <- function(x) {
-      pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE) 
+      pred <- predFit(object, newdata = makeData(x, x0.name), se.fit = TRUE) 
       denom <- if (mean.response) {
                  pred$se.fit^2 
                } else {
@@ -759,7 +828,7 @@ invest.nls <- function(object, y0,
         z <- params[length(params)]
       }
       uniroot(function(x) { 
-        predict(object_copy, newdata = makeData(x, xname)) - z
+        predict(object_copy, newdata = makeData(x, x0.name)) - z
       }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
     }
     
@@ -805,11 +874,11 @@ invest.lme <- function(object, y0,
   
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else object$data
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  x0.name <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
   yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (missing(lower)) lower <- min(.data[, xname])  # lower limit default
-  if (missing(upper)) upper <- max(.data[, xname])  # upper limit default
+  if (length(x0.name) != 1) stop("Only one independent variable allowed.")
+  if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default
+  if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
   # Set up for inverse estimation
 #   if(m > 1) stop("Only one response value allowed.")
@@ -827,7 +896,7 @@ invest.lme <- function(object, y0,
   
   # Calculate point estimate by inverting fitted model
   x0_est <- try(uniroot(function(x) {
-    predict(object, newdata = makeData(x, xname), level = 0) - eta
+    predict(object, newdata = makeData(x, x0.name), level = 0) - eta
   }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
   silent = TRUE)
   
@@ -850,14 +919,14 @@ invest.lme <- function(object, y0,
   }
 
   # Estimate variance of new response
-  if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0_est, xname))
+  if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0_est, x0.name))
   
   # Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
     
     # Inversion function
     inversionFun <- function(x, bound = c("lower", "upper")) {
-      pred <- predFit(object, newdata = makeData(x, xname), se.fit = TRUE)
+      pred <- predFit(object, newdata = makeData(x, x0.name), se.fit = TRUE)
       denom <- if (mean.response) {
                  pred[, "se.fit"] 
                } else {
@@ -911,7 +980,7 @@ invest.lme <- function(object, y0,
     dmFun <- function(params) {
       fun <- function(x) {
         X <- model.matrix(eval(object$call$fixed)[-2], 
-                          data = makeData(x, xname))
+                          data = makeData(x, x0.name))
         if (mean.response) {
           X %*% params - eta
         } else {
