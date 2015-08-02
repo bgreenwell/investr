@@ -66,6 +66,41 @@ MASS::dose.p(binom_fit, p = 0.5)
 # p = 0.5: 1.778753 0.00400654
 ```
 
+### Including a factor variable
+
+Multiple predictor variables are allowed for objects of class `lm` and `gls`. 
+For instance, the example from `?MASS::dose.p` can be re-created as follows:
+```r
+
+# Load package, assuming it is already installed
+library(MASS)
+
+# Data
+ldose <- rep(0:5, 2)
+numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+sex <- factor(rep(c("M", "F"), c(6, 6)))
+SF <- cbind(numdead, numalive = 20 - numdead)
+budworm <- data.frame(ldose, numdead, sex, SF)
+
+# Logistic regression
+budworm.lg0 <- glm(SF ~ sex + ldose - 1, family = binomial, data = budworm)
+
+# Using dose.p function from package MASS
+dose.p(budworm.lg0, cf = c(1, 3), p = 1/4)
+
+#               Dose        SE
+# p = 0.25: 2.231265 0.2499089
+
+# Using invest function from package investr
+invest(budworm.lg0, y0 = 1/4, 
+       interval = "Wald",
+       x0.name = "ldose", 
+       newdata = data.frame(sex = "F"))
+       
+# estimate    lower    upper       se 
+#   2.2313   1.7415   2.7211   0.2499
+```
+
 ## Bioassay on Nasturtium
 
 The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
