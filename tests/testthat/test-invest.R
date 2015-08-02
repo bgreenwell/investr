@@ -99,6 +99,27 @@ test_that("inversion and Wald methods work", {
   wald_se <- invest(beetle_glm, y0 = 0.5, interval = "Wald")$se
   expect_that(wald_se, equals(0.003858052, tol = 1e-05)) 
 
+  #
+  # ?MASS::dose.p
+  #
+#                 Dose        SE
+#   p = 0.25: 2.231265 0.2499089
+#   p = 0.50: 3.263587 0.2297539
+#   p = 0.75: 4.295910 0.2746874
+  ldose <- rep(0:5, 2)
+  numdead <- c(1, 4, 9, 13, 18, 20, 0, 2, 6, 10, 12, 16)
+  sex <- factor(rep(c("M", "F"), c(6, 6)))
+  SF <- cbind(numdead, numalive = 20 - numdead)
+  budworm <- data.frame(SF, sex, ldose)
+  nd <- data.frame(sex = "F")
+  budworm.fm <- glm(SF ~ sex + ldose - 1, family = binomial, data = budworm)
+  p.25 <- invest(budworm.fm, y0 = 1/4, x0.name = "ldose", newdata = nd)
+  p.50 <- invest(budworm.fm, y0 = 1/2, x0.name = "ldose", newdata = nd)
+  p.75 <- invest(budworm.fm, y0 = 3/4, x0.name = "ldose", newdata = nd)
+  expect_equal(p.25, 2.231265, tol = 1e-05, check.attributes = FALSE)
+  expect_equal(p.50, 3.263587, tol = 1e-05, check.attributes = FALSE)
+  expect_equal(p.75, 4.295910, tol = 1e-05, check.attributes = FALSE)
+  
 })
 
 test_that("invest.glm with Gaussian family matches invest.lm", {

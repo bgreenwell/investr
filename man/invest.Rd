@@ -18,7 +18,7 @@ invest(object, ...)
   "Bonferroni"), k, ...)
 
 \method{invest}{glm}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, lower, upper, data,
+  "percentile", "none"), level = 0.95, lower, upper, x0.name, newdata, data,
   tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 
 \method{invest}{nls}(object, y0, interval = c("inversion", "Wald",
@@ -48,16 +48,16 @@ scale of the response variable.}
 for the interval to be calculated.}
 
 \item{mean.response}{Logical indicating whether confidence intervals should
-                     correspond to an individual response (\code{FALSE}) or
-                     a mean response (\code{TRUE}). For \code{glm} objects,
-                     this is always \code{TRUE}.}
+correspond to an individual response (\code{FALSE}) or
+a mean response (\code{TRUE}). For \code{glm} objects,
+this is always \code{TRUE}.}
 
 \item{x0.name}{For multiple linear regression, a character string giving the
 the name of the predictor variable of interest.}
 
-\item{newdata}{For multiple linear regression, a \code{dataframe} giving the
-  values of interest for all other predictor variables (i.e., those other
-  than \code{x0.name}).}
+\item{newdata}{For multiple linear regression, a \code{data.frame} giving the
+values of interest for all other predictor variables (i.e., those other
+than \code{x0.name}).}
 
 \item{data}{An optional data frame. This is required if \code{object$data}
 is \code{NULL}.}
