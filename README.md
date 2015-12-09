@@ -1,6 +1,7 @@
 # investr: Inverse Estimation in R
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/investr)](http://cran.r-project.org/package=investr)
+[![Build Status](https://travis-ci.org/bgreenwell/investr.svg?branch=master)](https://travis-ci.org/bgreenwell/investr)
 [![Downloads](http://cranlogs.r-pkg.org/badges/investr)](http://cranlogs.r-pkg.org/badges/investr)
 [![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/investr)](http://cranlogs.r-pkg.org/badges/grand-total/investr)
 
