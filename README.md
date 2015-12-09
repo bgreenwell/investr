@@ -1,5 +1,9 @@
 # investr: Inverse Estimation in R
 
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/investr)](http://cran.r-project.org/package=investr)
+[![Downloads](http://cranlogs.r-pkg.org/badges/investr)](http://cranlogs.r-pkg.org/badges/investr)
+[![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/investr)](http://cranlogs.r-pkg.org/badges/grand-total/investr)
+
 Inverse estimation, also referred to as the calibration problem, is a classical and well-known problem in regression. In simple terms, it involves the use of an observed value of the response (or specified value of the mean response) to make inference on the corresponding unknown value of the explanatory variable. 
 
 A detailed introduction to investr has been published in The R Journal: "investr: An R Package for Inverse Estimation", http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf. You can track development at https://github.com/bgreenwell/investr. To report bugs or issues, contact the main author directly or submit them to https://github.com/bgreenwell/investr/issues. 

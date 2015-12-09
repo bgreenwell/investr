@@ -48,6 +48,6 @@ Changes for version 1.3.1
 * Multiple predictor variables are allowed for "lm" and "glm" objects.
 * NAMESPACE file now imports all non-base package functions.
 * The generic function predFit is now exported. This function is used by investr 
-  to obtain predictions, and hence, inverse predictionse. For example, predFit 
+  to obtain predictions, and hence, inverse predictions. For example, predFit 
   can be used to obtain prediction intervals for nonlinear least-squares fits 
-  (i.e., models of class "nls").
+  (i.e., models of class "nls"). It also includes the option to compute
