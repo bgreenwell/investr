@@ -1052,7 +1052,7 @@ invest.lme <- function(object, y0,
 
 
 #' @keywords internal
-print.invest <- function(x, digits = 4, ...) {
+print.invest <- function(x, digits = getOption("digits"), ...) {
   if (x$interval == "inversion") print(round(unlist(x[1:3]), digits))
   if (x$interval == "Wald") print(round(unlist(x[1:4]), digits))
   if (x$interval == "percentile") print(round(unlist(x[1:5]), digits))
