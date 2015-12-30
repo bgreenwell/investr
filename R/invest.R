@@ -44,6 +44,12 @@
 #'                 bar during the bootstrap simulation.
 #' @param lower The lower endpoint of the interval to be searched.
 #' @param upper The upper endpoint of the interval to be searched.
+#' @param extendInt Character string specifying if the interval 
+#'   \code{c(lower, upper)} should be extended or directly produce an error when
+#'   the inverse of the prediction function does not have differing signs at the
+#'   endpoints. The default, \code{"no"}, keeps the search interval and hence 
+#'   produces an error. Can be abbreviated. See the documentation for the 
+#'   \code{base} R function \code{uniroot} for details.
 #' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
 #'           Only used when \code{object} inherits from class \code{"lme"}. 
 #'           Defaults to \code{qnorm((1+level)/2)}.
@@ -159,8 +165,9 @@ invest.lm <- function(object, y0,
                       x0.name, newdata, data, 
                       boot.type = c("parametric", "nonparametric"), nsim = 999, 
                       seed = NULL, progress = FALSE, lower, upper, 
-                      tol = .Machine$double.eps^0.25, maxiter = 1000, 
-                      adjust = c("none", "Bonferroni"), k,  ...) {
+                      extendInt = "no", tol = .Machine$double.eps^0.25, 
+                      maxiter = 1000, adjust = c("none", "Bonferroni"), 
+                      k,  ...) {
   
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else eval(object$call$data, 
@@ -211,26 +218,37 @@ invest.lm <- function(object, y0,
   var_pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
   rat <- var_pooled / var1  # right variance?
   
-  # Calculate point estimate by inverting fitted model
-  x0_est <- try(uniroot(function(x) {
+  x0_est <- uniroot(function(x) {
     nd <- if (multi) {
-            cbind(newdata, makeData(x, x0.name))  # append newdata
-          } else {
-            makeData(x, x0.name)
-          }
+      cbind(newdata, makeData(x, x0.name))  # append newdata
+    } else {
+      makeData(x, x0.name)
+    }
     predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
-  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-  silent = TRUE)
+  }, interval = c(lower, upper), extendInt = extendInt, 
+  tol = tol, maxiter = maxiter, trace = TRUE)$root
   
-  # Provide (informative) error message if point estimate is not found
-  if (inherits(x0_est, "try-error")) {
-    stop(paste("Point estimate not found in the search interval (", lower, 
-               ", ", upper, "). ", 
-               "Try tweaking the values of lower and upper. ",
-               "Use plotFit for guidance.", sep = ""), 
-         call. = FALSE)
-  }
-  
+#   # Calculate point estimate by inverting fitted model
+#   x0_est <- try(uniroot(function(x) {
+#     nd <- if (multi) {
+#             cbind(newdata, makeData(x, x0.name))  # append newdata
+#           } else {
+#             makeData(x, x0.name)
+#           }
+#     predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
+#   }, interval = c(lower, upper), extendInt = extendInt, 
+#   tol = tol, maxiter = maxiter)$root, 
+#   silent = TRUE)
+#   
+#   # Provide (informative) error message if point estimate is not found
+#   if (inherits(x0_est, "try-error")) {
+#     stop(paste("Point estimate not found in the search interval (", lower, 
+#                ", ", upper, "). ", 
+#                "Try tweaking the values of lower and upper. ",
+#                "Use plotFit for guidance.", sep = ""), 
+#          call. = FALSE)
+#   }
+#   
   # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") {  # || multi) {
@@ -298,7 +316,8 @@ invest.lm <- function(object, y0,
         # Calculate point estimate
         ret <- tryCatch(uniroot(function(x) {
           predict(boot_object, newdata = makeData(x, x0.name)) - mean(y0_star)
-        }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+        }, interval = c(lower, upper), extendInt = extendInt, 
+        tol = tol, maxiter = maxiter)$root, 
         error = function(e) NA)
       }
       
@@ -372,9 +391,11 @@ invest.lm <- function(object, y0,
     
     # Compute lower and upper confidence limits (i.e., the roots of the 
     # inversion function)
-    lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), tol = tol, 
+    lwr <- try(uniroot(inversionFun, interval = c(lower, x0_est), 
+                       extendInt = extendInt, tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
-    upr <- try(uniroot(inversionFun, interval = c(x0_est, upper), tol = tol, 
+    upr <- try(uniroot(inversionFun, interval = c(x0_est, upper), 
+                       extendInt = extendInt, tol = tol, 
                        maxiter = maxiter)$root, silent = TRUE)
     
     # Provide (informative) error message if confidence limits not found
@@ -420,7 +441,8 @@ invest.lm <- function(object, y0,
           makeData(x, x0.name)
         }
         predict(object_copy, newdata = nd) - z
-      }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
+      }, interval = c(lower, upper), extendInt = extendInt, 
+      tol = tol, maxiter = maxiter)$root
     }
     
     # Variance-covariane matrix
@@ -1052,6 +1074,7 @@ invest.lme <- function(object, y0,
 
 
 #' @keywords internal
+#' @export
 print.invest <- function(x, digits = getOption("digits"), ...) {
   if (x$interval == "inversion") print(round(unlist(x[1:3]), digits))
   if (x$interval == "Wald") print(round(unlist(x[1:4]), digits))
@@ -1066,7 +1089,7 @@ print.invest <- function(x, digits = getOption("digits"), ...) {
 #' bootstrap replicates of the inverse estimate.
 #' 
 #' @rdname plot.bootCal
-#' @importFrom graphics hist par
+#' @importFrom graphics hist par plot
 #' @importFrom stats qqline qqnorm
 #' @export
 #' @method plot bootCal
@@ -1074,6 +1097,7 @@ print.invest <- function(x, digits = getOption("digits"), ...) {
 #' @param x An object that inherits from class \code{"bootCal"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'            are used.
+#' @export
 plot.bootCal <- function(x, ...) {
   
   t <- x$bootreps  # bootstrap replicates
