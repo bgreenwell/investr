@@ -9,18 +9,23 @@ Description: Functions to facilitate inverse estimation (e.g., calibration) in
     generic function is also provided for plotting fitted regression models with
     or without confidence/prediction bands that may be of use to the general
     user.
-Depends:
-    base,
-Suggests:
-    testthat
-Imports:
-    graphics,
-    nlme,
-    stats,
-    utils
 Date: 2015-12-12
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/investr
+Depends: 
+    base,
+Suggests: 
+    boot,
+    car,
+    drc,
+    knitr,
+    testthat,
+Imports: 
+    graphics,
+    nlme,
+    stats,
+    utils,
+VignetteBuilder: knitr
 LazyLoad: true
 LazyData: true
 RoxygenNote: 5.0.1
