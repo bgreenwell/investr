@@ -156,7 +156,8 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
     
     # Calculate standard error
     R1 <- object$m$Rmat()
-    v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
+    # v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
+    v0 <- diag(f0 %*% tcrossprod(solve(crossprod(R1)), f0))  # slightly faster
     se_fit <- sqrt(Sigma(object)^2 * v0)
     
     # Add standard error to list of results
