@@ -25,7 +25,6 @@ Imports:
     nlme,
     stats,
     utils,
-VignetteBuilder: knitr
 LazyLoad: true
 LazyData: true
 RoxygenNote: 5.0.1
