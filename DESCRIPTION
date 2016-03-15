@@ -16,9 +16,6 @@ Depends:
     base,
 Suggests: 
     boot,
-    car,
-    drc,
-    knitr,
     testthat,
 Imports: 
     graphics,
