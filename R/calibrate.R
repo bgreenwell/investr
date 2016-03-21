@@ -133,12 +133,19 @@ calibrate.default <- function(object, y0,
   eta <- mean(y0)  # mean of new observations
   m <- length(y0)  # number of new observations
   if (mean.response && m > 1) stop("Only one mean response value allowed.")
-  b <- unname(coef(z <- lm(y ~ x, data = data.frame(x, y))))  # coefficients
-  n <- length(e <- resid(z))  # sample size and residuals
-  df <- (df1 <- n - 2) + (df2 <- m - 1)  # degrees of freedom
-  var1 <- Sigma(z)^2  # stage 1 variance estimate
+  
+  # Fit a simple linear regression model and compute necessary components
+  #b <- unname(coef(z <- lm(y ~ x, data = data.frame(x, y))))  # coefficients
+  #n <- length(e <- resid(z))  # sample size and residuals
+  #DF <- (DF1 <- n - 2) + (DF2 <- m - 1)  # degrees of freedom
+  #var1 <- Sigma(z)^2  # stage 1 variance estimate
+  z <- lm.fit(cbind(1, x), y)
+  b <- unname(z$coefficients)
+  n <- length(r <- z$residuals)  # sample size and residuals
+  DF <- (DF1 <- n - 2) + (DF2 <- m - 1)  # degrees of freedom
+  var1 <- sum(r ^ 2) / z$df.residual  # stage 1 variance estimate
   var2 <- if (m == 1) 0 else var(y0)  # stage 2 variance estimate
-  var.pooled <- (df1 * var1 + df2 * var2) / df  # pooled estimate of variance
+  var.pooled <- (DF1 * var1 + DF2 * var2) / DF  # pooled estimate of variance
   sigma.pooled <- sqrt(var.pooled)  # sqrt of pooled variance estimate
   ssx <- sum((x - mean(x))^2)  # sum-of-squares for x, Sxx
   x0.mle <- (eta - b[1L])/b[2L]  # MLE of x0
