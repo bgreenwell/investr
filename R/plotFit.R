@@ -108,7 +108,7 @@ plotFit.lm <- function(object,
   if (!missing(data)) { 
     .data <- data 
   } else {
-    .data <- eval(object$call$data, envir = parent.frame())
+    .data <- eval(getCall(object)$data, envir = parent.frame())
   }
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
@@ -273,7 +273,7 @@ plotFit.nls <- function(object,
   if (!missing(data)) { 
     .data <- data 
   } else {
-    .data <- eval(object$call$data, envir = parent.frame())
+    .data <- eval(getCall(object)$data, envir = parent.frame())
   }
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
@@ -435,7 +435,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   if (!missing(data)) { 
     .data <- data 
   } else {
-    .data <- eval(object$call$data, envir = parent.frame())
+    .data <- eval(getCall(object)$data, envir = parent.frame())
   }
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
