@@ -582,7 +582,7 @@ plotFit.rlm <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   if (!missing(data)) { 
     .data <- data 
   } else {
-    .data <- eval(object$call$data, envir = parent.frame())
+    .data <- eval(getCall(object)$data, envir = parent.frame())
   }
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
@@ -643,7 +643,7 @@ plotFit.lqs <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   if (!missing(data)) { 
     .data <- data 
   } else {
-    .data <- eval(object$call$data, envir = parent.frame())
+    .data <- eval(getCall(object)$data, envir = parent.frame())
   }
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
