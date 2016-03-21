@@ -36,7 +36,7 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
   
   # Prediction data
   newdata <- if (missing(newdata)) {
-    eval(object$call$data, envir = parent.frame()) 
+    eval(getCall(object)$data, envir = parent.frame()) 
   } else {
     as.data.frame(newdata) 
   } 
@@ -119,7 +119,7 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
   
   # Prediction data
   newdata <- if (missing(newdata)) {
-    eval(object$call$data, envir = parent.frame()) 
+    eval(getCall(object)$data, envir = parent.frame()) 
   } else {
     as.data.frame(newdata) 
   }
