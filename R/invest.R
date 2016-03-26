@@ -218,37 +218,27 @@ invest.lm <- function(object, y0,
   var_pooled <- (df1*var1 + df2*var2) / (df1 + df2)  # pooled estimate
   rat <- var_pooled / var1  # right variance?
   
-  x0_est <- uniroot(function(x) {
+  # Calculate point estimate by inverting fitted model
+  x0_est <- try(uniroot(function(x) {
     nd <- if (multi) {
-      cbind(newdata, makeData(x, x0.name))  # append newdata
-    } else {
-      makeData(x, x0.name)
-    }
+            cbind(newdata, makeData(x, x0.name))  # append newdata
+          } else {
+            makeData(x, x0.name)
+          }
     predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
-  }, interval = c(lower, upper), extendInt = extendInt, 
-  tol = tol, maxiter = maxiter, trace = TRUE)$root
-  
-#   # Calculate point estimate by inverting fitted model
-#   x0_est <- try(uniroot(function(x) {
-#     nd <- if (multi) {
-#             cbind(newdata, makeData(x, x0.name))  # append newdata
-#           } else {
-#             makeData(x, x0.name)
-#           }
-#     predict(object, newdata = nd) - eta  #  solve yhat(x0) - eta = 0 for x0
-#   }, interval = c(lower, upper), extendInt = extendInt, 
-#   tol = tol, maxiter = maxiter)$root, 
-#   silent = TRUE)
-#   
-#   # Provide (informative) error message if point estimate is not found
-#   if (inherits(x0_est, "try-error")) {
-#     stop(paste("Point estimate not found in the search interval (", lower, 
-#                ", ", upper, "). ", 
-#                "Try tweaking the values of lower and upper. ",
-#                "Use plotFit for guidance.", sep = ""), 
-#          call. = FALSE)
-#   }
-#   
+  }, interval = c(lower, upper), extendInt = extendInt,
+  tol = tol, maxiter = maxiter)$root,
+  silent = TRUE)
+
+  # Provide (informative) error message if point estimate is not found
+  if (inherits(x0_est, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower,
+               ", ", upper, "). ",
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""),
+         call. = FALSE)
+  }
+
   # Return point estimate only
   interval <- match.arg(interval)
   if (interval == "none") {  # || multi) {
