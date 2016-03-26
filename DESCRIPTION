@@ -12,12 +12,14 @@ Description: Functions to facilitate inverse estimation (e.g., calibration) in
 Date: 2015-12-12
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/investr
-Depends: 
+Depends:
     base,
-Suggests: 
+Suggests:
     boot,
     testthat,
-Imports: 
+    knitr,
+    rmarkdown
+Imports:
     graphics,
     nlme,
     stats,
@@ -25,3 +27,4 @@ Imports:
 LazyLoad: true
 LazyData: true
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr

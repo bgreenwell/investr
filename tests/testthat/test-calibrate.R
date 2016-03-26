@@ -1,6 +1,6 @@
-## The following tests are for calibration with simple linear regression models 
-## fit using the lm() function.
-context("Inverse estimation in the simple linear regression model")
+## The following tests are for calibration with simple linear regression models.
+context("Inverse estimation in the SLR model")
+
 
 test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
     
@@ -41,6 +41,7 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
   
 })
 
+
 test_that("errors are handled appropriately", {
   
   ## Simulated data
@@ -59,6 +60,7 @@ test_that("errors are handled appropriately", {
   expect_that(calibrate(y ~ x + I(x^2), y0 = 2.5), throws_error())
   
 })
+
 
 test_that("approximate standard error is correct", {
   
@@ -81,5 +83,28 @@ test_that("approximate standard error is correct", {
   ## Expectations
   expect_that(crystal.cal$se, equals(se.cal, tol = 1e-04)) # small diff
   expect_that(crystal.reg$se, equals(se.reg, tol = 1e-04))
+  
+})
+
+
+test_that("all methods produce equivalent results", {
+  
+  # Generatesome data
+  set.seed(101)
+  x <- rep(1:10, each = 3)
+  y <- 2 + 3 * x + rnorm(length(x), sd = 1)
+  
+  # Invoke all methods
+  cal1 <- calibrate(cbind(x, y), y0 = 15, mean.response = FALSE)
+  cal2 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE)
+  cal3 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE)
+  cal4 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE)
+  cal5 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE)
+  
+  # These should all be identical
+  expect_identical(cal1, cal2)
+  expect_identical(cal1, cal3)
+  expect_identical(cal1, cal4)
+  expect_identical(cal1, cal5)
   
 })
