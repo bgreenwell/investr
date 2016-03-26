@@ -94,17 +94,22 @@ test_that("all methods produce equivalent results", {
   x <- rep(1:10, each = 3)
   y <- 2 + 3 * x + rnorm(length(x), sd = 1)
   
-  # Invoke all methods
+  # Invoke all methods and throw in an example using transformations in the
+  # formula method
   cal1 <- calibrate(cbind(x, y), y0 = 15, mean.response = FALSE)
   cal2 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE)
   cal3 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE)
   cal4 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE)
   cal5 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE)
+  cal6 <- calibrate(exp(log(y)) ~ sqrt(x^2), y0 = 15, mean.response = FALSE)
   
   # These should all be identical
   expect_identical(cal1, cal2)
   expect_identical(cal1, cal3)
   expect_identical(cal1, cal4)
   expect_identical(cal1, cal5)
+  expect_identical(cal1, cal6)
+  
+  
   
 })
