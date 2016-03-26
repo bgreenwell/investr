@@ -35,9 +35,9 @@ test_that("output matches answers to Graybill and Iyer (1996, chap. 6)", {
                            level = 0.9)
   
   ## Expectations for calibration
-  expect_that(round(crystal.reg$estimate, 2), equals(9.93))
-  expect_that(round(crystal.reg$lower, 2), equals(8.65))
-  expect_that(round(crystal.reg$upper, 2), equals(11.05))
+  expect_equal(round(crystal.reg$estimate, 2), 9.93)
+  expect_equal(round(crystal.reg$lower, 2), 8.65)
+  expect_equal(round(crystal.reg$upper, 2), 11.05)
   
 })
 

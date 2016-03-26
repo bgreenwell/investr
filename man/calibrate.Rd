@@ -17,7 +17,9 @@ calibrate(object, ...)
 \method{calibrate}{formula}(formula, data = NULL, ..., subset,
   na.action = na.fail)
 
-\method{calibrate}{lm}(object, ...)
+\method{calibrate}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
+  level = 0.95, mean.response = FALSE, adjust = c("none", "Bonferroni",
+  "Scheffe"), k, ...)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, a matrix, a 
@@ -77,6 +79,13 @@ The function \code{calibrate} computes the maximum likelihood estimate and a
 condfidence interval for the unknown predictor value that corresponds to an 
 observed value of the response (or vector thereof) or specified value of the 
 mean response. See the reference listed below for more details.
+
+#' @rdname calibrate
+#' @export
+#' @method calibrate lm
+calibrate.lm <- function(object, ...) {
+  calibrate(formula(object), data = eval(object$call$data), ...)
+}
 }
 \note{
 The function \code{invest} is more general, but based on numerical

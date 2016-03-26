@@ -113,7 +113,7 @@ plotFit.lm <- function(object,
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
                "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied though the 'data'", 
+               "variables in the model must be supplied through the 'data'", 
                "argument to plotFit."))
   }
   
@@ -278,7 +278,7 @@ plotFit.nls <- function(object,
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
                "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied though the 'data'", 
+               "variables in the model must be supplied through the 'data'", 
                "argument to plotFit."))
   }
   
@@ -440,7 +440,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
                "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied though the 'data'", 
+               "variables in the model must be supplied through the 'data'", 
                "argument to plotFit."))
   }
   
@@ -587,7 +587,7 @@ plotFit.rlm <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
                "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied though the 'data'", 
+               "variables in the model must be supplied through the 'data'", 
                "argument to plotFit."))
   }
   
@@ -648,7 +648,7 @@ plotFit.lqs <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
   if (is.null(.data)) {  # throw error if no data are found
     stop(paste("No data to plot. If the", class(object), "object does not",
                "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied though the 'data'", 
+               "variables in the model must be supplied through the 'data'", 
                "argument to plotFit."))
   }
   
