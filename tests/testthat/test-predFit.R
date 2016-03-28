@@ -80,24 +80,39 @@ test_that("", {
   lm1 <- lm(y ~ x, data = d)
   lm2 <- lm(y ~ x)
 
+  # Predictions only
+  pred.investr <- predFit(lm1)
+  pred.stats <- predict(lm1)
+
+  # Predictions and confidence intervals
+  pred.investr.se.conf <- predFit(lm1, interval = "confidence")
+  pred.stats.se.conf <- predict(lm1, interval = "confidence")
+
+  # Predictions and prediction intervals
+  pred.investr.se.pred <- predFit(lm1, interval = "prediction")
+  pred.stats.se.pred <- predict(lm1, interval = "prediction")
+
   # Predictions and standard errors
   pred.investr.se <- predFit(lm1, se.fit = TRUE)
   pred.stats.se <- predict(lm1, se.fit = TRUE)
 
   # Predictions, confidence intervals, and standard errors
-  pred.investr.conf <- predFit(lm1, se.fit = TRUE, interval = "confidence")
-  pred.stats.conf <- predict(lm1, se.fit = TRUE, interval = "confidence")
+  pred.investr.se.conf <- predFit(lm1, se.fit = TRUE, interval = "confidence")
+  pred.stats.se.conf <- predict(lm1, se.fit = TRUE, interval = "confidence")
 
   # Predictions, prediction intervals, and standard errors
-  pred.investr.pred <- predFit(lm1, se.fit = TRUE, interval = "prediction")
-  pred.stats.pred <- predict(lm1, se.fit = TRUE, interval = "prediction")
+  pred.investr.se.pred <- predFit(lm1, se.fit = TRUE, interval = "prediction")
+  pred.stats.se.pred <- predict(lm1, se.fit = TRUE, interval = "prediction")
 
   # Expectations
+  expect_equal(pred.investr, pred.stats)
+  expect_equal(pred.investr.conf, pred.stats.conf)
+  expect_equal(pred.investr.pred, pred.stats.pred)
   expect_equal(pred.investr.se$se.fit, pred.stats.se$se.fit)
-  expect_equal(pred.investr.conf$se.fit, pred.stats.se$se.fit)
-  expect_equal(pred.investr.pred$se.fit, pred.stats.se$se.fit)
-  expect_equal(pred.investr.conf$fit, pred.stats.conf$fit)
-  expect_equal(pred.investr.pred$fit, pred.stats.pred$fit)
+  expect_equal(pred.investr.se.conf$se.fit, pred.stats.se$se.fit)
+  expect_equal(pred.investr.se.pred$se.fit, pred.stats.se$se.fit)
+  expect_equal(pred.investr.se.conf$fit, pred.stats.se.conf$fit)
+  expect_equal(pred.investr.se.pred$fit, pred.stats.se.pred$fit)
 
   # Using predFit on an object with no data component should cause an error if no
   # data frame is supplied via the newdata argument.
