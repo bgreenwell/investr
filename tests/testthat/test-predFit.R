@@ -85,19 +85,19 @@ test_that("", {
   pred.stats.se <- predict(lm1, se.fit = TRUE)
 
   # Predictions, confidence intervals, and standard errors
-  pred.investr.conf <- predFit(lm1, interval = "confidence")
+  pred.investr.conf <- predFit(lm1, se.fit = TRUE, interval = "confidence")
   pred.stats.conf <- predict(lm1, se.fit = TRUE, interval = "confidence")
 
   # Predictions, prediction intervals, and standard errors
-  pred.investr.pred <- predFit(lm1, interval = "prediction")
+  pred.investr.pred <- predFit(lm1, se.fit = TRUE, interval = "prediction")
   pred.stats.pred <- predict(lm1, se.fit = TRUE, interval = "prediction")
 
   # Expectations
-  expect_equal(unname(pred.investr.se$se.fit), pred.stats.se$se.fit)
-  expect_equal(unname(pred.investr.conf[, "se.fit"]), pred.stats.se$se.fit)
-  expect_equal(unname(pred.investr.pred[, "se.fit"]), pred.stats.se$se.fit)
-  expect_equal(pred.investr.conf[, 1:3], pred.stats.conf$fit)
-  expect_equal(pred.investr.pred[, 1:3], pred.stats.pred$fit)
+  expect_equal(pred.investr.se$se.fit, pred.stats.se$se.fit)
+  expect_equal(pred.investr.conf$se.fit, pred.stats.se$se.fit)
+  expect_equal(pred.investr.pred$se.fit, pred.stats.se$se.fit)
+  expect_equal(pred.investr.conf$fit, pred.stats.conf$fit)
+  expect_equal(pred.investr.pred$fit, pred.stats.pred$fit)
 
   # Using predFit on an object with no data component should cause an error if no
   # data frame is supplied via the newdata argument.
