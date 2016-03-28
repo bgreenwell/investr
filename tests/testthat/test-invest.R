@@ -2,6 +2,7 @@
 # using the lm() function.
 context("Inverse estimation with linear models")
 
+
 test_that("invest() and calibrate() produce the same results", {
   
   # Crystal weight example from Graybill and Iyer (1996, p. 434)
@@ -20,6 +21,45 @@ test_that("invest() and calibrate() produce the same results", {
   expect_true(all.equal(res2.cal, res2.inv, tol = 1e-05))
   expect_true(all.equal(res3.cal, res3.inv, tol = 1e-05))
   expect_true(all.equal(res4.cal, res4.inv, tol = 1e-04))
+  
+})
+
+
+test_that("multiple predictor results match output from JMP (v11)", {
+  
+  # Simulate some data
+  set.seed(101)
+  x1 <- runif(50, min = 0, max = 10)
+  x2 <- runif(50, min = 0, max = 10)
+  x3 <- gl(2, 50, labels = c("Control", "Treat"))
+  e <- rnorm(50, sd = 3)
+  y <- ifelse(x3 == "Control", 3 + 2*x1 - 3*x2, 6 + 7*x1 - 3*x2) + e
+  d <- data.frame("x1" = x1, "x2" = x2, "x3" = x3, "y" = y)
+  
+  # Corresponding linear model fit
+  fm <- lm(y ~ x1 + x2 + x3 + x1 * x3, data = d)
+  # coplot(y ~ x2 | x1*x3, data = d, panel = panel.smooth)
+  
+  # Compute unknown corresponding to eta = 20
+  contr <- data.frame("x1" = mean(x1), "x3" = "Control")
+  treat <- data.frame("x1" = mean(x1), "x3" = "Treat")
+  inv.contr <- invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", 
+                      newdata = contr, lower = -10)
+  inv.treat <- invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", 
+                      newdata = treat)
+  
+  # Extract model coefficients
+  b <- unname(coef(fm))
+  
+  # Expectations (confidence bounds are compared to output from JMP v11)
+  expect_equal(inv.contr$estimate, 
+               (20 - b[1L] - b[2L]*mean(x1)) / b[3L])
+  expect_equal(inv.treat$estimate, 
+               (20 - b[1L] - (b[5L] + b[2L])*mean(x1) - b[4L]) / b[3L])
+  expect_equal(inv.contr$lower, -4.28662, tol = 1e-04)
+  expect_equal(inv.contr$upper, -0.35969, tol = 1e-04)
+  expect_equal(inv.treat$lower, 5.13027, tol = 1e-04)
+  expect_equal(inv.treat$upper, 8.94294, tol = 1e-04)
   
 })
 
