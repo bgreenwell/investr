@@ -222,7 +222,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   if (se.fit) {
     res <- list("fit" = res,
                 "se.fit" = se_fit,
-                "df" = length(residuals(object)) - length(coef(object)),
+                "df" = df.residual(object),
                 "residual.scale" = Sigma(object))
   }
   
