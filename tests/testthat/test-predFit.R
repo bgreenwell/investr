@@ -50,20 +50,20 @@ test_that("results from predFit match results from PROC NLIN in SAS", {
   SAS.pred.upr.new <- c(1.54510, 1.74598, 0.49958, 1.65829, 1.34300)
   
   # Expectations for original data
-  expect_true(all.equal(round(DNase1.conf[, "se.fit"], 6), SAS.se.fit))
-  expect_true(all.equal(round(DNase1.pred[, "se.fit"], 6), SAS.se.fit))
-  expect_true(all.equal(round(DNase1.conf[, "lwr"], 5), SAS.conf.lwr, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.conf[, "upr"], 5), SAS.conf.upr, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.pred[, "lwr"], 5), SAS.pred.lwr, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.pred[, "upr"], 5), SAS.pred.upr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.conf$se.fit, 6), SAS.se.fit))
+  expect_true(all.equal(round(DNase1.pred$se.fit, 6), SAS.se.fit))
+  expect_true(all.equal(round(DNase1.conf$fit[, "lwr"], 5), SAS.conf.lwr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.conf$fit[, "upr"], 5), SAS.conf.upr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred$fit[, "lwr"], 5), SAS.pred.lwr, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred$fit[, "upr"], 5), SAS.pred.upr, tol = 1e-05))
   
   # Expectations for new data
-  expect_true(all.equal(round(DNase1.conf2[, "se.fit"], 6), SAS.se.fit.new))
-  expect_true(all.equal(round(DNase1.pred2[, "se.fit"], 6), SAS.se.fit.new))
-  expect_true(all.equal(round(DNase1.conf2[, "lwr"], 5), SAS.conf.lwr.new, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.conf2[, "upr"], 5), SAS.conf.upr.new, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.pred2[, "lwr"], 5), SAS.pred.lwr.new, tol = 1e-05))
-  expect_true(all.equal(round(DNase1.pred2[, "upr"], 5), SAS.pred.upr.new, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.conf2$se.fit, 6), SAS.se.fit.new))
+  expect_true(all.equal(round(DNase1.pred2$se.fit, 6), SAS.se.fit.new))
+  expect_true(all.equal(round(DNase1.conf2$fit[, "lwr"], 5), SAS.conf.lwr.new, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.conf2$fit[, "upr"], 5), SAS.conf.upr.new, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred2$fit[, "lwr"], 5), SAS.pred.lwr.new, tol = 1e-05))
+  expect_true(all.equal(round(DNase1.pred2$fit[, "upr"], 5), SAS.pred.upr.new, tol = 1e-05))
   
 })
 
