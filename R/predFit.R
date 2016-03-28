@@ -36,6 +36,12 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
+  # Make sure se.fit is set to TRUE if intervals are requested
+  interval <- match.arg(interval)
+  if (interval != "none") {
+    se.fit <- TRUE
+  }
+  
   # Predicted values and, if requested, standard errors too
   if (missing(newdata)) {
     # newdata <- eval(getCall(object)$data, envir = parent.frame()) 
@@ -49,7 +55,6 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   # }
 
   # Compute results
-  interval <- match.arg(interval)
   if (interval == "none") {
     
     res <- pred  # nothing else to add!
