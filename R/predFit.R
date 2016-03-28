@@ -7,14 +7,16 @@
 #'               \code{"nls"}, or \code{"lme"}.
 #' @param newdata An optional data frame in which to look for variables with 
 #'   which to predict. If omitted, the fitted values are used.      
-#' @param se.fit A logical vaue indicating if standard errors are required.
+#' @param se.fit A logical vaue indicating if standard errors are required. Default
+#'   is \code{FALSE}.
 #' @param interval Type of interval to be calculated. Can be one of "none" 
-#'   (default), "confidence", or "prediction".
+#'   (default), "confidence", or "prediction". Default is \code{"none"}.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'   the intervals (if any) to be calculated. Default is 0.95.
+#'   the intervals (if any) to be calculated. Default is \code{0.95}.
 #' @param adjust A logical value indicating if an adjustment should be made to
 #'   the critical value used in calculating the confidence interval. This is 
 #'   useful for when the calibration curve is to be used multiple, say k, times.
+#'   Default is \code{FALSE}.
 #' @param k The number times the calibration curve is to be used for computing 
 #'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
@@ -28,26 +30,24 @@ predFit <- function(object, ...) {
 #' @rdname predFit
 #' @method predFit lm
 #' @export
-predFit.lm <- function(object, newdata, se.fit = TRUE,
+predFit.lm <- function(object, newdata, se.fit = FALSE,
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
-  # Prediction data
-  newdata <- if (missing(newdata)) {
-    eval(getCall(object)$data, envir = parent.frame()) 
+  # Predicted values and, if requested, standard errors too
+  if (missing(newdata)) {
+    # newdata <- eval(getCall(object)$data, envir = parent.frame()) 
+    pred <- predict(object, se.fit = se.fit) 
   } else {
-    as.data.frame(newdata) 
+    # as.data.frame(newdata) 
+    pred <- predict(object, newdata = as.data.frame(newdata), se.fit = se.fit)
   } 
   if (is.null(newdata)) {
     stop("No data available for predictions.", call. = FALSE)
   }
 
-  # Predicted values and, if requested (default), standard errors
-  pred <- predict(object, newdata = newdata, se.fit = se.fit)  
-  # FIXME: suppressWarnings
-  
   # Compute results
   interval <- match.arg(interval)
   if (interval == "none") {
@@ -90,9 +90,13 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
     # Store results in a matrix
     res <- cbind("fit"    = pred$fit, 
                  "lwr"    = lwr, 
-                 "upr"    = upr,
-                 "se.fit" = pred$se.fit)
-    
+                 "upr"    = upr)
+    if (se.fit) {
+      res$se.fit <- pred$se.fit
+      res$df <- pred$df
+      res$residual.scale <- pred$residual.scale
+    }
+
   }
   
   # Return results
@@ -104,7 +108,7 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
 #' @rdname predFit
 #' @method predFit nls
 #' @export
-predFit.nls <- function(object, newdata, se.fit = TRUE,
+predFit.nls <- function(object, newdata, se.fit = FALSE,
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
