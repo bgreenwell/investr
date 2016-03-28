@@ -205,15 +205,15 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
     
     # Interval calculations
     if (interval == "confidence") {  # confidence limits for mean response
-      lwr <- fit - crit * se_fit  # lower limits
-      upr <- fit + crit * se_fit  # upper limits
+      lwr <- pred - crit * se_fit  # lower limits
+      upr <- pred + crit * se_fit  # upper limits
     } else {  # prediction limits for individual response
-      lwr <- fit - crit * sqrt(Sigma(object)^2 + se_fit^2)  # lower limits
-      upr <- fit + crit * sqrt(Sigma(object)^2 + se_fit^2)  # upper limits
+      lwr <- pred - crit * sqrt(Sigma(object)^2 + se_fit^2)  # lower limits
+      upr <- pred + crit * sqrt(Sigma(object)^2 + se_fit^2)  # upper limits
     }
     
     # Store results in a matrix
-    res <- cbind("fit" = fit, "lwr" = lwr, "upr" = upr)
+    res <- cbind("fit" = pred, "lwr" = lwr, "upr" = upr)
     
   }
   
