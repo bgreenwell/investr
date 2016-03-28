@@ -47,7 +47,6 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   } else {
     # as.data.frame(newdata) 
     pred <- predict(object, newdata = as.data.frame(newdata), se.fit = compute.se.fit)
-    warning("predictions on current data refer to _future_ responses")
   } 
   # if (is.null(newdata)) {
   #  stop("No data available for predictions.", call. = FALSE)
@@ -89,6 +88,7 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     } else {  # prediction interval for individual response
       lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      warning("predictions on current data refer to _future_ responses")
     }
     
     # Store results in a matrix
