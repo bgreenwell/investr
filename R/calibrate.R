@@ -127,8 +127,8 @@ calibrate.default <- function(object, y0,
                  "' not of same length.", sep = ""), call. = FALSE)
     }
   } else {
-    stop(paste(deparse(substitute(object)), 
-               "' is not a valid matrix, list, or data frame.", sep = ""),
+    stop("'", paste(deparse(substitute(object)), 
+                    "' is not a valid matrix, list, or data frame.", sep = ""),
          call. = FALSE)
   }
   eta <- mean(y0)  # mean of new observations
