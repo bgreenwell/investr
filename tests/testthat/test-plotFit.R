@@ -18,6 +18,10 @@ test_that("plotFit works", {
   # Expectations
   expect_silent(plotFit(crystal_lm))
   expect_warning(plotFit(crystal_lm, interval = "both"))
+  expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
+  expect_silent(plotFit(crystal_lm, interval = "confidence", hide = FALSE))
+  expect_silent(plotFit(crystal_lm, interval = "confidence", extend.range = TRUE, shade = TRUE, hide = FALSE))
+
   expect_silent(plotFit(beetle_glm, pch = 19, cex = 1.2, lwd = 2, 
                         xlab = "Log dose of carbon disulphide",
                         interval = "confidence", shade = TRUE, 
