@@ -44,9 +44,9 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     # as.data.frame(newdata) 
     pred <- predict(object, newdata = as.data.frame(newdata), se.fit = se.fit)
   } 
-  if (is.null(newdata)) {
-    stop("No data available for predictions.", call. = FALSE)
-  }
+  # if (is.null(newdata)) {
+  #  stop("No data available for predictions.", call. = FALSE)
+  # }
 
   # Compute results
   interval <- match.arg(interval)
