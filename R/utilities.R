@@ -12,21 +12,6 @@ AnyNA <- function(x) {
 #   }
   any(is.na(x))
 }
-
-
-#' Default Predictor Values
-#' 
-#' Sets the default predictor values for \code{invest} when \code{newdata} is
-#' missing.
-#' 
-#' @keywords internal
-getNewData <- function(x) {
-  if (is.null(dim(x))) dim(x) <- c(length(x), 1)
-  res <- apply(x, 2, function(y) {
-    if (is.numeric(y)) mean(y) else y[which.max(table(y))]
-  })
-  as.data.frame(res)
-}
   
 
 #' Make new data frame
