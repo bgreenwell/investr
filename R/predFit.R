@@ -117,6 +117,10 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
+  # Make sure se.fit is set to TRUE if intervals are requested
+  adjust <- match.arg(adjust)
+  compute.se.fit <- if (se.fit || (interval != "none")) TRUE else FALSE
+
   # No support for the Golub-Pereyra algorithm for partially linear 
   # least-squares models
   if (object$call$algorithm == "plinear") {
@@ -141,7 +145,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   pred <- object$m$predict(newdata)
   
   # Compute standard error
-  if (se.fit) {
+  if (compute.se.fit) {
     
     # Assign values to parameter names in current environment
     param.names <- names(coef(object))  
@@ -181,7 +185,6 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   } else { 
     
     # Adjustment for simultaneous inference
-    adjust <- match.arg(adjust)
     crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment 
                                            
       qt((level + 2*k - 1) / (2*k), df.residual(object))
