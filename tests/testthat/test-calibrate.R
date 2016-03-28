@@ -93,24 +93,55 @@ test_that("all methods produce equivalent results", {
   set.seed(101)
   x <- rep(1:10, each = 3)
   y <- 2 + 3 * x + rnorm(length(x), sd = 1)
+  d <- data.frame(x = x, y = y)
   
-  # Invoke all methods and throw in an example using transformations in the
-  # formula method (inversion interval)
+  # Matrix method - inversion interval
   cal1 <- calibrate(cbind(x, y), y0 = 15, mean.response = FALSE)
-  cal2 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE)
-  cal3 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE)
-  cal4 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE)
-  cal5 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE)
-  cal6 <- calibrate(exp(log(y)) ~ sqrt(x^2), y0 = 15, mean.response = FALSE)
   
-  # Invoke all methods and throw in an example using transformations in the
-  # formula method (Wald interval)
-  cal7 <- calibrate(cbind(x, y), y0 = 15, mean.response = FALSE, interval = "Wald")
-  cal8 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE, interval = "Wald")
-  cal9 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE, interval = "Wald")
-  cal10 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE, interval = "Wald")
-  cal11 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE, interval = "Wald")
-  cal12 <- calibrate(exp(log(y)) ~ sqrt(x^2), y0 = 15, mean.response = FALSE, interval = "Wald")
+  # data.frame method - inversion interval
+  cal2 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE)
+  
+  # list method - inversion interval
+  cal3 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE)
+  
+  # formula method - inversion interval
+  cal4 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE)
+  
+  # formula method w/ data - inversion interval
+  cal5 <- calibrate(y ~ x, data = d, y0 = 15, mean.response = FALSE)
+  
+  # lm method - inversion interval
+  cal6 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE)
+  
+  # formula method w/ transformations - inversion interval
+  cal7 <- calibrate(exp(log(y)) ~ sqrt(x^2), y0 = 15, mean.response = FALSE)
+
+  # Matrix method - Wald interval
+  cal8 <- calibrate(cbind(x, y), y0 = 15, mean.response = FALSE, 
+                    interval = "Wald")
+  
+  # Matrix method - Wald interval
+  cal9 <- calibrate(data.frame(x, y), y0 = 15, mean.response = FALSE, 
+                    interval = "Wald")
+  
+  # data.frame method - Wald interval
+  cal10 <- calibrate(list(x, y), y0 = 15, mean.response = FALSE, 
+                     interval = "Wald")
+  
+  # formula method - Wald interval
+  cal11 <- calibrate(y ~ x, y0 = 15, mean.response = FALSE, interval = "Wald")
+  
+  # formula method w/ data - Wald interval
+  cal12 <- calibrate(y ~ x, data = d, y0 = 15, mean.response = FALSE, 
+                    interval = "Wald")
+  
+  # lm method - Wald interval
+  cal13 <- calibrate(lm(y ~ x), y0 = 15, mean.response = FALSE, 
+                     interval = "Wald")
+  
+  # formula method method w/transformations - Wald interval
+  cal14 <- calibrate(exp(log(y)) ~ sqrt(x^2), y0 = 15, mean.response = FALSE, 
+                     interval = "Wald")
   
   # These should all be identical
   expect_identical(cal1, cal2)
@@ -118,11 +149,15 @@ test_that("all methods produce equivalent results", {
   expect_identical(cal1, cal4)
   expect_identical(cal1, cal5)
   expect_identical(cal1, cal6)
-  expect_identical(cal7, cal8)
-  expect_identical(cal7, cal9)
-  expect_identical(cal7, cal10)
-  expect_identical(cal7, cal11)
-  expect_equal(cal7, cal12)  # ?
+  expect_identical(cal1, cal7)
+  
+  # These should all be identical
+  expect_identical(cal8, cal9)
+  expect_identical(cal8, cal10)
+  expect_identical(cal8, cal11)
+  expect_identical(cal8, cal12)
+  expect_identical(cal8, cal13)
+  expect_equal(cal8, cal14)  # Why are these two not identical?
   
 })
 
@@ -130,12 +165,18 @@ test_that("all methods produce equivalent results", {
 test_that("errors get handled apprropriately", {
   
   # Nonlinear least squares fit
-  mod <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
-             start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
-             data = nasturtium)
+  nls.fit <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+                 start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+                 data = nasturtium)
   
-  # calibration
-  expect_error(calibrate(mod, y0 = c(309, 296, 419)))
+  # Multiple linear regression
+  mlr.fit1 <- lm(weight ~ time + I(time ^ 2), data = crystal)
+  mlr.fit2 <- lm(cbind(weight, weight ^ 2) ~ time, data = crystal)
+  
+  # Expectations
+  expect_error(calibrate(nls.fit, y0 = c(309, 296, 419)))
+  expect_error(calibrate(mlr.fit1, y0 = c(309, 296, 419)))
+  expect_error(calibrate(mlr.fit1, y0 = c(309, 296, 419)))
   
 })
 
