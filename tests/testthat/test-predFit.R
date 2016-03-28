@@ -113,9 +113,7 @@ test_that("", {
   expect_equal(pred.investr.se.pred$se.fit, pred.stats.se$se.fit)
   expect_equal(pred.investr.se.conf$fit, pred.stats.se.conf$fit)
   expect_equal(pred.investr.se.pred$fit, pred.stats.se.pred$fit)
-
-  # Using predFit on an object with no data component should cause an error if no
-  # data frame is supplied via the newdata argument.
-  expect_error(predFit(lm2))
+  expect_equal(predFit(lm1, se.fit = TRUE, interval = "prediction"),
+               predFit(lm2, se.fit = TRUE, interval = "prediction"))
   
 })
