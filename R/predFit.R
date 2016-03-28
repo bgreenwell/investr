@@ -88,13 +88,12 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     }
     
     # Store results in a matrix
-    res <- cbind("fit"    = pred$fit, 
-                 "lwr"    = lwr, 
-                 "upr"    = upr)
+    res <- cbind("fit" = pred$fit, "lwr" = lwr, "upr" = upr)
     if (se.fit) {
-      res$se.fit <- pred$se.fit
-      res$df <- pred$df
-      res$residual.scale <- pred$residual.scale
+      res <- list("fit"            = res,
+                  "se.fit"         = pred$se.fit,
+                  "df"             = pred$df,
+                  "residual.scale" = pred$residual.scale)
     }
 
   }
