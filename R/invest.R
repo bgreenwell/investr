@@ -246,7 +246,7 @@ invest.lm <- function(object, y0,
   }
   
   # Bootstrap intervals -------------------------------------------------------
-  if (interval == "parametric") {
+  if (interval == "percentile") {
     
     # Sanity check
     stopifnot((nsim <- as.integer(nsim[1])) > 0)
