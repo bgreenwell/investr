@@ -38,17 +38,15 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   
   # Make sure se.fit is set to TRUE if intervals are requested
   interval <- match.arg(interval)
-  if (interval != "none") {
-    se.fit <- TRUE
-  }
+  compute.se.fit <- if (interval != "none") TRUE else FALSE
   
   # Predicted values and, if requested, standard errors too
   if (missing(newdata)) {
     # newdata <- eval(getCall(object)$data, envir = parent.frame()) 
-    pred <- predict(object, se.fit = se.fit) 
+    pred <- predict(object, se.fit = compute.se.fit) 
   } else {
     # as.data.frame(newdata) 
-    pred <- predict(object, newdata = as.data.frame(newdata), se.fit = se.fit)
+    pred <- predict(object, newdata = as.data.frame(newdata), se.fit = compute.se.fit)
   } 
   # if (is.null(newdata)) {
   #  stop("No data available for predictions.", call. = FALSE)
