@@ -224,7 +224,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
 #' @rdname predFit
 #' @method predFit lme
 #' @export
-predFit.lme <- function(object, newdata, se.fit = TRUE, ...) {
+predFit.lme <- function(object, newdata, se.fit = FALSE, ...) {
   
   # Prediction data
   newdata <- if (missing(newdata)) {
