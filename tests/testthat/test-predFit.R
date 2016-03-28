@@ -67,7 +67,40 @@ test_that("results from predFit match results from PROC NLIN in SAS", {
   
 })
 
-# test_that("results from predFit match results from PROC MIXED in SAS", {
-#   
-#   
-# )}
+
+test_that("", {
+
+  # Simulate some data
+  set.seed(101)  # for reproducibilty
+  x <- rep(1:10, each = 3)
+  y <- 1 + 2 * x + rnorm(length(x), sd = 1)
+  d <- data.frame("x" = x, "y" = y)
+
+  # Fit some linear models
+  lm1 <- lm(y ~ x, data = d)
+  lm2 <- lm(y ~ x)
+
+  # Predictions and standard errors
+  pred.investr.se <- predFit(lm1, se.fit = TRUE)
+  pred.stats.se <- predict(lm1, se.fit = TRUE)
+
+  # Predictions, confidence intervals, and standard errors
+  pred.investr.conf <- predFit(lm1, interval = "confidence")
+  pred.stats.conf <- predict(lm1, se.fit = TRUE, interval = "confidence")
+
+  # Predictions, prediction intervals, and standard errors
+  pred.investr.pred <- predFit(lm1, interval = "prediction")
+  pred.stats.pred <- predict(lm1, se.fit = TRUE, interval = "prediction")
+
+  # Expectations
+  expect_equal(unname(pred.investr.se$se.fit), pred.stats.se$se.fit)
+  expect_equal(unname(pred.investr.conf[, "se.fit"]), pred.stats.se$se.fit)
+  expect_equal(unname(pred.investr.pred[, "se.fit"]), pred.stats.se$se.fit)
+  expect_equal(pred.investr.conf[, 1:3], pred.stats.conf$fit)
+  expect_equal(pred.investr.pred[, 1:3], pred.stats.pred$fit)
+
+  # Using predFit on an object with no data component should cause an error if no
+  # data frame is supplied via the newdata argument.
+  expect_error(predFit(lm2))
+  
+})
