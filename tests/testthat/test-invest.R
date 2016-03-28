@@ -25,6 +25,24 @@ test_that("invest() and calibrate() produce the same results", {
 })
 
 
+test_that("bootstrap method produces reasonable results", {
+  
+  # Crystal weight example from Graybill and Iyer (1996, p. 434)
+  crystal_lm <- lm(weight ~ time, data = crystal)
+  
+  # Bootstrap intervals
+  boot.npar <- invest(crystal_lm, y0 = 5, data = crystal, interval = "percentile",
+                      boot.type = "nonparametric", nsim = 9, seed = 101)
+  boot.par <- invest(crystal_lm, y0 = 5, data = crystal, interval = "percentile",
+                     boot.type = "parametric", nsim = 9, seed = 101)
+  
+  # Expectations
+  expect_is(boot.npar, c("invest", "bootCal"))
+  expect_is(boot.par, c("invest", "bootCal"))
+  
+})
+
+
 test_that("multiple predictor results match output from JMP (v11)", {
   
   # Simulate some data
