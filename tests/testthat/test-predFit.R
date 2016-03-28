@@ -16,12 +16,12 @@ test_that("results from predFit match results from PROC NLIN in SAS", {
   
   DNase1.nls <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
                     data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
-  DNase1.conf <- predFit(DNase1.nls, interval = "confidence")
-  DNase1.conf2 <- predFit(DNase1.nls, newdata = DNase1.new, 
-                           interval = "confidence")
-  DNase1.pred <- predFit(DNase1.nls, interval = "prediction")
-  DNase1.pred2 <- predFit(DNase1.nls, newdata = DNase1.new, 
-                           interval = "prediction")
+  DNase1.conf <- predFit(DNase1.nls, se.fit = TRUE, interval = "confidence")
+  DNase1.conf2 <- predFit(DNase1.nls, se.fit = TRUE, newdata = DNase1.new, 
+                          interval = "confidence")
+  DNase1.pred <- predFit(DNase1.nls, se.fit = TRUE, interval = "prediction")
+  DNase1.pred2 <- predFit(DNase1.nls, se.fit = TRUE, newdata = DNase1.new, 
+                          interval = "prediction")
   
   ## Fitted value standard errors from PROC NLIN in SAS/STATS
   SAS.se.fit <- c(0.002899, 0.002899, 0.006079, 0.006079, 0.007461, 0.007461, 
