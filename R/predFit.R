@@ -38,7 +38,7 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   
   # Make sure se.fit is set to TRUE if intervals are requested
   interval <- match.arg(interval)
-  compute.se.fit <- if (interval != "none") TRUE else FALSE
+  compute.se.fit <- if (se.fit || (interval != "none")) TRUE else FALSE
   
   # Predicted values and, if requested, standard errors too
   if (missing(newdata)) {
