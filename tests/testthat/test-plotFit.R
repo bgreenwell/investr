@@ -22,10 +22,15 @@ test_that("plotFit works", {
   expect_silent(plotFit(crystal_lm, interval = "confidence", hide = FALSE))
   expect_silent(plotFit(crystal_lm, interval = "confidence", extend.range = TRUE, shade = TRUE, hide = FALSE))
 
-  expect_silent(plotFit(beetle_glm, pch = 19, cex = 1.2, lwd = 2, 
-                        xlab = "Log dose of carbon disulphide",
-                        interval = "confidence", shade = TRUE, 
-                        col.conf = "lightskyblue"))
-  expect_silent(plotFit(nas_nls, lwd.fit = 2))
+  expect_silent(plotFit(beetle_glm))
+  expect_silent(plotFit(beetle_glm, interval = "confidence"))
+  expect_silent(plotFit(beetle_glm, interval = "confidence", hide = FALSE))
+  expect_silent(plotFit(beetle_glm, interval = "confidence", extend.range = TRUE, shade = TRUE, hide = FALSE))
+
+  expect_silent(plotFit(nas_nls))
+  expect_warning(plotFit(nas_nls, interval = "both"))
+  expect_warning(plotFit(nas_nls, interval = "both", extend.range = TRUE, shade = TRUE))
+  expect_silent(plotFit(nas_nls, interval = "confidence", hide = FALSE))
+  expect_silent(plotFit(nas_nls, interval = "confidence", extend.range = TRUE, shade = TRUE, hide = FALSE))
   
 })
