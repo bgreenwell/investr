@@ -159,7 +159,7 @@ test_that("invest works properly on 'special' nls fits", {
   
   # Nonlinear model fit
   DNase1_nls_1 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
-                    data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1)
+                    data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
                     
   # Using conditional linearity
   DNase1_nls_2 <- nls(density ~ 1/(1 + exp((xmid - log(conc))/scal)),
@@ -186,11 +186,11 @@ test_that("invest works properly on 'special' nls fits", {
   # Expectations
   expect_error(invest(DNase1_nls_2, y0 = 0.5))
   expect_equal(res_1$estimate, res_3$estimate, tol = 1e-05)
-  expect_equal(res_1$lower, res_3$lower)
-  expect_equal(res_1$upper, res_3$upper)
-  expect_equal(res_1$estimate, res_4$estimate)
-  expect_equal(res_1$lower, res_4$lower)
-  expect_equal(res_1$upper, res_4$upper)
+  expect_equal(res_1$lower, res_3$lower, tol = 1e-05)
+  expect_equal(res_1$upper, res_3$upper, tol = 1e-05)
+  expect_equal(res_1$estimate, res_4$estimate, tol = 1e-05)
+  expect_equal(res_1$lower, res_4$lower, tol = 1e-05)
+  expect_equal(res_1$upper, res_4$upper, tol = 1e-05)
   
 })
 
