@@ -23,10 +23,10 @@ test_that("invest() and calibrate() produce the same results", {
   expect_true(all.equal(res4.cal, res4.inv, tol = 1e-04))
   
   # invest should throw an error when extrapolating beyond the range of the data
-  expect_silent(calibrate(fm, y0 = 20, interval = "none"))  # calibrate should still work!
-  expect_error(invest(fm, y0 = 20, interval = "none"))  # point estimate should fail
-  expect_error(invest(fm, y0 = 2, interval = "inversion"))  # lwr limit should fail
-  expect_error(invest(fm, y0 = 14, interval = "inversion"))  # upr limit should fail
+  expect_silent(calibrate(crystal_lm, y0 = 20, interval = "none"))  # calibrate should still work!
+  expect_error(invest(crystal_lm, y0 = 20, interval = "none"))  # point estimate should fail
+  expect_error(invest(crystal_lm, y0 = 2, interval = "inversion"))  # lwr limit should fail
+  expect_error(invest(crystal_lm, y0 = 14, interval = "inversion"))  # upr limit should fail
 
 })
 
