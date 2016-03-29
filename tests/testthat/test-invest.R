@@ -39,6 +39,7 @@ test_that("bootstrap method produces reasonable results", {
   # Expectations
   expect_is(boot.npar, c("invest", "bootCal"))
   expect_is(boot.par, c("invest", "bootCal"))
+  expect_silent(plot(boot.npar))
   
 })
 
