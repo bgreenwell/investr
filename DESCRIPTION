@@ -16,9 +16,9 @@ Depends:
     base,
 Suggests:
     boot,
-    testthat,
     knitr,
-    rmarkdown
+    MASS,
+    testthat,
 Imports:
     graphics,
     nlme,
