@@ -2,25 +2,30 @@
 # standard errors of the fitted values
 context("Prediction")
 
-test_that("results from predFit match results from PROC NLIN in SAS", {
+# DNase data from the dataframes package
+DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
+                              0.39062500, 0.39062500, 0.78125000, 0.78125000, 
+                              1.56250000, 1.56250000, 3.12500000, 3.12500000, 
+                              6.25000000, 6.25000000, 12.50000000, 12.50000000),
+                     density = c(0.017, 0.018, 0.121, 0.124, 0.206, 0.215, 
+                                 0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
+                                 1.334, 1.364, 1.730, 1.710))
+
+# Nonlinear model fit
+DNase1_nls <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
+                  data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
+                    
+test_that("predFit matches results from PROC NLIN in SAS", {
   
-  # DNase data from the dataframes package
-  DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
-                                0.39062500, 0.39062500, 0.78125000, 0.78125000, 
-                                1.56250000, 1.56250000, 3.12500000, 3.12500000, 
-                                6.25000000, 6.25000000, 12.50000000, 12.50000000),
-                       density = c(0.017, 0.018, 0.121, 0.124, 0.206, 0.215, 
-                                   0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
-                                   1.334, 1.364, 1.730, 1.710))
+  # New data
   DNase1.new <- data.frame(conc = c(8.0, 12.0, 1.0, 10.0, 5.5))
   
-  DNase1.nls <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
-                    data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
-  DNase1.conf <- predFit(DNase1.nls, se.fit = TRUE, interval = "confidence")
-  DNase1.conf2 <- predFit(DNase1.nls, se.fit = TRUE, newdata = DNase1.new, 
+  # Predictions, standard errors, etc.
+  DNase1.conf <- predFit(DNase1_nls, se.fit = TRUE, interval = "confidence")
+  DNase1.conf2 <- predFit(DNase1_nls, se.fit = TRUE, newdata = DNase1.new, 
                           interval = "confidence")
-  DNase1.pred <- predFit(DNase1.nls, se.fit = TRUE, interval = "prediction")
-  DNase1.pred2 <- predFit(DNase1.nls, se.fit = TRUE, newdata = DNase1.new, 
+  DNase1.pred <- predFit(DNase1_nls, se.fit = TRUE, interval = "prediction")
+  DNase1.pred2 <- predFit(DNase1_nls, se.fit = TRUE, newdata = DNase1.new, 
                           interval = "prediction")
   
   # Fitted value standard errors from PROC NLIN in SAS/STATS
@@ -68,7 +73,46 @@ test_that("results from predFit match results from PROC NLIN in SAS", {
 })
 
 
-test_that("", {
+test_that("predFit works properly on 'special' nls fits", {
+  
+  # Using conditional linearity
+  DNase1_nls_2 <- nls(density ~ 1/(1 + exp((xmid - log(conc))/scal)),
+                      data = DNase1,
+                      start = list(xmid = 0, scal = 1),
+                      algorithm = "plinear")
+  
+  # Without conditional linearity
+  DNase1_nls_3 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
+                      data = DNase1,
+                      start = list(Asym = 3, xmid = 0, scal = 1))
+  
+  
+  # Using Port's nl2sol algorithm
+  DNase1_nls_4 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
+                      data = DNase1,
+                      start = list(Asym = 3, xmid = 0, scal = 1),
+                      algorithm = "port")
+  
+  # Predictions
+  pred <- predFit(DNase1_nls, se.fit = TRUE, interval = "prediction")
+  pred_3 <- predFit(DNase1_nls_3, se.fit = TRUE, interval = "prediction")
+  pred_4 <- predFit(DNase1_nls_4, se.fit = TRUE, interval = "prediction")
+  
+  # Expectations
+  expect_error(predFit(DNase1_nls_2))
+  expect_true(all.equal(pred$fit[, "fit"], pred_3$fit[, "fit"], tol = 1e-06))
+  expect_true(all.equal(pred$fit[, "fit"], pred_4$fit[, "fit"], tol = 1e-06))
+  expect_true(all.equal(pred$fit[, "lwr"], pred_3$fit[, "lwr"], tol = 1e-06))
+  expect_true(all.equal(pred$fit[, "lwr"], pred_4$fit[, "lwr"], tol = 1e-06))
+  expect_true(all.equal(pred$fit[, "upr"], pred_3$fit[, "upr"], tol = 1e-06))
+  expect_true(all.equal(pred$fit[, "upr"], pred_4$fit[, "upr"], tol = 1e-06))
+  expect_true(all.equal(pred$se.fit, pred_3$se.fit, tol = 1e-06))
+  expect_true(all.equal(pred$se.fit, pred_4$se.fit, tol = 1e-06))
+  
+})
+
+
+test_that("predFit matches output from stats::predict", {
 
   # Simulate some data
   set.seed(101)  # for reproducibilty
