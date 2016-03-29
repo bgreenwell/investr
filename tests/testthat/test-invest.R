@@ -97,33 +97,54 @@ test_that("multiple predictor results match output from JMP (v11)", {
 # using the nls() function.
 context("Inverse estimation with nonlinear models")
 
+# Nasturtium data from the drc package
+nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
+                               4.000), each = 6),
+                  weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
+                             854, 851, 850, 870,  825, 953, 834, 810, 875, 
+                             880, 834, 795,  837, 834, 810, 693, 690, 722, 
+                             738, 563,  591, 429, 395, 435, 412, 273, 257, 
+                             200,  244, 209, 225, 128, 221))
+                               
+# Log-logistic model for nasturtium data
+nas_nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+               start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+               data = nasturtium)
+
 test_that("approximate standard error is correct", {
-  
-  # Nasturtium data from the drc package
-  nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
-                                 4.000), each = 6),
-                    weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
-                               854, 851, 850, 870,  825, 953, 834, 810, 875, 
-                               880, 834, 795,  837, 834, 810, 693, 690, 722, 
-                               738, 563,  591, 429, 395, 435, 412, 273, 257, 
-                               200,  244, 209, 225, 128, 221))
-  
-  # Log-logistic model
-  nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3*log(conc))),
-                 start = list(theta1 = 1000, theta2 = -1, theta3 = 1), 
-                 data = nas)
   
   # Calculate standard errors using default and user-specified precision. The
   # estimate based on the deltaMethod function from car is 0.2847019. This was
   # calculated in the R Journal article.
-  se1 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")$se
-  se2 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald", data = nas,
+  se1 <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald")$se
+  se2 <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald", data = nas,
                 tol = 1e-10)$se
   
   # Expectations
   expect_true(all.equal(se1, 0.2847019, tol = 1e-05))  # less precise
   expect_true(all.equal(se2, 0.2847019, tol = 1e-05))  # more precise
   
+})
+
+
+test_that("Waldna and inversion methods produce the same point estimate", {
+
+  # Compute approximate 95% calibration intervals
+  res.inv <- invest(mod, y0 = c(309, 296, 419), interval = "inversion")
+  res.wald <- invest(mod, y0 = c(309, 296, 419), interval = "Wald") 
+
+  # Expectations
+  expect_identical(res.inv$estimate, res.wald$estimate)
+
+})
+
+
+test_that("bootstrap produces reasonable results", {
+
+  # Make sure bootstrap runs
+  expect_silent(invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
+                       nsim = 9, seed = 101))
+
 })
 
 # The following tests are for linear calibration with generalized linear models
