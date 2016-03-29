@@ -23,8 +23,8 @@ test_that("invest() and calibrate() produce the same results", {
   expect_true(all.equal(res4.cal, res4.inv, tol = 1e-04))
   
   # invest should throw an error when extrapolating beyond the range of the data
-  expect_silent(calibrate(fm, y0 = 20))  # calibrate should still work!
-  expect_error(invest(fm, y0 = 20))
+  expect_silent(calibrate(fm, y0 = 20, interval = "none"))  # calibrate should still work!
+  expect_error(invest(fm, y0 = 20, interval = "none"))
 
 })
 
