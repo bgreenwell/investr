@@ -554,9 +554,7 @@ invest.glm <- function(object, y0,
   # Based on exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by 
   # Alan Agresti.
   if (interval == "inversion") { 
-    
-    covmat <- vcov(object)
-    
+
     # Inversion function
     inversionFun <- function(x) {
       nd <- if (multi) {
