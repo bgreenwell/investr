@@ -24,6 +24,8 @@ test_that("plotFit works", {
   
   # Expectations
   expect_error(plotFit(lm(y ~ x)))
+  expect_error(plotFit(rlm(crystal$weight ~ crystal$time)))  # requires MASS
+  expect_error(plotFit(lqs(crystal$weight ~ crystal$time)))  # requires MASS
   expect_silent(plotFit(crystal_rlm))  # requires MASS
   expect_silent(plotFit(crystal_lqs))  # requires MASS
   expect_silent(plotFit(crystal_lm))
