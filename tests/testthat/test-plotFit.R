@@ -18,7 +18,12 @@ test_that("plotFit works", {
                  start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
                  data = nasturtium)
   
+  # Simulated data
+  x <- rnorm(10)
+  y <- rnorm(10)
+  
   # Expectations
+  expect_error(plotFit(lm(y ~ x)))
   expect_silent(plotFit(crystal_rlm))  # requires MASS
   expect_silent(plotFit(crystal_lqs))  # requires MASS
   expect_silent(plotFit(crystal_lm))
