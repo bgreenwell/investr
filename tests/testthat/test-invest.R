@@ -146,59 +146,6 @@ test_that("bootstrap produces reasonable results", {
 })
 
 
-test_that("invest works properly on 'special' nls fits", {
-  
-  # Data set from ?nls
-  DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250,  
-                                0.39062500, 0.39062500, 0.78125000, 0.78125000,  
-                                1.56250000, 1.56250000, 3.12500000, 3.12500000,
-                                6.25000000, 6.25000000, 12.50000000, 12.50000000),
-                       density = c(0.017, 0.018, 0.121, 0.124, 0.206, 0.215, 
-                                   0.377, 0.374, 0.614, 0.609, 1.019, 1.001,
-                                   1.334, 1.364, 1.730, 1.710))
-  
-  # Using a selfStart model
-  DNase1_nls_1 <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
-                      data = DNase1)
-  
-  
-  # Using conditional linearity
-  DNase1_nls_2 <- nls(density ~ 1/(1 + exp((xmid - log(conc))/scal)),
-                      data = DNase1,
-                      start = list(xmid = 0, scal = 1),
-                      algorithm = "plinear")
-  
-  # Without conditional linearity
-  DNase1_nls_3 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
-                      data = DNase1,
-                      start = list(Asym = 3, xmid = 0, scal = 1))
-  
-  
-  # Using Port's nl2sol algorithm
-  DNase1_nls_4 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
-                      data = DNase1,
-                      start = list(Asym = 3, xmid = 0, scal = 1),
-                      algorithm = "port")
-  
-  # Predictions
-  pred_1 <- predFit(DNase1_nls_1, se.fit = TRUE, interval = "prediction")
-  pred_3 <- predFit(DNase1_nls_3, se.fit = TRUE, interval = "prediction")
-  pred_4 <- predFit(DNase1_nls_4, se.fit = TRUE, interval = "prediction")
-  
-  # Expectations
-  expect_error(predFit(DNase1_nls_2))
-  expect_true(all.equal(pred_1$fit[, "fit"], pred_3$fit[, "fit"], tol = 1e-06))
-  expect_true(all.equal(pred_1$fit[, "fit"], pred_4$fit[, "fit"], tol = 1e-06))
-  expect_true(all.equal(pred_1$fit[, "lwr"], pred_3$fit[, "lwr"], tol = 1e-06))
-  expect_true(all.equal(pred_1$fit[, "lwr"], pred_4$fit[, "lwr"], tol = 1e-06))
-  expect_true(all.equal(pred_1$fit[, "upr"], pred_3$fit[, "upr"], tol = 1e-06))
-  expect_true(all.equal(pred_1$fit[, "upr"], pred_4$fit[, "upr"], tol = 1e-06))
-  expect_true(all.equal(pred_1$se.fit, pred_3$se.fit, tol = 1e-06))
-  expect_true(all.equal(pred_1$se.fit, pred_4$se.fit, tol = 1e-06))
-  
-})
-
-
 # The following tests are for linear calibration with generalized linear models
 # (GzLMs) fit using the glm() function from the stats package.
 context("Inverse estimation with generalized linear models")
