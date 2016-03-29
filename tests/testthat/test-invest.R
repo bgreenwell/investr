@@ -79,12 +79,12 @@ test_that("multiple predictor results match output from JMP (v11)", {
   expect_equal(inv.contr$upper, -0.35969, tol = 1e-04)
   expect_equal(inv.treat$lower, 5.13027, tol = 1e-04)
   expect_equal(inv.treat$upper, 8.94294, tol = 1e-04)
-  expect_error(invest(fm, y0 = 20, interval = "inversion", newdata = contr, lower = -10))  # missing x0.name
-  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", lower = -10))  # missing newdata
-  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = data.matrix(newd), lower = -10))
-  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = cbind(newd, newd), lower = -10))
-  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = newd[, 1], lower = -10))
-  
+  expect_error(invest(fm, y0 = 20, interval = "inversion", newdata = contr, lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = data.matrix(treat), lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = d, lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = d[, 1, drop = FALSE], lower = -10))
+    
 })
 
 # The following tests are for calibration with nonlinear regression models fit
