@@ -208,41 +208,46 @@ test_that("inversion and Wald methods work", {
                  interval = "Wald")
   p.75 <- invest(budworm.fm, y0 = 3/4, x0.name = "ldose", newdata = nd,
                  interval = "Wald")
+                 
+  # Expectations
   expect_equal(p.25$estimate, 2.231265, tol = 1e-05)
   expect_equal(p.50$estimate, 3.263587, tol = 1e-05)
   expect_equal(p.75$estimate, 4.295910, tol = 1e-05)
   expect_equal(p.25$se, 0.2499089, tol = 1e-05)
   expect_equal(p.50$se, 0.2297539, tol = 1e-05)
   expect_equal(p.75$se, 0.2746874, tol = 1e-05)
-  
-  # Errors
-  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.710, upper = 1.720))  # point est
-  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.770, upper = 1.800))  # lwr
-  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.700, upper = 1.772))  # upr
-  expect_error(invest(beetle_glm, y0 = 0.5, interval = "percentile"))  # bootstrap
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.710, upper = 1.720))  # point est should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.770, upper = 1.800))  # lwr should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.700, upper = 1.772))  # upr should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, interval = "percentile"))  # bootstrap should always fail
 
   
 })
 
-#test_that("invest.glm with Gaussian family matches invest.lm", {
-#  
-#  # Using glm
-#  crystal_glm <- glm(weight ~ time, data = crystal, family = gaussian)
-#  glm_inversion <- invest(gauss_glm, y0 = 5, interval = "inversion")
-#  glm_wald <- invest(gauss_glm, y0 = 5, interval = "Wald")
-#  
-#  # Using lm
-#  lm_inversion <- invest(crystal_lm, y0 = 5, interval = "inversion")
-#  lm_wald <- invest(crystal_lm, y0 = 5, interval = "Wald")
-#  
-#  # Results should match
-#  expect_equal(glm_inversion$lower, lm_inversion$lower)
-#  expect_equal(glm_inversion$upper, lm_inversion$upper)
-#  expect_equal(glm_wald$upper, lm_wald$upper)
-#  expect_equal(glm_wald$upper, lm_wald$upper)
-#  expect_equal(glm_wald$se, lm_wald$se)
-#  
-#})
+test_that("invest.glm with Gaussian family matches invest.lm", {
+  
+  # Using glm
+  crystal_glm <- glm(weight ~ time, data = crystal, family = gaussian)
+  glm_inversion <- invest(crystal_glm, y0 = 5, interval = "inversion")
+  glm_wald <- invest(crystal_glm, y0 = 5, interval = "Wald")
+  
+  # Using lm
+  lm_inversion <- invest(crystal_lm, y0 = 5, interval = "inversion", mean.response = TRUE)
+  lm_wald <- invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
+  
+  # The GLM method uses a critical value based on the standard normal 
+  # distribution; hence, these intervals will be too optimistic. However, the 
+  # point estimate should still be the same.
+  
+  # Expectations
+  expect_equal(glm_inversion$estimate, lm_inversion$estimate)
+  expect_equal(glm_wald$estimate, lm_wald$estimate)
+  expect_true(glm_inversion$lower > lm_inversion$lower)
+  expect_true(glm_inversion$upper < lm_inversion$upper)
+  expect_true(glm_wald$lower > lm_wald$lower)
+  expect_true(glm_wald$upper < lm_wald$upper)
+  
+})
 
 # The following tests are for linear calibration with random coefficient models
 # fit using the lme() function from the nlme package.
