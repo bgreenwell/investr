@@ -29,8 +29,8 @@ test_that("plotFit works", {
   expect_silent(plotFit(crystal_lm))
   expect_warning(plotFit(crystal_lm, interval = "both"))
   expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
-  expect_silent(plotFit(crystal_lm, interval = "confidence", hide = FALSE))
-  expect_silent(plotFit(crystal_lm, interval = "confidence", extend.range = TRUE, shade = TRUE, hide = FALSE))
+  expect_silent(plotFit(crystal_lm, interval = "both", hide = FALSE))
+  expect_silent(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE, hide = FALSE))
   
   expect_silent(plotFit(beetle_glm))
   expect_silent(plotFit(beetle_glm, interval = "confidence"))
@@ -41,8 +41,8 @@ test_that("plotFit works", {
   expect_silent(plotFit(nas_nls, interval = "both"))
   expect_silent(plotFit(nas_nls, interval = "both", 
                         extend.range = TRUE, shade = TRUE, xlim = c(1, 4)))
-  expect_silent(plotFit(nas_nls, interval = "confidence", hide = FALSE))
-  expect_silent(plotFit(nas_nls, interval = "confidence", extend.range = TRUE, 
+  expect_silent(plotFit(nas_nls, interval = "both", hide = FALSE))
+  expect_silent(plotFit(nas_nls, interval = "both", extend.range = TRUE, 
                         shade = TRUE, hide = FALSE, xlim = c(1, 4)))
   
 })
