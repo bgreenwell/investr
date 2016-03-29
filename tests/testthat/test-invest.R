@@ -196,6 +196,13 @@ test_that("inversion and Wald methods work", {
   expect_equal(p.50$se, 0.2297539, tol = 1e-05)
   expect_equal(p.75$se, 0.2746874, tol = 1e-05)
   
+  # Errors
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.710, upper = 1.720))  # point est
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.770, upper = 1.800))  # lwr
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.700, upper = 1.772))  # upr
+  expect_error(invest(beetle_glm, y0 = 0.5, interval = "percentile"))  # bootstrap
+
+  
 })
 
 test_that("invest.glm with Gaussian family matches invest.lm", {
