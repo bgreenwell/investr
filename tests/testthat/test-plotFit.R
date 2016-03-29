@@ -10,7 +10,12 @@ test_that("plotFit works", {
   crystal_lqs <- lqs(weight ~ time, data = crystal)  # requires MASS
 
   # Dobson's beetle example
-  beetle_glm <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
+  beetle <- data.frame(
+    x = c(1.6907, 1.7242, 1.7552, 1.7842, 1.8113, 1.8369, 1.8610, 1.8839),
+    n = c(59, 60, 62, 56, 63, 59, 62, 60),
+    y = c(6, 13, 18, 28, 52, 53, 61, 60)
+  )
+  beetle_glm <- glm(cbind(y, n-y) ~ x, data = beetle, 
                     family = binomial(link = "cloglog"))
   
   # Nasturtium example
@@ -19,6 +24,7 @@ test_that("plotFit works", {
                  data = nasturtium)
   
   # Simulated data
+  set.seed(101)
   x <- rnorm(10)
   y <- rnorm(10)
   
@@ -31,8 +37,8 @@ test_that("plotFit works", {
   expect_silent(plotFit(crystal_lm))
   expect_warning(plotFit(crystal_lm, interval = "both"))
   expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
-  expect_silent(plotFit(crystal_lm, interval = "both", hide = FALSE))
-  expect_silent(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE, hide = FALSE))
+  expect_warning(plotFit(crystal_lm, interval = "both", hide = FALSE))
+  expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE, hide = FALSE))
   
   expect_silent(plotFit(beetle_glm))
   expect_silent(plotFit(beetle_glm, interval = "confidence", extend.range = TRUE))
