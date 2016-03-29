@@ -81,10 +81,9 @@ test_that("predFit works properly on 'special' nls fits", {
                       start = list(xmid = 0, scal = 1),
                       algorithm = "plinear")
   
-  # Without conditional linearity
-  DNase1_nls_3 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
-                      data = DNase1,
-                      start = list(Asym = 3, xmid = 0, scal = 1))
+  # Using selfStart
+  DNase1_nls_3 <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
+                      data = DNase1)
   
   
   # Using Port's nl2sol algorithm
