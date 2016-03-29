@@ -1,11 +1,14 @@
 context("Basic functionality")
 
+library(MASS)
 
 test_that("plotFit works", {
   
   # Crystal weight example from Graybill and Iyer (1996, p. 434)
   crystal_lm <- lm(weight ~ time, data = crystal)
-  
+  crystal_rlm <- rlm(weight ~ time, data = crystal)  # requires MASS
+  crystal_lqs <- lqs(weight ~ time, data = crystal)  # requires MASS
+
   # Dobson's beetle example
   beetle_glm <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
                     family = binomial(link = "cloglog"))
@@ -16,6 +19,8 @@ test_that("plotFit works", {
                  data = nasturtium)
   
   # Expectations
+  expect_silent(plotFit(crystal_rlm))  # requires MASS
+  expect_silent(plotFit(crystal_lqs))  # requires MASS
   expect_silent(plotFit(crystal_lm))
   expect_warning(plotFit(crystal_lm, interval = "both"))
   expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
