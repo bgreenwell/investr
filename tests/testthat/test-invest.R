@@ -2,11 +2,12 @@
 # using the lm() function.
 context("Inverse estimation with linear models")
 
-
+# Crystal weight example from Graybill and Iyer (1996, p. 434)
+crystal_lm <- lm(weight ~ time, data = crystal)
+  
 test_that("invest() and calibrate() produce the same results", {
   
   # Crystal weight example from Graybill and Iyer (1996, p. 434)
-  crystal_lm <- lm(weight ~ time, data = crystal)
   res1.cal <- calibrate(crystal_lm, y0 = 5)
   res2.cal <- calibrate(crystal_lm, y0 = 5, mean.response = TRUE)
   res3.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald")
@@ -32,10 +33,7 @@ test_that("invest() and calibrate() produce the same results", {
 
 
 test_that("bootstrap method produces reasonable results", {
-  
-  # Crystal weight example from Graybill and Iyer (1996, p. 434)
-  crystal_lm <- lm(weight ~ time, data = crystal)
-  
+
   # Bootstrap intervals
   boot.npar <- invest(crystal_lm, y0 = 5, data = crystal, interval = "percentile",
                       boot.type = "nonparametric", nsim = 9, seed = 101)
@@ -127,11 +125,11 @@ test_that("approximate standard error is correct", {
 })
 
 
-test_that("Waldna and inversion methods produce the same point estimate", {
+test_that("Wald and inversion methods produce the same point estimate", {
 
   # Compute approximate 95% calibration intervals
-  res.inv <- invest(mod, y0 = c(309, 296, 419), interval = "inversion")
-  res.wald <- invest(mod, y0 = c(309, 296, 419), interval = "Wald") 
+  res.inv <- invest(nas_nls, y0 = c(309, 296, 419), interval = "inversion")
+  res.wald <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald") 
 
   # Expectations
   expect_identical(res.inv$estimate, res.wald$estimate)
@@ -142,7 +140,7 @@ test_that("Waldna and inversion methods produce the same point estimate", {
 test_that("bootstrap produces reasonable results", {
 
   # Make sure bootstrap runs
-  expect_silent(invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
+  expect_silent(invest(nas_nls, y0 = c(309, 296, 419), interval = "percentile", 
                        nsim = 9, seed = 101))
 
 })
@@ -229,21 +227,20 @@ test_that("inversion and Wald methods work", {
 test_that("invest.glm with Gaussian family matches invest.lm", {
   
   # Using glm
-  gauss_glm <- glm(weight ~ time, data = crystal, family = gaussian)
-  gauss_glm_inversion <- invest(gauss_glm, y0 = 5, interval = "inversion")
-  gauss_glm_wald <- invest(gauss_glm, y0 = 5, interval = "Wald")
+  crystal_glm <- glm(weight ~ time, data = crystal, family = gaussian)
+  glm_inversion <- invest(gauss_glm, y0 = 5, interval = "inversion")
+  glm_wald <- invest(gauss_glm, y0 = 5, interval = "Wald")
   
   # Using lm
-  gauss_lm <- glm(weight ~ time, data = crystal)
-  gauss_lm_inversion <- invest(gauss_lm, y0 = 5, interval = "inversion")
-  gauss_lm_wald <- invest(gauss_lm, y0 = 5, interval = "Wald")
+  lm_inversion <- invest(crystal_lm, y0 = 5, interval = "inversion")
+  lm_wald <- invest(crystal_lm, y0 = 5, interval = "Wald")
   
   # Results should match
-  expect_true(all.equal(gauss_glm_inversion$lower, gauss_lm_inversion$lower))
-  expect_true(all.equal(gauss_glm_inversion$upper, gauss_lm_inversion$upper))
-  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
-  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
-  expect_true(all.equal(gauss_glm_wald$se, gauss_lm_wald$se))
+  expect_equal(glm_inversion$lower, lm_inversion$lower)
+  expect_equal(glm_inversion$upper, lm_inversion$upper)
+  expect_equal(glm_wald$upper, lm_wald$upper)
+  expect_equal(glm_wald$upper, lm_wald$upper)
+  expect_equal(glm_wald$se, lm_wald$se)
   
 })
 
