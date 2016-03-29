@@ -5,7 +5,7 @@ context("Inverse estimation with linear models")
 # Crystal weight example from Graybill and Iyer (1996, p. 434)
 crystal_lm <- lm(weight ~ time, data = crystal)
   
-test_that("invest() and calibrate() produce the same results", {
+test_that("invest and calibrate produce the same results", {
   
   # Crystal weight example from Graybill and Iyer (1996, p. 434)
   res1.cal <- calibrate(crystal_lm, y0 = 5)
@@ -211,6 +211,10 @@ test_that("inversion and Wald methods work", {
                  interval = "Wald")
                  
   # Expectations
+  expect_error(invest(budworm.fm, y0 = 1/2, newdata = nd))  # missing x0.name
+  expect_error(invest(budworm.fm, y0 = 1/2, x0.name = "ldose"))  # missing newdata
+  expect_error(invest(budworm.fm, y0 = 1/2, x0.name = "ldose", 
+               newdata = data.matrix(nd)))  # newdata must be a data frame
   expect_equal(p.25$estimate, 2.231265, tol = 1e-05)
   expect_equal(p.50$estimate, 3.263587, tol = 1e-05)
   expect_equal(p.75$estimate, 4.295910, tol = 1e-05)
