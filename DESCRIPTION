@@ -16,6 +16,7 @@ Depends:
     base,
 Suggests:
     boot,
+    datasets,
     knitr,
     MASS,
     testthat,
