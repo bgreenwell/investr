@@ -87,10 +87,13 @@ test_that("invest and calibrate produce the same results", {
   res4.inv <- invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
   
   # Expectations
-  expect_true(all.equal(res1.cal, res1.inv, tol = 1e-05))
-  expect_true(all.equal(res2.cal, res2.inv, tol = 1e-05))
-  expect_true(all.equal(res3.cal, res3.inv, tol = 1e-05))
-  expect_true(all.equal(res4.cal, res4.inv, tol = 1e-04))
+  expect_equal(calibrate(crystal_lm, y0 = 5, interval = "none"),
+               unname(invest(crystal_lm, y0 = 5, interval = "none")), 
+               tol = 1e-05)
+  expect_equal(res1.cal, res1.inv, tol = 1e-05)
+  expect_equal(res2.cal, res2.inv, tol = 1e-05)
+  expect_equal(res3.cal, res3.inv, tol = 1e-05)
+  expect_equal(res4.cal, res4.inv, tol = 1e-04)
   
   # invest should throw an error when extrapolating beyond the range of the data
   expect_silent(calibrate(crystal_lm, y0 = 20, interval = "none"))  # calibrate should still work!
@@ -175,8 +178,8 @@ test_that("approximate standard error is correct", {
                 data = nasturtium, tol = 1e-10)$se
   
   # Expectations
-  expect_true(all.equal(se1, 0.2847019, tol = 1e-05))  # less precise
-  expect_true(all.equal(se2, 0.2847019, tol = 1e-05))  # more precise
+  expect_equal(se1, 0.2847019, tol = 1e-05)  # less precise
+  expect_equal(se2, 0.2847019, tol = 1e-05)  # more precise
   
 })
 
@@ -267,8 +270,8 @@ test_that("inversion and Wald methods work", {
   }
   lwr <- uniroot(fun, lower = 1.76, upper = 1.77, tol = 1e-10)$root
   upr <- uniroot(fun, lower = 1.77, upper = 1.79, tol = 1e-10)$root
-  expect_true(all.equal(res$lower, lwr))
-  expect_true(all.equal(res$upper, upr))
+  expect_equal(res$lower, lwr)
+  expect_equal(res$upper, upr)
   
   # Check Taylor series approximation of standard error using MASS::dose.p
   #   mass_se <- MASS::dose.p(beetle_glm, p = 0.5)
