@@ -192,9 +192,11 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
       
       if (interval == "confidence") {
         p <- length(coef(object))  # number of regression parameters
-        sqrt(p * qf((level + 1) / 2, p, df.residual(object))) 
+        # sqrt(p * qf((level + 1) / 2, p, df.residual(object))) 
+        sqrt(p * qf(level, p, df.residual(object))) 
       } else {
-        sqrt(k * qf((level + 1) / 2, k, df.residual(object))) 
+        # sqrt(k * qf((level + 1) / 2, k, df.residual(object))) 
+        sqrt(k * qf(level, k, df.residual(object))) 
       }     
       
     } else {  # no adjustment   

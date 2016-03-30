@@ -176,12 +176,17 @@ test_that("predFit reproduces example from pplied Linear Statistical Models", {
   
   # Simple linear regression model
   toluca_lm <- lm(workhrs ~ lotsize, data = toluca)
+  toluca_nls <- nls(workhrs ~ b0 + b1*lotsize, data = toluca,
+                    start = list(b0 = 62.37, b1 = 3.57))
+  
   
   # Working-Hotelling band
-  wh <- predFit(toluca_lm, newdata = data.frame("lotsize" = c(30, 65, 100)), 
-                se.fit = TRUE, interval = "confidence", level = 0.9,
-                adjust = "Scheffe")
-  
+  wh_lm <- predFit(toluca_lm, newdata = data.frame("lotsize" = c(30, 65, 100)), 
+                   se.fit = TRUE, interval = "confidence", level = 0.9,
+                   adjust = "Scheffe")
+  wh_nls <- predFit(toluca_nls, newdata = data.frame("lotsize" = c(30, 65, 100)), 
+                    se.fit = TRUE, interval = "confidence", level = 0.9,
+                    adjust = "Scheffe")
   # Answer from ALSM
   ans <- cbind("fit" = c(169.5, 294.4, 419.4),
                "lwr" = c(131.2, 272.0, 387.2),
@@ -189,7 +194,8 @@ test_that("predFit reproduces example from pplied Linear Statistical Models", {
   rownames(ans) <- 1:3
   
   # Expectations
-  expect_identical(unname(round(wh$se.fit, digits = 2)), c(16.97, 9.92, 14.27))
-  expect_identical(round(wh$fit, digits = 1), ans)
+  expect_equal(wh_lm, wh_nls, tol = 1e-05, check.attributes = FALSE)
+  expect_identical(unname(round(wh_lm$se.fit, digits = 2)), c(16.97, 9.92, 14.27))
+  expect_identical(round(wh_lm$fit, digits = 1), ans)
   
 })
