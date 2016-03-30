@@ -7,14 +7,16 @@
 #'               \code{"nls"}, or \code{"lme"}.
 #' @param newdata An optional data frame in which to look for variables with 
 #'   which to predict. If omitted, the fitted values are used.      
-#' @param se.fit A logical vaue indicating if standard errors are required.
+#' @param se.fit A logical vaue indicating if standard errors are required. Default
+#'   is \code{FALSE}.
 #' @param interval Type of interval to be calculated. Can be one of "none" 
-#'   (default), "confidence", or "prediction".
+#'   (default), "confidence", or "prediction". Default is \code{"none"}.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'   the intervals (if any) to be calculated. Default is 0.95.
+#'   the intervals (if any) to be calculated. Default is \code{0.95}.
 #' @param adjust A logical value indicating if an adjustment should be made to
 #'   the critical value used in calculating the confidence interval. This is 
 #'   useful for when the calibration curve is to be used multiple, say k, times.
+#'   Default is \code{FALSE}.
 #' @param k The number times the calibration curve is to be used for computing 
 #'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
@@ -28,31 +30,30 @@ predFit <- function(object, ...) {
 #' @rdname predFit
 #' @method predFit lm
 #' @export
-predFit.lm <- function(object, newdata, se.fit = TRUE,
-                        interval = c("none", "confidence", "prediction"), 
-                        level = 0.95, 
-                        adjust = c("none", "Bonferroni", "Scheffe"), k, 
-                        ...) {
+predFit.lm <- function(object, newdata, se.fit = FALSE,
+                       interval = c("none", "confidence", "prediction"), 
+                       level = 0.95, 
+                       adjust = c("none", "Bonferroni", "Scheffe"), k, 
+                       ...) {
   
-  # Prediction data
-  newdata <- if (missing(newdata)) {
-    eval(getCall(object)$data, envir = parent.frame()) 
-  } else {
-    as.data.frame(newdata) 
-  } 
-  if (is.null(newdata)) {
-    stop("No data available for predictions.", call. = FALSE)
-  }
-
-  # Predicted values and, if requested (default), standard errors
-  pred <- predict(object, newdata = newdata, se.fit = se.fit)  
-  # FIXME: suppressWarnings
-  
-  # Compute results
+  # Make sure se.fit is set to TRUE if intervals are requested
   interval <- match.arg(interval)
+  compute.se.fit <- if (se.fit || (interval != "none")) TRUE else FALSE
+  
+  # Predicted values and, if requested, standard errors too
+  if (missing(newdata)) {
+    # newdata <- eval(getCall(object)$data, envir = parent.frame()) 
+    pred <- predict(object, se.fit = compute.se.fit) 
+  } else {
+    # as.data.frame(newdata) 
+    pred <- predict(object, newdata = as.data.frame(newdata), se.fit = compute.se.fit)
+  } 
+
+  # Compute results
   if (interval == "none") {
     
-    res <- pred  # nothing else to add!
+    # Vector of fitted/predicted values
+    res <- pred
     
   } else { 
     
@@ -85,14 +86,21 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
     } else {  # prediction interval for individual response
       lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
       upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      warning("predictions on current data refer to _future_ responses")
     }
     
     # Store results in a matrix
-    res <- cbind("fit"    = pred$fit, 
-                 "lwr"    = lwr, 
-                 "upr"    = upr,
-                 "se.fit" = pred$se.fit)
+    res <- cbind("fit" = pred$fit, "lwr" = lwr, "upr" = upr)
     
+  }
+  
+  # If standard errors of fitted values are requested, convert results to a list
+  # and store addional information
+  if (se.fit) {
+    res <- list("fit" = res,
+                "se.fit" = pred$se.fit,
+                "df" = pred$df,
+                "residual.scale" = pred$residual.scale)
   }
   
   # Return results
@@ -104,11 +112,15 @@ predFit.lm <- function(object, newdata, se.fit = TRUE,
 #' @rdname predFit
 #' @method predFit nls
 #' @export
-predFit.nls <- function(object, newdata, se.fit = TRUE,
+predFit.nls <- function(object, newdata, se.fit = FALSE,
                         interval = c("none", "confidence", "prediction"), 
                         level = 0.95, 
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
+  
+  # Make sure se.fit is set to TRUE if intervals are requested
+  adjust <- match.arg(adjust)
+  compute.se.fit <- if (se.fit || (interval != "none")) TRUE else FALSE
   
   # No support for the Golub-Pereyra algorithm for partially linear 
   # least-squares models
@@ -134,7 +146,7 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
   pred <- object$m$predict(newdata)
   
   # Compute standard error
-  if (se.fit) {
+  if (compute.se.fit) {
     
     # Assign values to parameter names in current environment
     param.names <- names(coef(object))  
@@ -160,23 +172,20 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
     v0 <- diag(f0 %*% tcrossprod(solve(crossprod(R1)), f0))  # slightly faster
     se_fit <- sqrt(Sigma(object)^2 * v0)
     
-    # Add standard error to list of results
-    pred <- list(fit = pred, se.fit = se_fit)
-    
   }
   
   # Compute results
   interval <- match.arg(interval)
   if (interval == "none") {
     
+    # Vector of fitted/predicted values
     res <- pred    
     
   } else { 
     
     # Adjustment for simultaneous inference
-    adjust <- match.arg(adjust)
     crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment 
-                                           
+      
       qt((level + 2*k - 1) / (2*k), df.residual(object))
       
     } else if (adjust == "Scheffe") {  # Scheffe adjustment
@@ -196,22 +205,28 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
     
     # Interval calculations
     if (interval == "confidence") {  # confidence limits for mean response
-      lwr <- pred$fit - crit * pred$se.fit  # lower limits
-      upr <- pred$fit + crit * pred$se.fit  # upper limits
+      lwr <- pred - crit * se_fit  # lower limits
+      upr <- pred + crit * se_fit  # upper limits
     } else {  # prediction limits for individual response
-      lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # lower limits
-      upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)  # upper limits
+      lwr <- pred - crit * sqrt(Sigma(object)^2 + se_fit^2)  # lower limits
+      upr <- pred + crit * sqrt(Sigma(object)^2 + se_fit^2)  # upper limits
     }
     
     # Store results in a matrix
-    res <- cbind("fit"    = pred$fit, 
-                 "lwr"    = lwr, 
-                 "upr"    = upr,
-                 "se.fit" = pred$se.fit)
+    res <- cbind("fit" = pred, "lwr" = lwr, "upr" = upr)
     
   }
   
-  # Return list of results
+  # If standard errors of fitted values are requested, convert results to a list
+  # and store addional information
+  if (se.fit) {
+    res <- list("fit" = res,
+                "se.fit" = se_fit,
+                "df" = df.residual(object),
+                "residual.scale" = Sigma(object))
+  }
+  
+  # Return results
   return(res)
   
   }
@@ -220,7 +235,7 @@ predFit.nls <- function(object, newdata, se.fit = TRUE,
 #' @rdname predFit
 #' @method predFit lme
 #' @export
-predFit.lme <- function(object, newdata, se.fit = TRUE, ...) {
+predFit.lme <- function(object, newdata, se.fit = FALSE, ...) {
   
   # Prediction data
   newdata <- if (missing(newdata)) {
@@ -238,12 +253,12 @@ predFit.lme <- function(object, newdata, se.fit = TRUE, ...) {
   # Approximate standard error of fitted values
   if (se.fit) {
     Xmat <- makeX(object, newdata)  # fixed-effects design matrix
-#     Xmat <- makeX(object, newdata = makeData(newdata, xname))
+    #     Xmat <- makeX(object, newdata = makeData(newdata, xname))
     se_fit <- sqrt(diag(Xmat %*% vcov(object) %*% t(Xmat)))
     # list(fit = pred, se.fit = se_fit)
     cbind("fit" = pred, "se.fit" = se_fit)
   } else {
     pred
   }
-
+  
 }

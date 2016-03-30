@@ -9,15 +9,15 @@
 \usage{
 predFit(object, ...)
 
-\method{predFit}{lm}(object, newdata, se.fit = TRUE, interval = c("none",
+\method{predFit}{lm}(object, newdata, se.fit = FALSE, interval = c("none",
   "confidence", "prediction"), level = 0.95, adjust = c("none",
   "Bonferroni", "Scheffe"), k, ...)
 
-\method{predFit}{nls}(object, newdata, se.fit = TRUE, interval = c("none",
+\method{predFit}{nls}(object, newdata, se.fit = FALSE, interval = c("none",
   "confidence", "prediction"), level = 0.95, adjust = c("none",
   "Bonferroni", "Scheffe"), k, ...)
 
-\method{predFit}{lme}(object, newdata, se.fit = TRUE, ...)
+\method{predFit}{lme}(object, newdata, se.fit = FALSE, ...)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},

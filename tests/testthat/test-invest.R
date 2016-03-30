@@ -2,10 +2,12 @@
 # using the lm() function.
 context("Inverse estimation with linear models")
 
-test_that("invest() and calibrate() produce the same results", {
+# Crystal weight example from Graybill and Iyer (1996, p. 434)
+crystal_lm <- lm(weight ~ time, data = crystal)
+  
+test_that("invest and calibrate produce the same results", {
   
   # Crystal weight example from Graybill and Iyer (1996, p. 434)
-  crystal_lm <- lm(weight ~ time, data = crystal)
   res1.cal <- calibrate(crystal_lm, y0 = 5)
   res2.cal <- calibrate(crystal_lm, y0 = 5, mean.response = TRUE)
   res3.cal <- calibrate(crystal_lm, y0 = 5, interval = "Wald")
@@ -21,33 +23,99 @@ test_that("invest() and calibrate() produce the same results", {
   expect_true(all.equal(res3.cal, res3.inv, tol = 1e-05))
   expect_true(all.equal(res4.cal, res4.inv, tol = 1e-04))
   
+  # invest should throw an error when extrapolating beyond the range of the data
+  expect_silent(calibrate(crystal_lm, y0 = 20, interval = "none"))  # calibrate should still work!
+  expect_error(invest(crystal_lm, y0 = 20, interval = "none"))  # point estimate should fail
+  expect_error(invest(crystal_lm, y0 = 2, interval = "inversion"))  # lwr limit should fail
+  expect_error(invest(crystal_lm, y0 = 14, interval = "inversion"))  # upr limit should fail
+
+})
+
+
+test_that("bootstrap method produces reasonable results", {
+
+  # Bootstrap intervals
+  boot.npar <- invest(crystal_lm, y0 = 5, data = crystal, interval = "percentile",
+                      boot.type = "nonparametric", nsim = 9, seed = 101)
+  boot.par <- invest(crystal_lm, y0 = 5, data = crystal, interval = "percentile",
+                     boot.type = "parametric", nsim = 9, seed = 101)
+  
+  # Expectations
+  expect_is(boot.npar, c("invest", "bootCal"))
+  expect_is(boot.par, c("invest", "bootCal"))
+  expect_silent(plot(boot.npar))
+  
+})
+
+
+test_that("multiple predictor results match output from JMP (v11)", {
+  
+  # Simulate some data
+  set.seed(101)
+  x1 <- runif(50, min = 0, max = 10)
+  x2 <- runif(50, min = 0, max = 10)
+  x3 <- gl(2, 50, labels = c("Control", "Treat"))
+  e <- rnorm(50, sd = 3)
+  y <- ifelse(x3 == "Control", 3 + 2*x1 - 3*x2, 6 + 7*x1 - 3*x2) + e
+  d <- data.frame("x1" = x1, "x2" = x2, "x3" = x3, "y" = y)
+  
+  # Corresponding linear model fit
+  fm <- lm(y ~ x1 + x2 + x3 + x1 * x3, data = d)
+  # coplot(y ~ x2 | x1*x3, data = d, panel = panel.smooth)
+  
+  # Compute unknown corresponding to eta = 20
+  contr <- data.frame("x1" = mean(x1), "x3" = "Control")
+  treat <- data.frame("x1" = mean(x1), "x3" = "Treat")
+  inv.contr <- invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", 
+                      newdata = contr, lower = -10)
+  inv.treat <- invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", 
+                      newdata = treat)
+  
+  # Extract model coefficients
+  b <- unname(coef(fm))
+  
+  # Expectations (confidence bounds are compared to output from JMP v11)
+  expect_equal(inv.contr$estimate, 
+               (20 - b[1L] - b[2L]*mean(x1)) / b[3L])
+  expect_equal(inv.treat$estimate, 
+               (20 - b[1L] - (b[5L] + b[2L])*mean(x1) - b[4L]) / b[3L])
+  expect_equal(inv.contr$lower, -4.28662, tol = 1e-04)
+  expect_equal(inv.contr$upper, -0.35969, tol = 1e-04)
+  expect_equal(inv.treat$lower, 5.13027, tol = 1e-04)
+  expect_equal(inv.treat$upper, 8.94294, tol = 1e-04)
+  expect_error(invest(fm, y0 = 20, interval = "inversion", newdata = contr, lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = data.matrix(treat), lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = d, lower = -10))
+  expect_error(invest(fm, y0 = 20, x0.name = "x2", interval = "inversion", newdata = d[, 1, drop = FALSE], lower = -10))
+    
 })
 
 # The following tests are for calibration with nonlinear regression models fit
 # using the nls() function.
 context("Inverse estimation with nonlinear models")
 
+# Nasturtium data from the drc package
+nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
+                               4.000), each = 6),
+                  weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
+                             854, 851, 850, 870,  825, 953, 834, 810, 875, 
+                             880, 834, 795,  837, 834, 810, 693, 690, 722, 
+                             738, 563,  591, 429, 395, 435, 412, 273, 257, 
+                             200,  244, 209, 225, 128, 221))
+                               
+# Log-logistic model for nasturtium data
+nas_nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+               start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
+               data = nasturtium)
+
 test_that("approximate standard error is correct", {
-  
-  # Nasturtium data from the drc package
-  nas <- data.frame(conc = rep(c(0.000, 0.025, 0.075, 0.250, 0.750, 2.000, 
-                                 4.000), each = 6),
-                    weight = c(920, 889, 866, 930, 992, 1017, 919, 878, 882, 
-                               854, 851, 850, 870,  825, 953, 834, 810, 875, 
-                               880, 834, 795,  837, 834, 810, 693, 690, 722, 
-                               738, 563,  591, 429, 395, 435, 412, 273, 257, 
-                               200,  244, 209, 225, 128, 221))
-  
-  # Log-logistic model
-  nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3*log(conc))),
-                 start = list(theta1 = 1000, theta2 = -1, theta3 = 1), 
-                 data = nas)
   
   # Calculate standard errors using default and user-specified precision. The
   # estimate based on the deltaMethod function from car is 0.2847019. This was
   # calculated in the R Journal article.
-  se1 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")$se
-  se2 <- invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald", data = nas,
+  se1 <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald")$se
+  se2 <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald", data = nas,
                 tol = 1e-10)$se
   
   # Expectations
@@ -55,6 +123,77 @@ test_that("approximate standard error is correct", {
   expect_true(all.equal(se2, 0.2847019, tol = 1e-05))  # more precise
   
 })
+
+
+test_that("Wald and inversion methods produce the same point estimate", {
+
+  # Compute approximate 95% calibration intervals
+  res.inv <- invest(nas_nls, y0 = c(309, 296, 419), interval = "inversion")
+  res.wald <- invest(nas_nls, y0 = c(309, 296, 419), interval = "Wald") 
+
+  # Expectations
+  expect_identical(res.inv$estimate, res.wald$estimate)
+
+})
+
+
+test_that("bootstrap produces reasonable results", {
+
+  # Make sure bootstrap runs
+  expect_silent(invest(nas_nls, y0 = c(309, 296, 419), interval = "percentile", 
+                       nsim = 9, seed = 101))
+
+})
+
+
+test_that("invest works properly on 'special' nls fits", {
+  
+  # DNase data from the dataframes package
+  DNase1 <- data.frame(conc = c(0.04882812, 0.04882812, 0.19531250, 0.19531250, 
+                                0.39062500, 0.39062500, 0.78125000, 0.78125000, 
+                                1.56250000, 1.56250000, 3.12500000, 3.12500000, 
+                                6.25000000, 6.25000000, 12.50000000, 12.50000000),
+                       density = c(0.017, 0.018, 0.121, 0.124, 0.206, 0.215, 
+                                   0.377, 0.374, 0.614, 0.609, 1.019, 1.001, 
+                                   1.334, 1.364, 1.730, 1.710))
+  
+  # Nonlinear model fit
+  DNase1_nls_1 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), 
+                    data = DNase1, start = list(Asym = 3, xmid = 0, scal = 1))
+                    
+  # Using conditional linearity
+  DNase1_nls_2 <- nls(density ~ 1/(1 + exp((xmid - log(conc))/scal)),
+                      data = DNase1,
+                      start = list(xmid = 0, scal = 1),
+                      algorithm = "plinear")
+  
+  # Using selfStart
+  DNase1_nls_3 <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), 
+                      data = DNase1)
+  
+  
+  # Using Port's nl2sol algorithm
+  DNase1_nls_4 <- nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)),
+                      data = DNase1,
+                      start = list(Asym = 3, xmid = 0, scal = 1),
+                      algorithm = "port")
+  
+  # Predictions
+  res_1 <- invest(DNase1_nls_1, y0 = 0.5)
+  res_3 <- invest(DNase1_nls_3, y0 = 0.5)
+  res_4 <- invest(DNase1_nls_4, y0 = 0.5)
+  
+  # Expectations
+  expect_error(invest(DNase1_nls_2, y0 = 0.5))
+  expect_equal(res_1$estimate, res_3$estimate, tol = 1e-05)
+  expect_equal(res_1$lower, res_3$lower, tol = 1e-05)
+  expect_equal(res_1$upper, res_3$upper, tol = 1e-05)
+  expect_equal(res_1$estimate, res_4$estimate, tol = 1e-05)
+  expect_equal(res_1$lower, res_4$lower, tol = 1e-05)
+  expect_equal(res_1$upper, res_4$upper, tol = 1e-05)
+  
+})
+
 
 # The following tests are for linear calibration with generalized linear models
 # (GzLMs) fit using the glm() function from the stats package.
@@ -119,33 +258,48 @@ test_that("inversion and Wald methods work", {
                  interval = "Wald")
   p.75 <- invest(budworm.fm, y0 = 3/4, x0.name = "ldose", newdata = nd,
                  interval = "Wald")
+                 
+  # Expectations
+  expect_error(invest(budworm.fm, y0 = 1/2, newdata = nd))  # missing x0.name
+  expect_error(invest(budworm.fm, y0 = 1/2, x0.name = "ldose"))  # missing newdata
+  expect_error(invest(budworm.fm, y0 = 1/2, x0.name = "ldose", 
+               newdata = data.matrix(nd)))  # newdata must be a data frame
   expect_equal(p.25$estimate, 2.231265, tol = 1e-05)
   expect_equal(p.50$estimate, 3.263587, tol = 1e-05)
   expect_equal(p.75$estimate, 4.295910, tol = 1e-05)
   expect_equal(p.25$se, 0.2499089, tol = 1e-05)
   expect_equal(p.50$se, 0.2297539, tol = 1e-05)
   expect_equal(p.75$se, 0.2746874, tol = 1e-05)
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.710, upper = 1.720))  # point est should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.770, upper = 1.800))  # lwr should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, lower = 1.700, upper = 1.772))  # upr should fail
+  expect_error(invest(beetle_glm, y0 = 0.5, interval = "percentile"))  # bootstrap should always fail
+
   
 })
 
 test_that("invest.glm with Gaussian family matches invest.lm", {
   
   # Using glm
-  gauss_glm <- glm(weight ~ time, data = crystal, family = gaussian)
-  gauss_glm_inversion <- invest(gauss_glm, y0 = 5, interval = "inversion")
-  gauss_glm_wald <- invest(gauss_glm, y0 = 5, interval = "Wald")
+  crystal_glm <- glm(weight ~ time, data = crystal, family = gaussian)
+  glm_inversion <- invest(crystal_glm, y0 = 5, interval = "inversion")
+  glm_wald <- invest(crystal_glm, y0 = 5, interval = "Wald")
   
   # Using lm
-  gauss_lm <- glm(weight ~ time, data = crystal)
-  gauss_lm_inversion <- invest(gauss_lm, y0 = 5, interval = "inversion")
-  gauss_lm_wald <- invest(gauss_lm, y0 = 5, interval = "Wald")
+  lm_inversion <- invest(crystal_lm, y0 = 5, interval = "inversion", mean.response = TRUE)
+  lm_wald <- invest(crystal_lm, y0 = 5, interval = "Wald", mean.response = TRUE)
   
-  # Results should match
-  expect_true(all.equal(gauss_glm_inversion$lower, gauss_lm_inversion$lower))
-  expect_true(all.equal(gauss_glm_inversion$upper, gauss_lm_inversion$upper))
-  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
-  expect_true(all.equal(gauss_glm_wald$upper, gauss_lm_wald$upper))
-  expect_true(all.equal(gauss_glm_wald$se, gauss_lm_wald$se))
+  # The GLM method uses a critical value based on the standard normal 
+  # distribution; hence, these intervals will be too optimistic. However, the 
+  # point estimate should still be the same.
+  
+  # Expectations
+  expect_equal(glm_inversion$estimate, lm_inversion$estimate)
+  expect_equal(glm_wald$estimate, lm_wald$estimate)
+  expect_true(glm_inversion$lower > lm_inversion$lower)
+  expect_true(glm_inversion$upper < lm_inversion$upper)
+  expect_true(glm_wald$lower > lm_wald$lower)
+  expect_true(glm_wald$upper < lm_wald$upper)
   
 })
 

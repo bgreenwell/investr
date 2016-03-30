@@ -50,4 +50,6 @@ Changes for version 1.3.1
 * The generic function predFit is now exported. This function is used by investr 
   to obtain predictions, and hence, inverse predictions. For example, predFit 
   can be used to obtain prediction intervals for nonlinear least-squares fits 
-  (i.e., models of class "nls"). It also includes the option to compute
+  (i.e., models of class "nls").
+* More tests have been added.
+* plotFit now has methods for "rlm" and "lqs" objects from package MASS.
