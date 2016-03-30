@@ -160,3 +160,36 @@ test_that("predFit matches output from stats::predict", {
                predFit(lm2, se.fit = TRUE, interval = "prediction"))
   
 })
+
+
+context("Working-Hotelling band")
+
+
+test_that("predFit reproduces example from pplied Linear Statistical Models", {
+  
+  # Toluca company data from Applied Linear Statistical Models (ALSM)
+  lotsize <- c(80, 30, 50, 90, 70, 60, 120, 80, 100, 50, 40, 70, 90, 
+               20, 110, 100, 30, 50, 90, 110, 30, 90, 40, 80, 70)
+  workhrs <- c(399, 121, 221, 376, 361, 224, 546, 352, 353, 157, 160, 252, 389, 
+               113, 435, 420, 212, 268, 377, 421, 273, 468, 244, 342, 323)
+  toluca <- data.frame(lotsize, workhrs)
+  
+  # Simple linear regression model
+  toluca_lm <- lm(workhrs ~ lotsize, data = toluca)
+  
+  # Working-Hotelling band
+  wh <- predFit(toluca_lm, newdata = data.frame("lotsize" = c(30, 65, 100)), 
+                se.fit = TRUE, interval = "confidence", level = 0.9,
+                adjust = "Scheffe")
+  
+  # Answer from ALSM
+  ans <- cbind("fit" = c(169.5, 294.4, 419.4),
+               "lwr" = c(131.2, 272.0, 387.2),
+               "upr" = c(207.8, 316.8,451.6))
+  rownames(ans) <- 1:3
+  
+  # Expectations
+  expect_identical(unname(round(wh$se.fit, digits = 2)), c(16.97, 9.92, 14.27))
+  expect_identical(round(wh$fit, digits = 1), ans)
+  
+})

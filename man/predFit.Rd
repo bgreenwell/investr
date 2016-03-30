@@ -29,17 +29,19 @@ are used.}
 \item{newdata}{An optional data frame in which to look for variables with 
 which to predict. If omitted, the fitted values are used.}
 
-\item{se.fit}{A logical vaue indicating if standard errors are required.}
+\item{se.fit}{A logical vaue indicating if standard errors are required. Default
+is \code{FALSE}.}
 
 \item{interval}{Type of interval to be calculated. Can be one of "none" 
-(default), "confidence", or "prediction".}
+(default), "confidence", or "prediction". Default is \code{"none"}.}
 
 \item{level}{A numeric scalar between 0 and 1 giving the confidence level for 
-the intervals (if any) to be calculated. Default is 0.95.}
+the intervals (if any) to be calculated. Default is \code{0.95}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
 the critical value used in calculating the confidence interval. This is 
-useful for when the calibration curve is to be used multiple, say k, times.}
+useful for when the calibration curve is to be used multiple, say k, times.
+Default is \code{FALSE}.}
 
 \item{k}{The number times the calibration curve is to be used for computing 
 a confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
