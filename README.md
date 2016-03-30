@@ -74,7 +74,7 @@ MASS::dose.p(binom_fit, p = 0.5)
 
 ### Including a factor variable
 
-Multiple predictor variables are allowed for objects of class `lm` and `gls`. 
+Multiple predictor variables are allowed for objects of class `lm` and `glm`. 
 For instance, the example from `?MASS::dose.p` can be re-created as follows:
 ```r
 
