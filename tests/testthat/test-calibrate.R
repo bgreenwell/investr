@@ -190,6 +190,6 @@ test_that("multiple inference procedures work", {
                                  adjust = "Scheffe", k = 1)
   
   # Expectations
-  expect_identical(crystal.cal, crystal.cal.multi)
+  expect_equal(crystal.cal, crystal.cal.multi)
   
 })
