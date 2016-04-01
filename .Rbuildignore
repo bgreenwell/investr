@@ -2,9 +2,4 @@
 ^\.Rproj\.user$
 ^.*\.png$
 ^\.travis\.yml$
-\.log$
-\.bst$
-\.bbl$
-\.tex$
-figure/.*
-cache/.*
+^tests/testthat/Rplots\.pdf$

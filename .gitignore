@@ -2,5 +2,4 @@
 .Rhistory
 .RData
 investr.Rproj
-vignettes/cache/*
 inst/doc
