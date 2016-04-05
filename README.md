@@ -18,6 +18,7 @@ As of right now, `investr` supports (univariate) inverse estimation with objects
 * `lme` - linear mixed-effects models (fit using the `nlme` package)
 
 ## Installation
+
 The package is [currently listed on CRAN](http://cran.r-project.org/package=investr) and can easily be installed:
 ```r
   # Install from CRAN
