@@ -17,7 +17,7 @@ As of right now, `investr` supports (univariate) inverse estimation with objects
 * `nls` - nonlinear least-squares models
 * `lme` - linear mixed-effects models (fit using the `nlme` package)
 
-# Installation
+## Installation
 The package is [currently listed on CRAN](http://cran.r-project.org/package=investr) and can easily be installed:
 ```r
   # Install from CRAN
@@ -30,9 +30,9 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
   ctv::install.views("ChemPhys")
 ```
 
-# Examples
+## Examples
 
-## Dobson's Beetle Data
+### Dobson's Beetle Data
 
 In binomial regression, the estimated lethal dose corresponding to a specific probability _p_ of death is often referred to as _LDp_. `invest` obtains an estimate of _LDp_ by inverting the fitted mean response on the link scale. Similarly, a confidence interval for _LDp_ can be obtained by inverting a confidence interval for the mean response on the link scale.
 ```r
@@ -107,7 +107,7 @@ invest(budworm.lg0, y0 = 1/4,
 #   2.2313   1.7415   2.7211   0.2499
 ```
 
-## Bioassay on Nasturtium
+### Bioassay on Nasturtium
 
 The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
 log-logistic model describes the data well:
