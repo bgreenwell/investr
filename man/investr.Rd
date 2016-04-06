@@ -23,8 +23,8 @@ bugs or issues, contact the main author directly or submit them to
 As of right now, \code{investr} supports (univariate) inverse estimation 
 with objects of class:
 \itemize{
-  \item{\code{lm}} --- linear models
-  \item{\code{glm}} --- generalized linear models
+  \item{\code{lm}} --- linear models (multiple predictor variables allowed)
+  \item{\code{glm}} --- generalized linear models (multiple predictor variables allowed)
   \item{\code{nls}} --- nonlinear least-squares models
   \item{\code{lme}} --- linear mixed-effects models (fit using the 
     \code{nlme} package)
