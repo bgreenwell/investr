@@ -46,7 +46,7 @@
 #' @rdname plotFit
 #' @importFrom graphics lines plot polygon
 #' @importFrom grDevices extendrange grey
-#' @importFrom stats family formula predict qnorm
+#' @importFrom stats family formula getCall predict qnorm
 #' @export
 #' @note
 #' By default, the plotted intervals are pointwise intervals. For simultaneous 
