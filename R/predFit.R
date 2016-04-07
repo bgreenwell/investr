@@ -21,6 +21,7 @@
 #'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'   are used.
+#' @importFrom stats getCall predict qf qt
 #' @export
 predFit <- function(object, ...) {
   UseMethod("predFit")
