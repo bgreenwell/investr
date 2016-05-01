@@ -16,9 +16,9 @@ explanatory variable.
 A detailed introduction to investr has been published in The R Journal: 
 "investr: An R Package for Inverse Estimation", 
 \url{http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf}. You 
-can track development at \url{https://github.com/w108bmg/investr}. To report 
+can track development at \url{https://github.com/bgreenwell/investr}. To report 
 bugs or issues, contact the main author directly or submit them to 
-\url{https://github.com/w108bmg/investr/issues}.
+\url{https://github.com/bgreenwell/investr/issues}.
 
 As of right now, \code{investr} supports (univariate) inverse estimation 
 with objects of class:

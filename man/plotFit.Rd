@@ -2,14 +2,18 @@
 % Please edit documentation in R/plotFit.R
 \name{plotFit}
 \alias{plotFit}
+\alias{plotFit.default}
 \alias{plotFit.glm}
 \alias{plotFit.lm}
-\alias{plotFit.lqs}
 \alias{plotFit.nls}
-\alias{plotFit.rlm}
-\title{Plotting Confidence/Prediction Bands}
+\alias{plotFit.pspline}
+\title{Plotting Fitted Models}
 \usage{
 plotFit(object, ...)
+
+\method{plotFit}{default}(object, data, ..., extend.range = FALSE,
+  hide = TRUE, col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500,
+  xlab, ylab, xlim, ylim)
 
 \method{plotFit}{lm}(object, interval = c("none", "both", "confidence",
   "prediction"), level = 0.95, data, adjust = c("none", "Bonferroni",
@@ -36,13 +40,10 @@ plotFit(object, ...)
   lty.conf = if (shade) 1 else 2, lty.fit = 1, lwd.conf = 1,
   lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim)
 
-\method{plotFit}{rlm}(object, data, ..., extend.range = FALSE, hide = TRUE,
-  col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, xlab, ylab,
-  xlim, ylim)
-
-\method{plotFit}{lqs}(object, data, ..., extend.range = FALSE, hide = TRUE,
-  col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, xlab, ylab,
-  xlim, ylim)
+\method{plotFit}{pspline}(object, interval = c("none", "confidence",
+  "prediction"), level = 0.95, ..., n = 500, knots = TRUE, lwd.fit = 2,
+  lty.fit = 1, col.fit = "black", col.knots = "grey", lwd.knots = 1,
+  lty.knots = 3)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"}, 
@@ -50,21 +51,7 @@ or \code{"nls"}.}
 
 \item{...}{Additional optional arguments passed on to \code{plot}.}
 
-\item{interval}{A character string indicating if a prediction band, 
-confidence band, both, or none should be plotted.}
-
-\item{level}{The desired confidence level.}
-
 \item{data}{An optional data frame containing the variables in the model.}
-
-\item{adjust}{A character string indicating the type of adjustment (if any) 
-to make to the confidence/prediction bands.}
-
-\item{k}{An integer to be used in computing the critical value for the 
-confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
-when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.}
-
-\item{shade}{A logical value indicating if the band should be shaded.}
 
 \item{extend.range}{A logical value indicating if the fitted regression line
 and bands (if any) should extend to the edges of the plot. Default is 
@@ -74,25 +61,9 @@ and bands (if any) should extend to the edges of the plot. Default is
 plotted on top of the points (FALSE) or behind them (TRUE). Default is 
 TRUE.}
 
-\item{col.conf}{Shade color for confidence band.}
-
-\item{col.pred}{Shade color for prediction band.}
-
-\item{border.conf}{The color to use for the confidence band border.}
-
-\item{border.pred}{The color to use for the prediction band border.}
-
 \item{col.fit}{The color to use for the fitted line.}
 
-\item{lty.conf}{Line type to use for confidence band border.}
-
-\item{lty.pred}{Line type to use for prediction band border.}
-
 \item{lty.fit}{Line type to use for the fitted regression line.}
-
-\item{lwd.conf}{Line width to use for confidence band border.}
-
-\item{lwd.pred}{Line width to use for prediction band border.}
 
 \item{lwd.fit}{Line width to use for the fitted regression line.}
 
@@ -107,14 +78,58 @@ TRUE.}
 
 \item{ylim}{The y limits (y1, y2) of the plot.}
 
+\item{interval}{A character string indicating if a prediction band, 
+confidence band, both, or none should be plotted.}
+
+\item{level}{The desired confidence level.}
+
+\item{adjust}{A character string indicating the type of adjustment (if any) 
+to make to the confidence/prediction bands.}
+
+\item{k}{An integer to be used in computing the critical value for the 
+confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
+when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.}
+
+\item{shade}{A logical value indicating if the band should be shaded.}
+
+\item{col.conf}{Shade color for confidence band.}
+
+\item{col.pred}{Shade color for prediction band.}
+
+\item{border.conf}{The color to use for the confidence band border.}
+
+\item{border.pred}{The color to use for the prediction band border.}
+
+\item{lty.conf}{Line type to use for confidence band border.}
+
+\item{lty.pred}{Line type to use for prediction band border.}
+
+\item{lwd.conf}{Line width to use for confidence band border.}
+
+\item{lwd.pred}{Line width to use for prediction band border.}
+
 \item{type}{The type of prediction required. The default is on the scale of 
 the response variable; the alternative \code{"link"} is on the 
 scale of the linear predictor. This option is only used when
 plotting \code{"glm"} objects.}
+
+\item{knots}{Logical indicating whether or not to display the knot locations
+for penalized regression spline fits (i.e., object of class 
+\code{"pspline"}).}
+
+\item{col.knots}{The color to use then displaying the knot locations. (For 
+\code{"pspline"} objects only.)}
+
+\item{lwd.knots}{Line width to use when displaying the knot locations. (For 
+\code{"pspline"} objects only.)}
+
+\item{lty.knots}{Line type to use for displaying the knot locations. (For 
+\code{"pspline"} objects only.)}
 }
 \description{
-Plots fitted model for an object of class \code{"lm"} or \code{"nls"} with 
-the option of adding a confidence and/or prediction band.
+Plots fitted model for an object of class \code{"lm"}, \code{"nls"}, 
+\code{"glm"}, possibly with the option of adding a confidence and/or 
+prediction band.
 }
 \note{
 By default, the plotted intervals are pointwise intervals. For simultaneous 

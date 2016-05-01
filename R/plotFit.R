@@ -1,7 +1,8 @@
-#' Plotting Confidence/Prediction Bands
+#' Plotting Fitted Models
 #' 
-#' Plots fitted model for an object of class \code{"lm"} or \code{"nls"} with 
-#' the option of adding a confidence and/or prediction band. 
+#' Plots fitted model for an object of class \code{"lm"}, \code{"nls"}, 
+#' \code{"glm"}, possibly with the option of adding a confidence and/or 
+#' prediction band. 
 #'
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"}, 
 #'               or \code{"nls"}.
@@ -22,17 +23,26 @@
 #' @param extend.range A logical value indicating if the fitted regression line
 #' and bands (if any) should extend to the edges of the plot. Default is 
 #' \code{FALSE}.
+#' @param knots Logical indicating whether or not to display the knot locations
+#'   for penalized regression spline fits (i.e., object of class 
+#'   \code{"pspline"}).
 #' @param col.conf Shade color for confidence band.
 #' @param col.pred Shade color for prediction band.
 #' @param col.fit The color to use for the fitted line.
+#' @param col.knots The color to use then displaying the knot locations. (For 
+#'   \code{"pspline"} objects only.)
 #' @param border.conf The color to use for the confidence band border.
 #' @param border.pred The color to use for the prediction band border. 
 #' @param lty.conf Line type to use for confidence band border.
 #' @param lty.pred Line type to use for prediction band border.
 #' @param lty.fit Line type to use for the fitted regression line.
+#' @param lty.knots Line type to use for displaying the knot locations. (For 
+#'   \code{"pspline"} objects only.)
 #' @param lwd.conf Line width to use for confidence band border.
 #' @param lwd.pred Line width to use for prediction band border.
 #' @param lwd.fit Line width to use for the fitted regression line.
+#' @param lwd.knots Line width to use when displaying the knot locations. (For 
+#'   \code{"pspline"} objects only.)
 #' @param n The number of predictor values at which to evaluate the fitted model
 #' (larger implies a smoother plot).
 #' @param xlab A title for the x axis.
@@ -87,9 +97,67 @@ plotFit <- function(object, ...) {
 
 
 #' @rdname plotFit
-#' @method plotFit lm
-#' @importFrom graphics plot
-#' @importFrom stats formula
+#' @export
+plotFit.default <- function(object, data, ..., extend.range = FALSE, 
+                            hide = TRUE, col.fit = "black", lty.fit = 1, 
+                            lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim) {
+  
+  # Extract data 
+  if (!missing(data)) { 
+    .data <- data 
+  } else {
+    .data <- eval(getCall(object)$data, envir = parent.frame())
+  }
+  if (is.null(.data)) {  # throw error if no data are found
+    stop(paste("No data to plot. If the", class(object), "object does not",
+               "contain a data component then a data frame containing the", 
+               "variables in the model must be supplied through the 'data'", 
+               "argument to plotFit."))
+  }
+  
+  # Extract variable names and values
+  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
+  yname <- all.vars(formula(object)[[2]])
+  if (length(xname) != 1) stop("Only one independent variable allowed.")
+  if (length(yname) != 1) stop("Only one dependent variable allowed.")
+  xvals <- .data[, xname]
+  yvals <- with(.data, eval(formula(object)[[2]]))
+  
+  # Plot limits, labels, etc.
+  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
+  xgrid <- if (extend.range) {  # the x values at which to evaluate
+    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+             length = n))
+  } else {
+    list(seq(from = xlim[1], to = xlim[2], length = n))
+  }
+  names(xgrid) <- xname
+  if (missing(xlab)) xlab <- xname  # default label for x-axis
+  if (missing(ylab)) ylab <- yname  # default label for y-axis
+  
+  fitvals <- predict(object, newdata = xgrid)
+  fit.ymin <- min(fitvals)
+  fit.ymax <- max(fitvals)
+  ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
+  
+  
+  # Plot data, mean response, etc.
+  plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+       panel.first = if (hide) {  # draw points last
+         # Draw (hidden) fitted response curve
+         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
+               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+       } else NULL,
+       panel.last = if(!hide) {  # draw points first
+         # Draw fitted response curve
+         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
+               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+       } else NULL, ...)
+  
+}
+
+
+#' @rdname plotFit
 #' @export
 plotFit.lm <- function(object, 
                        interval = c("none", "both", "confidence", "prediction"), 
@@ -255,7 +323,6 @@ plotFit.lm <- function(object,
 
 #' @rdname plotFit
 #' @export
-#' @method plotFit nls
 plotFit.nls <- function(object, 
                         interval = c("none", "both", "confidence", "prediction"), 
                         level = 0.95, data,
@@ -420,7 +487,6 @@ plotFit.nls <- function(object,
 
 #' @rdname plotFit
 #' @export
-#' @method plotFit glm
 plotFit.glm <- function(object, type = c("response", "link"),
                         interval = c("none", "confidence"), level = 0.95,
                         data, ..., shade = FALSE, extend.range = FALSE, 
@@ -573,122 +639,44 @@ plotFit.glm <- function(object, type = c("response", "link"),
 
 #' @rdname plotFit
 #' @export
-#' @method plotFit rlm
-plotFit.rlm <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
-                        col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
-                        xlab, ylab, xlim, ylim) {
+plotFit.pspline <- function(object, 
+                            interval = c("none", "confidence", "prediction"), 
+                            level = 0.95, ..., n = 500, knots = TRUE,
+                            lwd.fit = 2, lty.fit = 1, col.fit = "black", 
+                            col.knots = "grey", lwd.knots = 1, lty.knots = 3) {
   
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
-  } else {
-    .data <- eval(getCall(object)$data, envir = parent.frame())
+  # Extract needed components from pspline object
+  x <- object$x
+  y <- object$y
+  newx <- seq(from = min(x), to = max(x), length.out = n)
+  degree <- object$degree
+  beta.hat <- object$beta.hat
+  u.hat <- object$u.hat
+  
+  # Create design matrices and compute fitted values
+  Z <- outer(newx, object$knots, "-")
+  Z <- (Z * (Z > 0)) ^ degree
+  X <- cbind(1, poly(newx, degree = degree, raw = TRUE))
+  ftd <- X %*% beta.hat + Z %*% u.hat
+  
+  # Plot data with smoothed line and confidence/prediction bands (if requested)
+  plot(x, y, panel.first = {
+    if (knots) {
+      abline(v = object$knots, col = col.knots, lwd = lwd.knots, 
+             lty = lty.knots)
+    }
+  }, ...) 
+  lines(newx, ftd, col = col.fit, lwd = lwd.fit, 
+        lty = lty.fit)
+  
+  # Pointwise inference band (if any)
+  interval <- match.arg(interval)
+  if (interval != "none") {
+    pred <- predict.pspline(object, newdata = newx, interval = interval, 
+                            level = level)
+    lines(newx, pred[, "lwr"])
+    lines(newx, pred[, "upr"])
   }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
-  }
-  
-  # Extract variable names and values
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
-  xvals <- .data[, xname]
-  yvals <- with(.data, eval(formula(object)[[2]]))
-  
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # the x values at which to evaluate
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
-  } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
-  }
-  names(xgrid) <- xname
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
-  
-  fitvals <- predict(object, newdata = xgrid)
-  fit.ymin <- min(fitvals)
-  fit.ymax <- max(fitvals)
-  ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-
-  
-  # Plot data, mean response, etc.
-  plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-       panel.first = if (hide) {  # draw points last
-         # Draw (hidden) fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL,
-       panel.last = if(!hide) {  # draw points first
-         # Draw fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL, ...)
   
 }
 
-#' @rdname plotFit
-#' @export
-#' @method plotFit lqs
-plotFit.lqs <- function(object, data, ..., extend.range = FALSE, hide = TRUE,
-                        col.fit = "black", lty.fit = 1, lwd.fit = 1, n = 500, 
-                        xlab, ylab, xlim, ylim) {
-  
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
-  } else {
-    .data <- eval(getCall(object)$data, envir = parent.frame())
-  }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
-  }
-  
-  # Extract variable names and values
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
-  xvals <- .data[, xname]
-  yvals <- with(.data, eval(formula(object)[[2]]))
-  
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # the x values at which to evaluate
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
-  } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
-  }
-  names(xgrid) <- xname
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
-  
-  fitvals <- predict(object, newdata = xgrid)
-  fit.ymin <- min(fitvals)
-  fit.ymax <- max(fitvals)
-  ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-  
-  
-  # Plot data, mean response, etc.
-  plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-       panel.first = if (hide) {  # draw points last
-         # Draw (hidden) fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL,
-       panel.last = if(!hide) {  # draw points first
-         # Draw fitted response curve
-         lines(xgrid[[1]], suppressWarnings(predict(object, newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL, ...)
-  
-}
