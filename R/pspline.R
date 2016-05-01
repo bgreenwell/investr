@@ -15,23 +15,23 @@
 #' @param ... Additional optional arguments to be passed on to \code{nlme::lme}.
 #' @return An object of class \code{pspline} (essentially a list) containing the 
 #'   following components:
-#'   \itemize{
-#'     \item \code{x} The vector of predictor values.
-#'     \item \code{y} The vector of response values.
-#'     \item \code{xname}
-#'     \item \code{yname}
-#'     \item \code{fit} The vecotr of fitted values.
-#'     \item \code{knots} Numeric vector containing the knot locations.
-#'     \item \code{degree} The degree of the penalized regression spline.
-#'     \item \code{beta.hat} Vector of estimated fixed effects.
-#'     \item \code{u.hat} Vector of estimated random effects.
-#'     \item \code{spar} The smoothing parameter.
-#'     \item \code{var.rat} The ratio of variance components.
-#'     \item \code{matrices} A list of key matrices.
-#'     \item \code{var.components} Vector of variance components.
-#'     \item \code{df.res} Residual degrees of freedom.
-#'     \item \code{lmm} The original \code{"lme"} object.
-#'     \item \code{call} The (matched) function call.
+#'   \describe{
+#'     \item{\code{x}}{The vector of predictor values.}
+#'     \item{\code{y}}{The vector of response values.}
+#'     \item{\code{xname}}{The name of the predictor variable.}
+#'     \item{\code{yname}}{The name of the respons variable.}
+#'     \item{\code{fit}}{The vecotr of fitted values.}
+#'     \item{\code{knots}}{Numeric vector containing the knot locations.}
+#'     \item{\code{degree}}{The degree of the penalized regression spline.}
+#'     \item{\code{beta.hat}}{Vector of estimated fixed effects.}
+#'     \item{\code{u.hat}}{Vector of estimated random effects.}
+#'     \item{\code{spar}}{The smoothing parameter.}
+#'     \item{\code{var.rat}}{The ratio of variance components.}
+#'     \item{\code{matrices}}{A list of key matrices.}
+#'     \item{\code{var.components}}{Vector of variance components.}
+#'     \item{\code{df.res}}{Residual degrees of freedom.}
+#'     \item{\code{lmm}}{The original \code{"lme"} object.}
+#'     \item{\code{call}}{The (matched) function call.}
 #'   }
 #'   
 #' @references 
@@ -87,7 +87,7 @@ pspline.default <- function(x, y, degree = 1, knots, num.knots,
     num.knots <- length(knots)
   }
   
-  # Spline basis matrix
+  # Spline basis matrix (trunacted polynomials)
   Z <- outer(x, knots, "-")
   Z <- (Z * (Z > 0)) ^ degree
   colnames(Z) <- paste("k", 1:ncol(Z), sep = "")

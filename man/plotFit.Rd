@@ -46,8 +46,8 @@ plotFit(object, ...)
   lty.knots = 3)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{"lm"}, \code{"glm"}, 
-or \code{"nls"}.}
+\item{object}{A fitted model object. Typically, an object that inherits from 
+class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).}
 
 \item{...}{Additional optional arguments passed on to \code{plot}.}
 
@@ -128,8 +128,8 @@ for penalized regression spline fits (i.e., object of class
 }
 \description{
 Plots fitted model for an object of class \code{"lm"}, \code{"nls"}, 
-\code{"glm"}, possibly with the option of adding a confidence and/or 
-prediction band.
+or \code{"glm"}, possibly with the option of adding a confidence and/or 
+prediction band. The default
 }
 \note{
 By default, the plotted intervals are pointwise intervals. For simultaneous 

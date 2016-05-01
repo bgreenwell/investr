@@ -1,11 +1,11 @@
 #' Plotting Fitted Models
 #' 
 #' Plots fitted model for an object of class \code{"lm"}, \code{"nls"}, 
-#' \code{"glm"}, possibly with the option of adding a confidence and/or 
-#' prediction band. 
+#' or \code{"glm"}, possibly with the option of adding a confidence and/or 
+#' prediction band. The default
 #'
-#' @param object An object that inherits from class \code{"lm"}, \code{"glm"}, 
-#'               or \code{"nls"}.
+#' @param object A fitted model object. Typically, an object that inherits from 
+#'   class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).
 #' @param type The type of prediction required. The default is on the scale of 
 #'             the response variable; the alternative \code{"link"} is on the 
 #'             scale of the linear predictor. This option is only used when
