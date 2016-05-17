@@ -2,6 +2,10 @@
 
 ### Changes for version 1.4.0
 
+* Better y-axis limits when x-axis is on log scale (e.g., using log = "x"). Fixes issue #27.
+
+### Changes for version 1.4.0
+
 * Multiple predictor variables are allowed for "lm" and "glm" objects.
 * All non-base package functions are now imported.
 * The generic function predFit is now exported. This function is used by investr 
