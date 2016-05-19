@@ -123,23 +123,56 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   xvals <- .data[, xname]
   yvals <- with(.data, eval(formula(object)[[2]]))
   
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # the x values at which to evaluate
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
+  # # Plot limits, labels, etc.
+  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
+  # xgrid <- if (extend.range) {  # the x values at which to evaluate
+  #   list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+  #            length = n))
+  # } else {
+  #   list(seq(from = xlim[1], to = xlim[2], length = n))
+  # }
+  
+  # Check if logged x-axis is required
+  dots <- list(...)
+  logx <- FALSE
+  if ("log" %in% names(dots)) {
+    if (grepl("x", dots$log)) {
+      logx <- TRUE
+    }
+  } 
+  
+  # Determine x-axis limits
+  if (missing(xlim)) {
+    xlim <- range(xvals) # default limits for x-axis
+  }
+  ulim <- if (logx) {
+    log(xlim) 
   } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
+    xlim
+  }
+  if (extend.range) {
+    ulim <- extendrange(ulim)
+  }
+  
+  # Grid of predictor values
+  xgrid <- if (logx) {
+    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
+  } else {
+    list(seq(from = ulim[1L], to = ulim[2L], length = n))
   }
   names(xgrid) <- xname
+  
+  # Axis labels
   if (missing(xlab)) xlab <- xname  # default label for x-axis
   if (missing(ylab)) ylab <- yname  # default label for y-axis
   
+  # Vector of mean response values
   fitvals <- predict(object, newdata = xgrid)
+  
+  # Determine y-axis limits
   fit.ymin <- min(fitvals)
   fit.ymax <- max(fitvals)
   ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-  
   
   # Plot data, mean response, etc.
   plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
@@ -193,18 +226,52 @@ plotFit.lm <- function(object,
   xvals <- .data[, xname]
   yvals <- with(.data, eval(formula(object)[[2]]))
   
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # the x values at which to evaluate
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
+  # # Plot limits, labels, etc.
+  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
+  # xgrid <- if (extend.range) {  # the x values at which to evaluate
+  #   list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+  #            length = n))
+  # } else {
+  #   list(seq(from = xlim[1], to = xlim[2], length = n))
+  # }
+  # names(xgrid) <- xname
+  # if (missing(xlab)) xlab <- xname  # default label for x-axis
+  # if (missing(ylab)) ylab <- yname  # default label for y-axis
+
+  # Check if logged x-axis is required
+  dots <- list(...)
+  logx <- FALSE
+  if ("log" %in% names(dots)) {
+    if (grepl("x", dots$log)) {
+      logx <- TRUE
+    }
+  } 
+  
+  # Determine x-axis limits
+  if (missing(xlim)) {
+    xlim <- range(xvals) # default limits for x-axis
+  }
+  ulim <- if (logx) {
+    log(xlim) 
   } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
+    xlim
+  }
+  if (extend.range) {
+    ulim <- extendrange(ulim)
+  }
+  
+  # Grid of predictor values
+  xgrid <- if (logx) {
+    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
+  } else {
+    list(seq(from = ulim[1L], to = ulim[2L], length = n))
   }
   names(xgrid) <- xname
+  
+  # Axis labels
   if (missing(xlab)) xlab <- xname  # default label for x-axis
   if (missing(ylab)) ylab <- yname  # default label for y-axis
-
+  
   # Maximum and minimum of fitted values
   interval = match.arg(interval)
   if (interval == "none") {
@@ -357,15 +424,49 @@ plotFit.nls <- function(object,
   xvals <- .data[, xname]
   yvals <- with(.data, eval(formula(object)[[2]]))
   
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # set up plotting grid
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
+  # # Plot limits, labels, etc.
+  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
+  # xgrid <- if (extend.range) {  # set up plotting grid
+  #   list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+  #            length = n))
+  # } else {
+  #   list(seq(from = xlim[1], to = xlim[2], length = n))
+  # }
+  # names(xgrid) <- xname
+  # if (missing(xlab)) xlab <- xname  # default label for x-axis
+  # if (missing(ylab)) ylab <- yname  # default label for y-axis
+  
+  # Check if logged x-axis is required
+  dots <- list(...)
+  logx <- FALSE
+  if ("log" %in% names(dots)) {
+    if (grepl("x", dots$log)) {
+      logx <- TRUE
+    }
+  } 
+  
+  # Determine x-axis limits
+  if (missing(xlim)) {
+    xlim <- range(xvals) # default limits for x-axis
+  }
+  ulim <- if (logx) {
+    log(xlim) 
   } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
+    xlim
+  }
+  if (extend.range) {
+    ulim <- extendrange(ulim)
+  }
+  
+  # Grid of predictor values
+  xgrid <- if (logx) {
+    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
+  } else {
+    list(seq(from = ulim[1L], to = ulim[2L], length = n))
   }
   names(xgrid) <- xname
+  
+  # Axis labels
   if (missing(xlab)) xlab <- xname  # default label for x-axis
   if (missing(ylab)) ylab <- yname  # default label for y-axis
   
@@ -538,16 +639,47 @@ plotFit.glm <- function(object, type = c("response", "link"),
   type <- match.arg(type)
   if (type == "link") yvals <- family(object)$linkfun(yvals)
   
+  # # Plot limits, labels, etc.
+  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
+  # xgrid <- if (extend.range) {  # the x values at which to evaluate
+  #   list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
+  #            length = n))
+  # } else {
+  #   list(seq(from = xlim[1], to = xlim[2], length = n))
+  # }
+  # names(xgrid) <- xname
   
-  # Plot limits, labels, etc.
-  if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  xgrid <- if (extend.range) {  # the x values at which to evaluate
-    list(seq(from = extendrange(xlim)[1], to = extendrange(xlim)[2], 
-             length = n))
+  # Check if logged x-axis is required
+  dots <- list(...)
+  logx <- FALSE
+  if ("log" %in% names(dots)) {
+    if (grepl("x", dots$log)) {
+      logx <- TRUE
+    }
+  } 
+  
+  # Determine x-axis limits
+  if (missing(xlim)) {
+    xlim <- range(xvals) # default limits for x-axis
+  }
+  ulim <- if (logx) {
+    log(xlim) 
   } else {
-    list(seq(from = xlim[1], to = xlim[2], length = n))
+    xlim
+  }
+  if (extend.range) {
+    ulim <- extendrange(ulim)
+  }
+  
+  # Grid of predictor values
+  xgrid <- if (logx) {
+    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
+  } else {
+    list(seq(from = ulim[1L], to = ulim[2L], length = n))
   }
   names(xgrid) <- xname
+  
+  # Axis labels
   if (missing(xlab)) xlab <- xname  # default label for x-axis
   if (missing(ylab)) {
     ylab <- paste0("Prediction (", type, " scale)")  # default label for y-axis
