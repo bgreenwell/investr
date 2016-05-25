@@ -192,12 +192,8 @@ print.pspline <- function (x, digits = max(3L, getOption("digits") - 3L), ...) {
 }
 
 
-#' Predicting from Penalized Regression Spline Fits
-#'
-#' Generic prediction method for various types of fitted models. (For internal 
-#' use only.)
-#' 
-#' @keywords internal
+#' @method predict pspline
+#' @export
 predict.pspline <- function(object, newdata, se.fit = FALSE, 
                             interval = c("none", "confidence", "prediction"),
                             level = 0.95) {
