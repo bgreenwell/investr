@@ -57,7 +57,7 @@ invest(binom_fit, y0 = 0.99)  # 99% lethal dose
 # estimate    lower    upper 
 #   1.7788   1.7702   1.7862
 ```
-![Alt text](https://raw.githubusercontent.com/bgreenwell/investr/master/beetle_plotFit.png)
+![](https://raw.githubusercontent.com/bgreenwell/investr/master/beetle_plotFit.png)
 
 To obtain an estimate of the standard error, we can use the Wald method:
 ```r
@@ -119,7 +119,7 @@ log_fit <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                data = nasturtium)
 plotFit(log_fit, lwd.fit = 2)
 ```
-![Alt text](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_plotFit.png)
+![](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_plotFit.png)
 
 Three new replicates of the response (309, 296, 419) at an unknown concentration of interest ($x_0$) are measured. It is desired to estimate $x_0$.
 ```r      
@@ -148,4 +148,4 @@ boo  # print bootstrap summary
 
 plot(boo)  # plot results
 ```
-![Alt text](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_boot.png)
+![](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_boot.png)
