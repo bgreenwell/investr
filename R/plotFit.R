@@ -11,21 +11,21 @@
 #' @param object A fitted model object. Typically, an object that inherits from 
 #'   class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).
 #' @param type The type of prediction required. The default is on the scale of 
-#'             the response variable; the alternative \code{"link"} is on the 
-#'             scale of the linear predictor. This option is only used when
-#'             plotting \code{"glm"} objects.
+#'   the response variable; the alternative \code{"link"} is on the scale of the 
+#'   linear predictor. This option is only used when plotting \code{"glm"} 
+#'   objects.
 #' @param interval A character string indicating if a prediction band, 
 #'   confidence band, both, or none should be plotted.
 #' @param level The desired confidence level.
 #' @param data An optional data frame containing the variables in the model. 
 #' @param adjust A character string indicating the type of adjustment (if any) 
-#' to make to the confidence/prediction bands.
+#'   to make to the confidence/prediction bands.
 #' @param k An integer to be used in computing the critical value for the 
-#' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"} or
-#' when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
+#'   confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"},
+#'   or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
 #' @param shade A logical value indicating if the band should be shaded.
 #' @param extend.range A logical value indicating if the fitted regression line
-#' and bands (if any) should extend to the edges of the plot. Default is 
+#'   and bands (if any) should extend to the edges of the plot. Default is 
 #' \code{FALSE}.
 #' @param knots Logical indicating whether or not to display the knot locations
 #'   for penalized regression spline fits (i.e., object of class 
@@ -48,14 +48,14 @@
 #' @param lwd.knots Line width to use when displaying the knot locations. (For 
 #'   \code{"pspline"} objects only.)
 #' @param n The number of predictor values at which to evaluate the fitted model
-#' (larger implies a smoother plot).
+#'   (larger gives a smoother plot).
 #' @param xlab A title for the x axis.
 #' @param ylab A title for the y axis.
 #' @param xlim The x limits (x1, x2) of the plot.
 #' @param ylim The y limits (y1, y2) of the plot. 
-#' @param hide A logical value indicating if the fitted model should be 
-#' plotted on top of the points (FALSE) or behind them (TRUE). Default is 
-#' TRUE.
+#' @param hide A logical value indicating if the fitted model should be plotted 
+#'   on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default 
+#'   is \code{TRUE}.
 #' @param ... Additional optional arguments passed on to \code{plot}.
 #' @rdname plotFit
 #' @importFrom graphics lines plot polygon
