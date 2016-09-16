@@ -7,8 +7,8 @@
 #'               \code{"nls"}, or \code{"lme"}.
 #' @param newdata An optional data frame in which to look for variables with 
 #'   which to predict. If omitted, the fitted values are used.      
-#' @param se.fit A logical vaue indicating if standard errors are required. Default
-#'   is \code{FALSE}.
+#' @param se.fit A logical vaue indicating if standard errors are required. 
+#'   Default is \code{FALSE}.
 #' @param interval Type of interval to be calculated. Can be one of "none" 
 #'   (default), "confidence", or "prediction". Default is \code{"none"}.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level for 
@@ -21,7 +21,6 @@
 #'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'   are used.
-#' @importFrom stats getCall predict qf qt
 #' @export
 predFit <- function(object, ...) {
   UseMethod("predFit")
@@ -29,7 +28,6 @@ predFit <- function(object, ...) {
 
 
 #' @rdname predFit
-#' @method predFit lm
 #' @export
 predFit.lm <- function(object, newdata, se.fit = FALSE,
                        interval = c("none", "confidence", "prediction"), 
@@ -43,11 +41,12 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   
   # Predicted values and, if requested, standard errors too
   if (missing(newdata)) {
-    # newdata <- eval(getCall(object)$data, envir = parent.frame()) 
-    pred <- predict(object, se.fit = compute.se.fit) 
+    # newdata <- eval(stats::getCall(object)$data, envir = parent.frame()) 
+    pred <- stats::predict(object, se.fit = compute.se.fit) 
   } else {
     # as.data.frame(newdata) 
-    pred <- predict(object, newdata = as.data.frame(newdata), se.fit = compute.se.fit)
+    pred <- stats::predict(object, newdata = as.data.frame(newdata), 
+                           se.fit = compute.se.fit)
   } 
 
   # Compute results
@@ -62,21 +61,21 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     adjust <- match.arg(adjust)
     crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment
       
-      qt((level + 2*k - 1) / (2*k), pred$df)
+      stats::qt((level + 2*k - 1) / (2*k), pred$df)
       
     } else if (adjust == "Scheffe") {  # Scheffe adjustment
       
       # Working-Hotelling band or adjusted prediction band for k predictions
       if (interval == "confidence") {
-        p <- length(coef(object))
-        sqrt(p * qf(level, p, pred$df))  # Working-Hotelling band
+        p <- length(stats::coef(object))
+        sqrt(p * stats::qf(level, p, pred$df))  # Working-Hotelling band
       } else {
-        sqrt(k * qf(level, k, pred$df))  # need k for prediction
+        sqrt(k * stats::qf(level, k, pred$df))  # need k for prediction
       }  
       
     } else {   # no adjustment
       
-      qt((level + 1) / 2, pred$df)    
+      stats::qt((level + 1) / 2, pred$df)    
       
     }
     
@@ -85,8 +84,8 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
       lwr <- pred$fit - crit * pred$se.fit
       upr <- pred$fit + crit * pred$se.fit
     } else {  # prediction interval for individual response
-      lwr <- pred$fit - crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
-      upr <- pred$fit + crit * sqrt(Sigma(object)^2 + pred$se.fit^2)
+      lwr <- pred$fit - crit * sqrt(stats::sigma(object)^2 + pred$se.fit^2)
+      upr <- pred$fit + crit * sqrt(stats::sigma(object)^2 + pred$se.fit^2)
       warning("predictions on current data refer to _future_ responses")
     }
     
@@ -111,7 +110,6 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
 
 
 #' @rdname predFit
-#' @method predFit nls
 #' @export
 predFit.nls <- function(object, newdata, se.fit = FALSE,
                         interval = c("none", "confidence", "prediction"), 
@@ -132,7 +130,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   
   # Prediction data
   newdata <- if (missing(newdata)) {
-    eval(getCall(object)$data, envir = parent.frame()) 
+    eval(stats::getCall(object)$data, envir = parent.frame()) 
   } else {
     as.data.frame(newdata) 
   }
@@ -141,7 +139,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   }
   
   # Name of independent variable
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(newdata)) 
+  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(newdata)) 
   
   # Predicted values
   pred <- object$m$predict(newdata)
@@ -150,9 +148,9 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   if (compute.se.fit) {
     
     # Assign values to parameter names in current environment
-    param.names <- names(coef(object))  
+    param.names <- names(stats::coef(object))  
     for (i in 1:length(param.names)) { 
-      assign(param.names[i], coef(object)[i])  
+      assign(param.names[i], stats::coef(object)[i])  
     }
     
     # Assign values to independent variable name
@@ -162,7 +160,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
     form <- object$m$formula()
     rhs <- eval(form[[3]])
     if (is.null(attr(rhs, "gradient"))) {
-      f0 <- attr(numericDeriv(form[[3]], param.names), "gradient")
+      f0 <- attr(stats::numericDeriv(form[[3]], param.names), "gradient")
     } else {  # self start models should have gradient attribute
       f0 <- attr(rhs, "gradient")
     }
@@ -171,7 +169,7 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
     R1 <- object$m$Rmat()
     # v0 <- diag(f0 %*% solve(t(R1) %*% R1) %*% t(f0))
     v0 <- diag(f0 %*% tcrossprod(solve(crossprod(R1)), f0))  # slightly faster
-    se_fit <- sqrt(Sigma(object)^2 * v0)
+    se_fit <- sqrt(stats::sigma(object)^2 * v0)
     
   }
   
@@ -187,22 +185,22 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
     # Adjustment for simultaneous inference
     crit <- if (adjust == "Bonferroni") {  # Bonferroni adjustment 
       
-      qt((level + 2*k - 1) / (2*k), df.residual(object))
+      stats::qt((level + 2*k - 1) / (2*k), stats::df.residual(object))
       
     } else if (adjust == "Scheffe") {  # Scheffe adjustment
       
       if (interval == "confidence") {
-        p <- length(coef(object))  # number of regression parameters
-        # sqrt(p * qf((level + 1) / 2, p, df.residual(object))) 
-        sqrt(p * qf(level, p, df.residual(object))) 
+        p <- length(stats::coef(object))  # number of regression parameters
+        # sqrt(p * stats::qf((level + 1) / 2, p, stats::df.residual(object))) 
+        sqrt(p * stats::qf(level, p, stats::df.residual(object))) 
       } else {
-        # sqrt(k * qf((level + 1) / 2, k, df.residual(object))) 
-        sqrt(k * qf(level, k, df.residual(object))) 
+        # sqrt(k * stats::qf((level + 1) / 2, k, stats::df.residual(object))) 
+        sqrt(k * stats::qf(level, k, stats::df.residual(object))) 
       }     
       
     } else {  # no adjustment   
       
-      qt((level + 1) / 2, df.residual(object))   
+      stats::qt((level + 1) / 2, stats::df.residual(object))   
       
     }
     
@@ -211,8 +209,8 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
       lwr <- pred - crit * se_fit  # lower limits
       upr <- pred + crit * se_fit  # upper limits
     } else {  # prediction limits for individual response
-      lwr <- pred - crit * sqrt(Sigma(object)^2 + se_fit^2)  # lower limits
-      upr <- pred + crit * sqrt(Sigma(object)^2 + se_fit^2)  # upper limits
+      lwr <- pred - crit * sqrt(stats::sigma(object)^2 + se_fit^2)  # lower limits
+      upr <- pred + crit * sqrt(stats::sigma(object)^2 + se_fit^2)  # upper limits
     }
     
     # Store results in a matrix
@@ -225,18 +223,17 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   if (se.fit) {
     res <- list("fit" = res,
                 "se.fit" = se_fit,
-                "df" = df.residual(object),
-                "residual.scale" = Sigma(object))
+                "df" = stats::df.residual(object),
+                "residual.scale" = stats::sigma(object))
   }
   
   # Return results
   return(res)
   
-  }
+}
 
 
 #' @rdname predFit
-#' @method predFit lme
 #' @export
 predFit.lme <- function(object, newdata, se.fit = FALSE, ...) {
   
@@ -248,16 +245,16 @@ predFit.lme <- function(object, newdata, se.fit = FALSE, ...) {
   }  
   
   # Names of independent variables
-  xname <- intersect(all.vars(formula(object)[[3]]), colnames(newdata)) 
+  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(newdata)) 
   
   # Population predicted values
-  pred <- predict(object, newdata = newdata, level = 0)
+  pred <- stats::predict(object, newdata = newdata, level = 0)
   
   # Approximate standard error of fitted values
   if (se.fit) {
     Xmat <- makeX(object, newdata)  # fixed-effects design matrix
     #     Xmat <- makeX(object, newdata = makeData(newdata, xname))
-    se_fit <- sqrt(diag(Xmat %*% vcov(object) %*% t(Xmat)))
+    se_fit <- sqrt(diag(Xmat %*% stats::vcov(object) %*% t(Xmat)))
     # list(fit = pred, se.fit = se_fit)
     cbind("fit" = pred, "se.fit" = se_fit)
   } else {

@@ -18,12 +18,12 @@ Suggests:
     datasets,
     knitr,
     MASS,
-    testthat,
+    testthat
 Imports:
     graphics,
     nlme,
     stats,
-    utils,
+    utils
 LazyLoad: true
 LazyData: true
 RoxygenNote: 5.0.1

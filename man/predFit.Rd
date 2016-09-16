@@ -29,8 +29,8 @@ are used.}
 \item{newdata}{An optional data frame in which to look for variables with 
 which to predict. If omitted, the fitted values are used.}
 
-\item{se.fit}{A logical vaue indicating if standard errors are required. Default
-is \code{FALSE}.}
+\item{se.fit}{A logical vaue indicating if standard errors are required. 
+Default is \code{FALSE}.}
 
 \item{interval}{Type of interval to be calculated. Can be one of "none" 
 (default), "confidence", or "prediction". Default is \code{"none"}.}

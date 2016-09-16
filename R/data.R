@@ -15,6 +15,7 @@
 #' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 NULL
 
+
 #' Concentrations of arsenic in water samples
 #'
 #' The data give the actual and measured concentrations of arsenic present in
@@ -32,6 +33,7 @@ NULL
 #' Graybill, F. A., and Iyer, H. K. (1994)
 #' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 NULL
+
 
 #' Bioassay on Nasturtium
 #'
@@ -56,6 +58,7 @@ NULL
 #' S-PLUS and R Examples}. Springer.
 #'
 NULL
+
 
 #' Dobson's Beetle Data
 #'

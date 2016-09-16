@@ -101,11 +101,11 @@ a confidence interval. Only needed when
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals. 
 Only used when \code{object} inherits from class \code{"lme"}. 
-Defaults to \code{qnorm((1+level)/2)}.}
+Defaults to \code{stats::qnorm((1+level)/2)}.}
 
 \item{q2}{Optional upper cutoff to be used in forming confidence intervals. 
 Only used when \code{object} inherits from class \code{"lme"}. 
-Defaults to \code{qnorm((1-level)/2)}.}
+Defaults to \code{stats::qnorm((1-level)/2)}.}
 }
 \value{
 \code{invest} returns an object of class \code{"invest"} or, if

@@ -15,7 +15,7 @@ calibrate(object, ...)
   "Bonferroni", "Scheffe"), k, ...)
 
 \method{calibrate}{formula}(formula, data = NULL, ..., subset,
-  na.action = na.fail)
+  na.action = stats::na.fail)
 
 \method{calibrate}{lm}(object, y0, interval = c("inversion", "Wald", "none"),
   level = 0.95, mean.response = FALSE, adjust = c("none", "Bonferroni",
@@ -79,13 +79,6 @@ The function \code{calibrate} computes the maximum likelihood estimate and a
 condfidence interval for the unknown predictor value that corresponds to an 
 observed value of the response (or vector thereof) or specified value of the 
 mean response. See the reference listed below for more details.
-
-#' @rdname calibrate
-#' @export
-#' @method calibrate lm
-calibrate.lm <- function(object, ...) {
-  calibrate(formula(object), data = eval(object$call$data), ...)
-}
 }
 \note{
 The function \code{invest} is more general, but based on numerical
@@ -99,7 +92,7 @@ exist which are utilized by the function \code{calibrate}.
 #
 
 # Inverting a prediction interval for an individual response
-arsenic.lm <- lm(measured ~ actual, data = arsenic)
+arsenic.lm <- stats::lm(measured ~ actual, data = arsenic)
 plotFit(arsenic.lm, interval = "prediction", shade = TRUE, 
         col.pred = "lightblue")
 (cal <- calibrate(arsenic.lm, y0 = 3, interval = "inversion"))
@@ -113,7 +106,7 @@ arrows(cal$upper, 3, cal$upper, par()$usr[3])
 #
 
 # Inverting a confidence interval for the mean response
-crystal.lm <- lm(weight ~ time, data = crystal)
+crystal.lm <- stats::lm(weight ~ time, data = crystal)
 plotFit(crystal.lm, interval = "confidence", shade = TRUE,
         col.conf = "lightblue")
 (cal <- calibrate(crystal.lm, y0 = 8, interval = "inversion", 
