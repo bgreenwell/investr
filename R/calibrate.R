@@ -160,6 +160,7 @@ calibrate.default <- function(object, y0,
   # Inversion interval --------------------------------------------------------
   if (interval == "inversion") { 
 
+    # Define constants; see Graybill and Iyer (1994)
     c1 <- b[2L]^2 - (sigma.pooled^2 * crit^2)/ssx
     c2 <- if (mean.response) {
       c1/n + (eta - mean(y))^2/ssx
@@ -169,17 +170,21 @@ calibrate.default <- function(object, y0,
     c3 <- b[2L] * (eta - mean(y))
     c4 <- crit * sigma.pooled
     
-    # FIXME: catch errors and throw an appropriate warning
+    # Calculate inversion interval
     if (c1 < 0 && c2 <= 0) {
       
+      # Throw warning if interval is the real line
       warning("The calibration line is not well determined.", call. = FALSE)
       lwr <- -Inf
       upr <- Inf
       
     } else {
       
+      # Construct inversion interval
       lwr <- mean(x) + (c3 - c4*sqrt(c2))/c1
       upr <- mean(x) + (c3 + c4*sqrt(c2))/c1
+      
+      # Throw error if result is not a single interval
       if (c1 < 0 && c2 > 0) {
         stop(paste("The calibration line is not well determined. The resulting \nconfidence region is the union of two semi-infinite intervals:\n(", -Inf, ",", 
                    round(upr, 4), ") U (", round(lwr, 4), ",", Inf, ")"), 
@@ -187,6 +192,8 @@ calibrate.default <- function(object, y0,
       }
       
     }
+    
+    # Store results in a list
     res <- list("estimate" = x0.mle, 
                 "lower"    = lwr, 
                 "upper"    = upr, 
