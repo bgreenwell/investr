@@ -1,12 +1,9 @@
-#' Calibration for Linear and Nonlinear Regression Models.
+#' Inverse Estimation for Linear, Nonlinear, and Generalized Linear Models.
 #' 
-#' The function \code{invest} computes the inverse estimate and a condfidence 
-#' interval for the unknown predictor value that corresponds to an observed 
-#' value of the response (or vector thereof) or specified value of the mean 
-#' response. See the references listed below for more details. 
-#' 
-#' @rdname invest
-#' @export
+#' The \code{invest} function provides point and interval estimates for the 
+#' unknown predictor value that corresponds to an observed value of the 
+#' response (or vector thereof) or specified value of the mean response. See 
+#' the references listed below for more details. 
 #' 
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
 #'               \code{"nls"}, or \code{"lme"}.
@@ -106,7 +103,9 @@
 #' 
 #' Seber, G. A. F., and Wild, C. J. (1989)
 #' \emph{Nonlinear regression}. Wiley.
-#' 
+#'
+#' @rdname invest
+#' @export
 #' @examples
 #' #
 #' # Dobson's beetle data (generalized linear model)
