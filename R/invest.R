@@ -6,32 +6,31 @@
 #' the references listed below for more details. 
 #' 
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
-#'               \code{"nls"}, or \code{"lme"}.
+#'   \code{"nls"}, or \code{"lme"}.
 #' @param y0 The value of the observed response(s) or specified value of the 
-#'           mean response. For \code{"glm"} objects, \code{y0} should be on 
-#'           scale of the response variable.
+#'   mean response. For \code{"glm"} objects, \code{y0} should be on scale of 
+#'   the response variable.
 #' @param interval The type of interval required.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level 
-#'              for the interval to be calculated. 
+#'   for the interval to be calculated. 
 #' @param mean.response Logical indicating whether confidence intervals should
-#'                      correspond to an individual response (\code{FALSE}) or 
-#'                      a mean response (\code{TRUE}). For \code{glm} objects,
-#'                      this is always \code{TRUE}.
+#'   correspond to an individual response (\code{FALSE}) or a mean response 
+#'   (\code{TRUE}). For \code{glm} objects, this is always \code{TRUE}.
 #' @param x0.name For multiple linear regression, a character string giving the
 #'   the name of the predictor variable of interest.
 #' @param newdata For multiple linear regression, a \code{data.frame} giving the
 #'   values of interest for all other predictor variables (i.e., those other 
 #'   than \code{x0.name}).
-#' @param data An optional data frame. This is required if \code{object$data} 
-#'             is \code{NULL}.
+#' @param data An optional data frame. This is required if \code{object$data} is 
+#'   \code{NULL}.
 #' @param nsim Positive integer specifying the number of bootstrap simulations; 
-#'             the bootstrap B (or R).
-#' @param boot.type Character string specifying the type of bootstrap to use 
-#'                  when \code{interval = "percentile"}. Options are 
-#'                  \code{"parametric"} and \code{"nonparametric"}.
+#'   the bootstrap B (or R).
+#' @param boot.type Character string specifying the type of bootstrap to use when 
+#'   \code{interval = "percentile"}. Options are \code{"parametric"} and 
+#'   \code{"nonparametric"}.
 #' @param seed Optional argument to \code{set.seed}.
 #' @param progress Logical indicating whether to display a text-based progress
-#'                 bar during the bootstrap simulation.
+#'   bar during the bootstrap simulation.
 #' @param lower The lower endpoint of the interval to be searched.
 #' @param upper The upper endpoint of the interval to be searched.
 #' @param extendInt Character string specifying if the interval 
@@ -41,31 +40,28 @@
 #'   produces an error. Can be abbreviated. See the documentation for the 
 #'   \code{base} R function \code{uniroot} for details.
 #' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-#'           Only used when \code{object} inherits from class \code{"lme"}. 
-#'           Defaults to \code{stats::qnorm((1+level)/2)}.
+#'   Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
+#'   \code{stats::qnorm((1+level)/2)}.
 #' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-#'           Only used when \code{object} inherits from class \code{"lme"}. 
-#'           Defaults to \code{stats::qnorm((1-level)/2)}.
+#'   Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
+#'   \code{stats::qnorm((1-level)/2)}.
 #' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
-#'            minimum of 1e-10.
+#'   minimum of 1e-10.
 #' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
 #' @param adjust A logical value indicating if an adjustment should be made to
-#'               the critical value used in calculating the confidence interval.
-#'               This is useful for when the calibration curve is to be used 
-#'               multiple, say k, times.
+#'   the critical value used in calculating the confidence interval.This is 
+#'   useful for when the calibration curve is to be used multiple, say \code{k}, 
+#'   times.
 #' @param k The number times the calibration curve is to be used for computing 
-#'          a confidence interval. Only needed when 
-#'          \code{adjust = "Bonferroni"}.
+#'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
-#'            are used.
+#'   are used.
 #' @return \code{invest} returns an object of class \code{"invest"} or, if
-#'         \code{interval = "percentile"}, of class 
-#'         \code{c("invest", "bootCal")}. The generic function \code{plot} 
-#'         can be used to plot the output of the bootstrap simulation when 
-#'         \code{interval = "percentile"}.
+#'   \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. 
+#'   The generic function \code{plot} can be used to plot the output of the 
+#'   bootstrap simulation when \code{interval = "percentile"}.
 #'         
-#'         An object of class \code{"invest"} contains the following 
-#'         components:
+#'   An object of class \code{"invest"} containing the following components:
 #'   \itemize{
 #'     \item \code{estimate} The estimate of x0.
 #'     \item \code{lwr} The lower confidence limit for x0.
