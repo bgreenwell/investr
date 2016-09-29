@@ -23,6 +23,9 @@ The package is [currently listed on CRAN](http://cran.r-project.org/package=inve
 ```r
   # Install from CRAN
   install.packages("investr", dep = TRUE)
+  
+  # Alternatively, install the development version from GitHub
+  devtools::install_github("bgreenwell/investr")
 ```
 The package is also part of the [ChemPhys task view](http://cran.r-project.org/web/views/ChemPhys.html), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```r
@@ -37,38 +40,41 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
 
 In binomial regression, the estimated lethal dose corresponding to a specific probability _p_ of death is often referred to as _LDp_. `invest` obtains an estimate of _LDp_ by inverting the fitted mean response on the link scale. Similarly, a confidence interval for _LDp_ can be obtained by inverting a confidence interval for the mean response on the link scale.
 ```r
+# Load required packages
 library(investr)
 
-# Dobson's beetle data
-head(beetle)
-
 # Binomial regression
-binom_fit <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
-                 family = binomial(link = "cloglog"))
-plotFit(binom_fit, lwd.fit = 2, cex = 1.2, pch = 21, bg = "lightskyblue", 
+beetle.glm <- glm(cbind(y, n-y) ~ ldose, data = beetle, 
+                  family = binomial(link = "cloglog"))
+plotFit(beetle.glm, lwd.fit = 2, cex = 1.2, pch = 21, bg = "lightskyblue", 
         lwd = 2, xlab = "Log dose", ylab = "Probability")
 
-# Inverse estimation
-invest(binom_fit, y0 = 0.5)   # median lethal dose
-invest(binom_fit, y0 = 0.9)   # 90% lethal dose
-invest(binom_fit, y0 = 0.99)  # 99% lethal dose
-
-
+# Median lethal dose
+invest(beetle.glm, y0 = 0.5)   
 # estimate    lower    upper 
-#   1.7788   1.7702   1.7862
+# 1.778753 1.770211 1.786166 
+
+# 90% lethal dose
+invest(beetle.glm, y0 = 0.9)   
+# estimate    lower    upper 
+# 1.833221 1.825117 1.843062 
+
+# 99% lethal dose
+invest(beetle.glm, y0 = 0.99)  
+# estimate    lower    upper 
+# 1.864669 1.853607 1.879126 
+
 ```
 ![](https://raw.githubusercontent.com/bgreenwell/investr/master/beetle_plotFit.png)
 
 To obtain an estimate of the standard error, we can use the Wald method:
 ```r
 invest(binom_fit, y0 = 0.5, interval = "Wald")
-
 # estimate    lower    upper       se 
 #   1.7788   1.7709   1.7866   0.0040
 
-# The MASS package function dose.p works too 
+# The MASS package function dose.p can be used too 
 MASS::dose.p(binom_fit, p = 0.5)
-
 #              Dose         SE
 # p = 0.5: 1.778753 0.00400654
 ```
@@ -78,8 +84,7 @@ MASS::dose.p(binom_fit, p = 0.5)
 Multiple predictor variables are allowed for objects of class `lm` and `glm`. 
 For instance, the example from `?MASS::dose.p` can be re-created as follows:
 ```r
-
-# Load package, assuming it is already installed
+# Load required packages
 library(MASS)
 
 # Data
@@ -90,20 +95,18 @@ SF <- cbind(numdead, numalive = 20 - numdead)
 budworm <- data.frame(ldose, numdead, sex, SF)
 
 # Logistic regression
-budworm.lg0 <- glm(SF ~ sex + ldose - 1, family = binomial, data = budworm)
+budworm.glm <- glm(SF ~ sex + ldose - 1, family = binomial, data = budworm)
 
 # Using dose.p function from package MASS
-dose.p(budworm.lg0, cf = c(1, 3), p = 1/4)
-
+dose.p(budworm.glm, cf = c(1, 3), p = 1/4)
 #               Dose        SE
 # p = 0.25: 2.231265 0.2499089
 
 # Using invest function from package investr
-invest(budworm.lg0, y0 = 1/4, 
+invest(budworm.glm, y0 = 1/4, 
        interval = "Wald",
        x0.name = "ldose", 
        newdata = data.frame(sex = "F"))
-       
 # estimate    lower    upper       se 
 #   2.2313   1.7415   2.7211   0.2499
 ```
@@ -113,11 +116,13 @@ invest(budworm.lg0, y0 = 1/4,
 The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
 log-logistic model describes the data well:
 ```r
-# Log-logistic model
-log_fit <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+# Log-logistic model for the nasturtium data
+nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
                data = nasturtium)
-plotFit(log_fit, lwd.fit = 2)
+               
+# Plot the fitted model
+plotFit(nas.nls, lwd.fit = 2)
 ```
 ![](https://raw.githubusercontent.com/bgreenwell/investr/master/nasturtium_plotFit.png)
 

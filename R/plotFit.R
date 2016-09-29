@@ -108,21 +108,16 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   }
   
   # Extract variable names and values
-  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(stats::formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
+  xname <- intersect(all.vars(stats::formula(object)[[3L]]), colnames(.data)) 
+  yname <- deparse(stats::formula(object)[[2L]])
+  if (length(xname) != 1) {
+    stop("Only one independent variable allowed.")
+  }
+  if (length(yname) != 1) {
+    stop("Only one dependent variable allowed.")
+  }
   xvals <- .data[, xname]
-  yvals <- with(.data, eval(stats::formula(object)[[2]]))
-  
-  # # Plot limits, labels, etc.
-  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  # xgrid <- if (extend.range) {  # the x values at which to evaluate
-  #   list(seq(from = grDevices::extendrange(xlim)[1], to = grDevices::extendrange(xlim)[2], 
-  #            length = n))
-  # } else {
-  #   list(seq(from = xlim[1], to = xlim[2], length = n))
-  # }
+  yvals <- with(.data, eval(stats::formula(object)[[2L]]))
   
   # Check if logged x-axis is required
   dots <- list(...)
@@ -155,10 +150,14 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   names(xgrid) <- xname
   
   # Axis labels
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
+  if (missing(xlab)) {
+    xlab <- xname  # default label for x-axis
+  }
+  if (missing(ylab)) {
+    ylab <- yname  # default label for y-axis
+  }
   
-  # Vector of mean response values
+  # Vector of predicted mean response values
   fitvals <- stats::predict(object, newdata = xgrid)
   
   # Determine y-axis limits
@@ -167,15 +166,20 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
   
   # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, 
+                 xlim = xlim, ylim = ylim,
        panel.first = if (hide) {  # draw points last
          # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)  
        } else NULL,
        panel.last = if(!hide) {  # draw points first
          # Draw fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)  
        } else NULL, ...)
   
@@ -218,18 +222,6 @@ plotFit.lm <- function(object,
   xvals <- .data[, xname]
   yvals <- with(.data, eval(stats::formula(object)[[2]]))
   
-  # # Plot limits, labels, etc.
-  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  # xgrid <- if (extend.range) {  # the x values at which to evaluate
-  #   list(seq(from = grDevices::extendrange(xlim)[1], to = grDevices::extendrange(xlim)[2], 
-  #            length = n))
-  # } else {
-  #   list(seq(from = xlim[1], to = xlim[2], length = n))
-  # }
-  # names(xgrid) <- xname
-  # if (missing(xlab)) xlab <- xname  # default label for x-axis
-  # if (missing(ylab)) ylab <- yname  # default label for y-axis
-
   # Check if logged x-axis is required
   dots <- list(...)
   logx <- FALSE
@@ -415,18 +407,6 @@ plotFit.nls <- function(object,
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
   yvals <- with(.data, eval(stats::formula(object)[[2]]))
-  
-  # # Plot limits, labels, etc.
-  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  # xgrid <- if (extend.range) {  # set up plotting grid
-  #   list(seq(from = grDevices::extendrange(xlim)[1], to = grDevices::extendrange(xlim)[2], 
-  #            length = n))
-  # } else {
-  #   list(seq(from = xlim[1], to = xlim[2], length = n))
-  # }
-  # names(xgrid) <- xname
-  # if (missing(xlab)) xlab <- xname  # default label for x-axis
-  # if (missing(ylab)) ylab <- yname  # default label for y-axis
   
   # Check if logged x-axis is required
   dots <- list(...)

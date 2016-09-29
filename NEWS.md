@@ -1,8 +1,9 @@
 # NEWS for investr package
 
-### Changes for version 1.4.0
+### Changes for version 1.4.1
 
 * Better y-axis limits when x-axis is on log scale (e.g., using log = "x"). Fixes issue #27.
+* Better default y-axis label when plotting a model with transformed response; for example, `log(y) ~ x`.
 
 ### Changes for version 1.4.0
 
