@@ -171,7 +171,14 @@ invest.lm <- function(object, y0,
     }
     xnames <- xnames[xnames != x0.name]
     if (missing(newdata)) {
-      stop("'newdata' must be supplied when multiple predictor variables exist!")
+      # FIXME: Should the user be warned here about the default behavior?
+      newdata <- as.data.frame(lapply(.data[, xnames], FUN = function(x) {
+        if (is.numeric(x)) {
+          stats::median(x, na.rm = TRUE)
+        } else {
+          names(which.max(table(x, useNA = "always")))
+        }
+      }))
     }
     if (!is.data.frame(newdata)) {
       stop("'newdata' must be a data frame")
