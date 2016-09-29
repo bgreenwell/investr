@@ -147,8 +147,6 @@ test_that("multiple predictor results match output from JMP (v11)", {
   expect_error(invest(multi_lm, y0 = 20, interval = "inversion", 
                       newdata = contr, lower = -10))
   expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion", 
-                      lower = -10))
-  expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion", 
                       newdata = data.matrix(treat), lower = -10))
   expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion", 
                       newdata = d, lower = -10))
