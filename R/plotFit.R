@@ -64,19 +64,19 @@
 #' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
 #' \code{nls}) are based on a linear approximation as described in Bates & Watts 
-#' (2007). This funtion was inpired by the \code{\link[nlstools]{plotfit}} function
+#' (2007). This funtion was inspired by the \code{\link[nlstools]{plotfit}} function
 #' from the \code{nlstools} package.
 #' @references
 #' Bates, D. M., and Watts, D. G. (2007)
 #' \emph{Nonlinear Regression Analysis and its Applications}. Wiley.
 #' 
-#' F. Baty and M. L. Delignette-Muller (2012), 
-#' A Toolbox for Nonlinear Regression in R: The Package nlstools.
-#' \emph{Journal of Statistical Software} \bold{(under revision)}.
+#' Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche, 
+#' Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015). 
+#' A Toolbox for Nonlinear Regression in R: The Package nlstools. 
+#' \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
+#' 
 #' @examples
-#' #
-#' # A nonlinear regression example
-#' #
+#' # A nonlinear least squares example
 #' data(Puromycin, package = "datasets")
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 #' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
