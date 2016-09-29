@@ -5,8 +5,8 @@
 #' observed value of the response (or vector thereof) or specified value of the 
 #' mean response. See the reference listed below for more details.
 #'  
-#' @param object An object that inherits from class \code{"lm"}, a matrix, a 
-#' list, or a data frame.
+#' @param object A matrix, list, data frame, or object that inherits from class 
+#'   \code{"lm"}.
 #' @param formula A formula of the form \code{y ~ x}.
 #' @param data an optional data frame, list or environment (or object coercible 
 #' by \code{as.data.frame} to a data frame) containing the variables in the 
