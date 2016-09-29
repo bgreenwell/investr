@@ -3,7 +3,7 @@
 ### Changes for version 1.4.1
 
 * Better y-axis limits when x-axis is on log scale (e.g., using log = "x"). Fixes issue #27.
-* Better default y-axis label when plotting a model with transformed response; for example, `log(y) ~ x`.
+* Better default y-axis label when using `plotFit` on a model with transformed response. For example, calling `plotFit(fit)` where `fit <- lm(sqrt(dist) ~ speed, data = cars)` will have a default y-axis label of `"sqrt(y)"`.
 
 ### Changes for version 1.4.0
 
