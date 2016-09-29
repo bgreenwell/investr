@@ -9,30 +9,29 @@
 #'   \code{"lm"}.
 #' @param formula A formula of the form \code{y ~ x}.
 #' @param data an optional data frame, list or environment (or object coercible 
-#' by \code{as.data.frame} to a data frame) containing the variables in the 
-#' model. If not found in data, the variables are taken from 
+#'   by \code{as.data.frame} to a data frame) containing the variables in the 
+#'   model. If not found in data, the variables are taken from 
 #' \code{environment(formula)}, typically the environment from which \code{lm}
-#' is called. 
+#'   is called. 
 #' @param subset An optional vector specifying a subset of observations to be 
-#' used in the fitting process.
+#'   used in the fitting process.
 #' @param na.action a function which indicates what should happen when the data 
 #' contain \code{NA}s. 
 #' @param y0 The value of the observed response(s) or specified value of the
-#'           mean response.
+#'   mean response.
 #' @param interval The method to use for forming a confidence interval.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'              the interval to be calculated. 
+#'   the interval to be calculated. 
 #' @param mean.response Logicial indicating whether confidence intervals should 
-#' correspond to an observed response(s) (\code{FALSE}) or a specified value of 
-#' the mean response (\code{TRUE}). Default is \code{FALSE}.
+#'   correspond to an observed response(s) (\code{FALSE}) or a specified value 
+#'   of the mean response (\code{TRUE}). Default is \code{FALSE}.
 #' @param adjust A logical value indicating if an adjustment should be made to
-#'               the critical value used in calculating the confidence interval.
-#'               This useful for when the calibration curve is to be used 
-#'               multiple, say k, times.
-#' @param k The number times the calibration curve is to be used for computing a 
-#'          confidence interval. Only needed when \code{adjust = TRUE}.
+#'   the critical value used in constructing the confidence interval. This 
+#'   useful when the calibration curve is to be used k > 0 times.
+#' @param k The number of times the calibration curve is to be used for 
+#'   computing a confidence interval. Only needed when \code{adjust = TRUE}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
-#'            are used.
+#'   are used.
 #'            
 #' @return An object of class \code{"invest"} containing the following 
 #'         components:

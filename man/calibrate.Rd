@@ -22,8 +22,8 @@ calibrate(object, ...)
   "Scheffe"), k, ...)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{"lm"}, a matrix, a 
-list, or a data frame.}
+\item{object}{A matrix, list, data frame, or object that inherits from class 
+\code{"lm"}.}
 
 \item{...}{Additional optional arguments. At present, no optional arguments 
 are used.}
@@ -37,24 +37,23 @@ mean response.}
 the interval to be calculated.}
 
 \item{mean.response}{Logicial indicating whether confidence intervals should 
-correspond to an observed response(s) (\code{FALSE}) or a specified value of 
-the mean response (\code{TRUE}). Default is \code{FALSE}.}
+correspond to an observed response(s) (\code{FALSE}) or a specified value 
+of the mean response (\code{TRUE}). Default is \code{FALSE}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
-the critical value used in calculating the confidence interval.
-This useful for when the calibration curve is to be used 
-multiple, say k, times.}
+the critical value used in constructing the confidence interval. This 
+useful when the calibration curve is to be used k > 0 times.}
 
-\item{k}{The number times the calibration curve is to be used for computing a 
-confidence interval. Only needed when \code{adjust = TRUE}.}
+\item{k}{The number of times the calibration curve is to be used for 
+computing a confidence interval. Only needed when \code{adjust = TRUE}.}
 
 \item{formula}{A formula of the form \code{y ~ x}.}
 
 \item{data}{an optional data frame, list or environment (or object coercible 
-by \code{as.data.frame} to a data frame) containing the variables in the 
-model. If not found in data, the variables are taken from 
+  by \code{as.data.frame} to a data frame) containing the variables in the 
+  model. If not found in data, the variables are taken from 
 \code{environment(formula)}, typically the environment from which \code{lm}
-is called.}
+  is called.}
 
 \item{subset}{An optional vector specifying a subset of observations to be 
 used in the fitting process.}

@@ -6,7 +6,7 @@
 \alias{invest.lm}
 \alias{invest.lme}
 \alias{invest.nls}
-\title{Calibration for Linear and Nonlinear Regression Models.}
+\title{Inverse Estimation for Linear, Nonlinear, and Generalized Linear Models.}
 \usage{
 invest(object, ...)
 
@@ -39,8 +39,8 @@ invest(object, ...)
 are used.}
 
 \item{y0}{The value of the observed response(s) or specified value of the 
-mean response. For \code{"glm"} objects, \code{y0} should be on 
-scale of the response variable.}
+mean response. For \code{"glm"} objects, \code{y0} should be on scale of 
+the response variable.}
 
 \item{interval}{The type of interval required.}
 
@@ -48,9 +48,8 @@ scale of the response variable.}
 for the interval to be calculated.}
 
 \item{mean.response}{Logical indicating whether confidence intervals should
-correspond to an individual response (\code{FALSE}) or 
-a mean response (\code{TRUE}). For \code{glm} objects,
-this is always \code{TRUE}.}
+correspond to an individual response (\code{FALSE}) or a mean response 
+(\code{TRUE}). For \code{glm} objects, this is always \code{TRUE}.}
 
 \item{x0.name}{For multiple linear regression, a character string giving the
 the name of the predictor variable of interest.}
@@ -59,12 +58,12 @@ the name of the predictor variable of interest.}
 values of interest for all other predictor variables (i.e., those other 
 than \code{x0.name}).}
 
-\item{data}{An optional data frame. This is required if \code{object$data} 
-is \code{NULL}.}
+\item{data}{An optional data frame. This is required if \code{object$data} is 
+\code{NULL}.}
 
-\item{boot.type}{Character string specifying the type of bootstrap to use 
-when \code{interval = "percentile"}. Options are 
-\code{"parametric"} and \code{"nonparametric"}.}
+\item{boot.type}{Character string specifying the type of bootstrap to use when 
+\code{interval = "percentile"}. Options are \code{"parametric"} and 
+\code{"nonparametric"}.}
 
 \item{nsim}{Positive integer specifying the number of bootstrap simulations; 
 the bootstrap B (or R).}
@@ -91,31 +90,28 @@ minimum of 1e-10.}
 \item{maxiter}{The maximum number of iterations passed on to \code{uniroot}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
-the critical value used in calculating the confidence interval.
-This is useful for when the calibration curve is to be used 
-multiple, say k, times.}
+the critical value used in calculating the confidence interval.This is 
+useful for when the calibration curve is to be used multiple, say \code{k}, 
+times.}
 
 \item{k}{The number times the calibration curve is to be used for computing 
-a confidence interval. Only needed when 
-\code{adjust = "Bonferroni"}.}
+a confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{"lme"}. 
-Defaults to \code{stats::qnorm((1+level)/2)}.}
+Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
+\code{stats::qnorm((1+level)/2)}.}
 
 \item{q2}{Optional upper cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{"lme"}. 
-Defaults to \code{stats::qnorm((1-level)/2)}.}
+Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
+\code{stats::qnorm((1-level)/2)}.}
 }
 \value{
 \code{invest} returns an object of class \code{"invest"} or, if
-        \code{interval = "percentile"}, of class 
-        \code{c("invest", "bootCal")}. The generic function \code{plot} 
-        can be used to plot the output of the bootstrap simulation when 
-        \code{interval = "percentile"}.
+  \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. 
+  The generic function \code{plot} can be used to plot the output of the 
+  bootstrap simulation when \code{interval = "percentile"}.
         
-        An object of class \code{"invest"} contains the following 
-        components:
+  An object of class \code{"invest"} containing the following components:
   \itemize{
     \item \code{estimate} The estimate of x0.
     \item \code{lwr} The lower confidence limit for x0.
@@ -133,10 +129,10 @@ Defaults to \code{stats::qnorm((1-level)/2)}.}
   }
 }
 \description{
-The function \code{invest} computes the inverse estimate and a condfidence 
-interval for the unknown predictor value that corresponds to an observed 
-value of the response (or vector thereof) or specified value of the mean 
-response. See the references listed below for more details.
+The \code{invest} function provides point and interval estimates for the 
+unknown predictor value that corresponds to an observed value of the 
+response (or vector thereof) or specified value of the mean response. See 
+the references listed below for more details.
 }
 \examples{
 #

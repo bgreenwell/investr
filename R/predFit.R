@@ -41,12 +41,13 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   
   # Predicted values and, if requested, standard errors too
   if (missing(newdata)) {
-    # newdata <- eval(stats::getCall(object)$data, envir = parent.frame()) 
     pred <- stats::predict(object, se.fit = compute.se.fit) 
   } else {
-    # as.data.frame(newdata) 
-    pred <- stats::predict(object, newdata = as.data.frame(newdata), 
-                           se.fit = compute.se.fit)
+    # Suppress warning message printed when calling predict.lm with new data
+    suppressWarnings(
+      pred <- stats::predict(object, newdata = as.data.frame(newdata), 
+                             se.fit = compute.se.fit)
+    )
   } 
 
   # Compute results
