@@ -63,8 +63,8 @@
 #' \code{adjust = "Scheffe"} will plot the Working-Hotelling band.
 #' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
-#' \code{nls}) are based on a linear approximation as described in Bates & Watts 
-#' (2007). This funtion was inspired by the \code{\link[nlstools]{plotfit}} function
+#' \code{nls}) are based on the linear approximation described in Bates & Watts 
+#' (2007). This funtion was partially inspired by the \code{\link[nlstools]{plotfit}} function
 #' from the \code{nlstools} package.
 #' @references
 #' Bates, D. M., and Watts, D. G. (2007)
@@ -76,7 +76,7 @@
 #' \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
 #' 
 #' @examples
-#' # A nonlinear least squares example
+#' # A nonlinear least squares example (see ?datasets::Puromycin)
 #' data(Puromycin, package = "datasets")
 #' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 #' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
