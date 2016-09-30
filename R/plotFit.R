@@ -216,7 +216,7 @@ plotFit.lm <- function(object,
   
   # Extract variable names and values
   xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(stats::formula(object)[[2]])
+  yname <- deparse(stats::formula(object)[[2L]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
@@ -402,7 +402,7 @@ plotFit.nls <- function(object,
   
   # Extract variable names and values
   xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(stats::formula(object)[[2]])
+  yname <- deparse(stats::formula(object)[[2L]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   if (length(yname) != 1) stop("Only one dependent variable allowed.")
   xvals <- .data[, xname]
@@ -585,7 +585,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   
   # Extract variable names and values
   xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(stats::formula(object)[[2]])
+  yname <- deparse(stats::formula(object)[[2L]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   xvals <- .data[, xname]
   
