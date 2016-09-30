@@ -154,7 +154,7 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
     xlab <- xname  # default label for x-axis
   }
   if (missing(ylab)) {
-    ylab <- yname  # default label for y-axis
+    ylab <- deparse(stats::formula(object)[[2L]])  # default label for y-axis
   }
   
   # Vector of predicted mean response values
@@ -253,8 +253,12 @@ plotFit.lm <- function(object,
   names(xgrid) <- xname
   
   # Axis labels
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
+  if (missing(xlab)) {
+    xlab <- xname  # default label for x-axis
+  }
+  if (missing(ylab)) {
+    ylab <- deparse(stats::formula(object)[[2L]])  # default label for y-axis
+  }
   
   # Maximum and minimum of fitted values
   interval = match.arg(interval)
@@ -403,8 +407,12 @@ plotFit.nls <- function(object,
   # Extract variable names and values
   xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
   yname <- deparse(stats::formula(object)[[2L]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
+  if (length(xname) != 1) {
+    stop("Only one independent variable allowed.")
+  }
+  if (length(yname) != 1) {
+    stop("Only one dependent variable allowed.")
+  }
   xvals <- .data[, xname]
   yvals <- with(.data, eval(stats::formula(object)[[2]]))
   
@@ -585,7 +593,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   
   # Extract variable names and values
   xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- deparse(stats::formula(object)[[2L]])
+  yname <- all.vars(stats::formula(object)[[2]])
   if (length(xname) != 1) stop("Only one independent variable allowed.")
   xvals <- .data[, xname]
   
