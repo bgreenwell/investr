@@ -118,17 +118,26 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
                         adjust = c("none", "Bonferroni", "Scheffe"), k, 
                         ...) {
   
-  # Make sure se.fit is set to TRUE if intervals are requested
+  # Match arguments
+  interval <- match.arg(interval)
   adjust <- match.arg(adjust)
-  compute.se.fit <- if (se.fit || (interval != "none")) TRUE else FALSE
+  
+  # Make sure se.fit is set to TRUE if intervals are requested
+  compute.se.fit <- if (se.fit || (interval != "none")) {
+    TRUE
+  } else {
+    FALSE
+  }
   
   # No support for the Golub-Pereyra algorithm for partially linear 
   # least-squares models
-  if (object$call$algorithm == "plinear") {
-    stop(paste("The Golub-Pereyra algorithm for partially linear least-squares 
-               models is currently not supported."), call. = FALSE)
+  if (interval != "none") {
+    if (!is.null(object$call$algorithm) && object$call$algorithm == "plinear") {
+      stop(paste0("The Golub-Pereyra algorithm for partially linear least-", 
+                  "squares models is currently not supported."), call. = FALSE)
+    }
   }
-  
+
   # Prediction data
   newdata <- if (missing(newdata)) {
     eval(stats::getCall(object)$data, envir = parent.frame()) 
@@ -175,7 +184,6 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   }
   
   # Compute results
-  interval <- match.arg(interval)
   if (interval == "none") {
     
     # Vector of fitted/predicted values

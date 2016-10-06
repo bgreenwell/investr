@@ -64,7 +64,8 @@
 #' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
 #' \code{nls}) are based on the linear approximation described in Bates & Watts 
-#' (2007). This funtion was partially inspired by the \code{\link[nlstools]{plotfit}} function
+#' (2007). This funtion was partially inspired by the 
+#' \code{\link[nlstools]{plotfit}} function
 #' from the \code{nlstools} package.
 #' @references
 #' Bates, D. M., and Watts, D. G. (2007)
@@ -303,73 +304,90 @@ plotFit.lm <- function(object,
   }
   
   # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
+                 ylim = ylim,
        panel.first = if (hide) {  # draw points last
          if (shade) {
            # Draw (hidden) shaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(pred.lwr, rev(pred.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(pred.lwr, rev(pred.upr)), 
                      col = col.pred, border = border.pred, lty = lty.pred, 
                      lwd = lwd.pred)
            }
            # Draw (hidden) shaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(conf.lwr, rev(conf.upr)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw (hidden) unshaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
            }
            # Draw (hidden) unshaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)  
        } else NULL,
        panel.last = if(!hide) {  # draw points first
          if (shade) {
            # Draw shaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(pred.lwr, rev(pred.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(pred.lwr, rev(pred.upr)), 
                      col = col.pred, border = border.pred, lty = lty.pred, 
                      lwd = lwd.pred)
            }
            # Draw shaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(conf.lwr, rev(conf.upr)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw unshaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
            }
            # Draw unshaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          # Draw fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)  
        } else NULL, ...)
   
@@ -493,73 +511,90 @@ plotFit.nls <- function(object,
   }
   
   # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
+                 ylim = ylim,
        panel.first = if (hide) {
          if (shade) {
            # Draw (hidden) shaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(pred.lwr, rev(pred.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(pred.lwr, rev(pred.upr)), 
                      col = col.pred, border = border.pred, lty = lty.pred, 
                      lwd = lwd.pred)
            }
            # Draw (hidden) shaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(conf.lwr, rev(conf.upr)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw (hidden) unshaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
            }
            # Draw (hidden) unshaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)
        } else NULL,
        panel.last = if(!hide) {
          if (shade) {
            # Draw shaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(pred.lwr, rev(pred.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(pred.lwr, rev(pred.upr)), 
                      col = col.pred, border = border.pred, lty = lty.pred, 
                      lwd = lwd.pred)
            }
            # Draw shaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(conf.lwr, rev(conf.upr)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(conf.lwr, rev(conf.upr)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw unshaded prediction band
            if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, lty = lty.pred, 
+             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
+                             lty = lty.pred, 
                    lwd = lwd.pred)
            }
            # Draw unshaded confidence band
            if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
          # Draw fitted response curve
-         graphics::lines(xgrid[[1]], suppressWarnings(stats::predict(object, newdata = xgrid)), 
+         graphics::lines(xgrid[[1]], 
+                         suppressWarnings(stats::predict(object, 
+                                                         newdata = xgrid)), 
                lty = lty.fit, lwd = lwd.fit, col = col.fit)
        } else NULL, ...)
   
@@ -618,17 +653,7 @@ plotFit.glm <- function(object, type = c("response", "link"),
   # FIXME: Produce -Inf/Inf for binomial model for yvals = 0/1
   type <- match.arg(type)
   if (type == "link") yvals <- stats::family(object)$linkfun(yvals)
-  
-  # # Plot limits, labels, etc.
-  # if (missing(xlim)) xlim <- range(xvals)  # default limits for x-axis
-  # xgrid <- if (extend.range) {  # the x values at which to evaluate
-  #   list(seq(from = grDevices::extendrange(xlim)[1], to = grDevices::extendrange(xlim)[2], 
-  #            length = n))
-  # } else {
-  #   list(seq(from = xlim[1], to = xlim[2], length = n))
-  # }
-  # names(xgrid) <- xname
-  
+
   # Check if logged x-axis is required
   dots <- list(...)
   logx <- FALSE
@@ -670,7 +695,8 @@ plotFit.glm <- function(object, type = c("response", "link"),
   if (interval == "confidence") {
     
     # Mean response and pointwise confidence intervals
-    conf <- stats::predict(object, newdata = xgrid, type = "link", se.fit = TRUE)
+    conf <- stats::predict(object, newdata = xgrid, type = "link", 
+                           se.fit = TRUE)
     lwr_link <- conf$fit - conf$se.fit * stats::qnorm((level+1) / 2)
     upr_link <- conf$fit + conf$se.fit * stats::qnorm((level+1) / 2)
     
@@ -702,21 +728,25 @@ plotFit.glm <- function(object, type = c("response", "link"),
   }
   
   # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
+                 ylim = ylim,
        panel.first = if (hide) {
          if (shade) {
            # Draw (hidden) shaded confidence band
            if (interval == "confidence") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(lwr_conf, rev(upr_conf)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(lwr_conf, rev(upr_conf)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw (hidden) unshaded confidence band
            if (interval == "confidence") {
-             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }
@@ -728,16 +758,19 @@ plotFit.glm <- function(object, type = c("response", "link"),
          if (shade) {
            # Draw shaded confidence band
            if (interval == "confidence") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), c(lwr_conf, rev(upr_conf)), 
+             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
+                               c(lwr_conf, rev(upr_conf)), 
                      col = col.conf, border = border.conf, lty = lty.conf, 
                      lwd = lwd.conf)
            }
          } else {
            # Draw unshaded confidence band
            if (interval == "confidence") {
-             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, lty = lty.conf, 
+             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, 
+                             lty = lty.conf, 
                    lwd = lwd.conf)
            }
          }

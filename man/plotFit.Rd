@@ -130,7 +130,8 @@ if \code{object} is a simple linear regression model, then calling
 
 Confidence/prediction bands for nonlinear regression (i.e., objects of class
 \code{nls}) are based on the linear approximation described in Bates & Watts 
-(2007). This funtion was partially inspired by the \code{\link[nlstools]{plotfit}} function
+(2007). This funtion was partially inspired by the 
+\code{\link[nlstools]{plotfit}} function
 from the \code{nlstools} package.
 }
 \examples{
