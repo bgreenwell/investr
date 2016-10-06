@@ -94,11 +94,12 @@ test_that("predFit works properly on 'special' nls fits", {
   
   # Predictions
   pred <- predFit(DNase1_nls, se.fit = TRUE, interval = "prediction")
+  pred_2 <- predFit(DNase1_nls_2, interval = "none")
   pred_3 <- predFit(DNase1_nls_3, se.fit = TRUE, interval = "prediction")
   pred_4 <- predFit(DNase1_nls_4, se.fit = TRUE, interval = "prediction")
   
   # Expectations
-  expect_error(predFit(DNase1_nls_2))
+  expect_true(all.equal(pred$fit[, "fit"], pred_2, tol = 1e-06))
   expect_true(all.equal(pred$fit[, "fit"], pred_3$fit[, "fit"], tol = 1e-06))
   expect_true(all.equal(pred$fit[, "fit"], pred_4$fit[, "fit"], tol = 1e-06))
   expect_true(all.equal(pred$fit[, "lwr"], pred_3$fit[, "lwr"], tol = 1e-06))
