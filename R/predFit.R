@@ -29,6 +29,13 @@ predFit <- function(object, ...) {
 
 #' @rdname predFit
 #' @export
+predFit.default <- function(object, ...) {
+  stats::predict(object, ...)
+}
+
+
+#' @rdname predFit
+#' @export
 predFit.lm <- function(object, newdata, se.fit = FALSE,
                        interval = c("none", "confidence", "prediction"), 
                        level = 0.95, 
@@ -87,7 +94,7 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     } else {  # prediction interval for individual response
       lwr <- pred$fit - crit * sqrt(stats::sigma(object)^2 + pred$se.fit^2)
       upr <- pred$fit + crit * sqrt(stats::sigma(object)^2 + pred$se.fit^2)
-      warning("predictions on current data refer to _future_ responses")
+      # warning("predictions on current data refer to _future_ responses")
     }
     
     # Store results in a matrix

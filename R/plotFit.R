@@ -1,3 +1,101 @@
+# Expression to be evaluated after the plot axes are set up but before any 
+# plotting takes place.
+panel.first <- quote({
+  if (hide) {  # draw points last
+    if (shade) {
+      # Draw (hidden) shaded prediction band
+      if (interval == "prediction" || interval == "both") {
+        graphics::polygon(c(xgrid[[1L]], rev(xgrid[[1L]])), 
+                          c(pred[, "lwr"], rev(pred[, "upr"])), 
+                          col = col.pred, border = border.pred, lty = lty.pred, 
+                          lwd = lwd.pred)
+      }
+      # Draw (hidden) shaded confidence band
+      if (interval == "confidence" || interval == "both") {
+        graphics::polygon(c(xgrid[[1L]], rev(xgrid[[1L]])), 
+                          c(conf[, "lwr"], rev(conf[, "upr"])), 
+                          col = col.conf, border = border.conf, lty = lty.conf, 
+                          lwd = lwd.conf)
+      }
+    } else {
+      # Draw (hidden) unshaded prediction band
+      if (interval == "prediction" || interval == "both") {
+        graphics::lines(xgrid[[1L]], pred[, "lwr"], col = col.pred, 
+                        lty = lty.pred, 
+                        lwd = lwd.pred)
+        graphics::lines(xgrid[[1L]], pred[, "upr"], col = col.pred, 
+                        lty = lty.pred, 
+                        lwd = lwd.pred)
+      }
+      # Draw (hidden) unshaded confidence band
+      if (interval == "confidence" || interval == "both") {
+        graphics::lines(xgrid[[1L]], conf[, "lwr"], col = col.conf, 
+                        lty = lty.conf, 
+                        lwd = lwd.conf)
+        graphics::lines(xgrid[[1L]], conf[, "upr"], col = col.conf, 
+                        lty = lty.conf, 
+                        lwd = lwd.conf)
+      }
+    }
+    # Draw (hidden) fitted response curve
+    graphics::lines(xgrid[[1L]], suppressWarnings(
+      stats::predict(object, newdata = xgrid, type = type)), 
+      lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+  } else {
+    NULL
+  }
+})
+
+
+# Expression to be evaluated after plotting has taken place but before the axes, 
+# title and box are added.
+panel.last <- quote({
+  if(!hide) {  # draw points first
+    if (shade) {
+      # Draw shaded prediction band
+      if (interval == "prediction" || interval == "both") {
+        graphics::polygon(c(xgrid[[1L]], rev(xgrid[[1L]])), 
+                          c(pred[, "lwr"], rev(pred[, "upr"])), 
+                          col = col.pred, border = border.pred, lty = lty.pred, 
+                          lwd = lwd.pred)
+      }
+      # Draw shaded confidence band
+      if (interval == "confidence" || interval == "both") {
+        graphics::polygon(c(xgrid[[1L]], rev(xgrid[[1L]])), 
+                          c(conf[, "lwr"], rev(conf[, "upr"])), 
+                          col = col.conf, border = border.conf, lty = lty.conf, 
+                          lwd = lwd.conf)
+      }
+    } else {
+      # Draw unshaded prediction band
+      if (interval == "prediction" || interval == "both") {
+        graphics::lines(xgrid[[1L]], pred[, "lwr"], col = col.pred, 
+                        lty = lty.pred, 
+                        lwd = lwd.pred)
+        graphics::lines(xgrid[[1L]], pred[, "upr"], col = col.pred, 
+                        lty = lty.pred, 
+                        lwd = lwd.pred)
+      }
+      # Draw unshaded confidence band
+      if (interval == "confidence" || interval == "both") {
+        graphics::lines(xgrid[[1L]], conf[, "lwr"], col = col.conf, 
+                        lty = lty.conf, 
+                        lwd = lwd.conf)
+        graphics::lines(xgrid[[1L]], conf[, "upr"], col = col.conf, 
+                        lty = lty.conf, 
+                        lwd = lwd.conf)
+      }
+    }
+    # Draw fitted response curve
+    graphics::lines(xgrid[[1L]], suppressWarnings(
+      stats::predict(object, newdata = xgrid, type = type)), 
+      lty = lty.fit, lwd = lwd.fit, col = col.fit)  
+  } else {
+    NULL
+  }
+})
+
+
 #' Plotting Fitted Models
 #' 
 #' \code{plotFit} is a generic function for plotting predictions from the 
@@ -91,36 +189,85 @@ plotFit <- function(object, ...) {
 
 #' @rdname plotFit
 #' @export
-plotFit.default <- function(object, data, ..., extend.range = FALSE, 
-                            hide = TRUE, col.fit = "black", lty.fit = 1, 
-                            lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim) {
+plotFit.default <- function(object, type = c("response", "link"), 
+                            interval = c("none", "both", "confidence", "prediction"), 
+                            level = 0.95, data,
+                            adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 
+                            shade = FALSE, extend.range = FALSE, hide = TRUE,
+                            col.conf = if (shade) grDevices::grey(0.7) else "black", 
+                            col.pred = if (shade) grDevices::grey(0.9) else "black",  
+                            border.conf = col.conf, border.pred = col.pred, 
+                            col.fit = "black", lty.conf = if (shade) 1 else 2, 
+                            lty.pred = if (shade) 1 else 3, lty.fit = 1, 
+                            lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
+                            xlab, ylab, xlim, ylim) {
   
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
+  # Match arguments
+  type <- match.arg(type)
+  interval <- match.arg(interval)
+  adjust <- match.arg(adjust)
+  
+  # Try to catch errors
+  if (interval != "none") {
+    if (!inherits(object, c("glm", "lm", "nls"))) {
+      stop(paste('Confidence and prediction bands can only be plotted for',
+                 '"glm", "lm", or "nls" objects.'))
+    }
+    if (inherits(object, "glm") && interval == "prediction") {
+      stop(paste('Prediction bands can only be plotted for "lm", or "nls"',
+                 'objects.'))    
+    }
+  }
+  if (inherits(object, c("lm", "nls")) && type != "response") {
+    warning('Option "type" is ignored for "lm" and "nls" objects.')
+  }
+  
+  # Extract data for plotting
+  if (missing(data)) {
+    data <- eval(stats::getCall(object)$data)
+  }
+  if (is.null(data)) {  # throw error if no data are found
+    stop(paste("Could not find data to plot."))
+  }
+  
+  # Dependent variable
+  yname <- all.vars(stats::formula(object)[[2L]])
+  if (inherits(object, "glm")) {
+    # For binomial and quasibinomial families the response can also be specified 
+    # as a factor (when the first level denotes failure and all others success) 
+    # or as a two-column matrix with the columns giving the numbers of successes 
+    # and failures.
+    if (stats::family(object)$family %in% c("binomial", "quasibinomial")) {
+      if (length(yname) == 1) {
+        yvals <- with(data, eval(stats::formula(object)[[2L]]))
+      } else {
+        ymat <- data[, yname]
+        yvals <- ymat[, 1L] / ymat[, 2L]
+      }
+    } else {
+      if (length(yname) != 1) {
+        stop("Only one dependent variable allowed.")
+      }
+      yvals <- with(data, eval(stats::formula(object)[[2L]]))
+    }
+    if (type == "link") {
+      yvals <- stats::family(object)$linkfun(yvals)
+    }
   } else {
-    .data <- eval(stats::getCall(object)$data, envir = parent.frame())
-  }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
+    if (length(yname) != 1) {
+      stop("Only one dependent variable allowed.")
+    }
+    yvals <- with(data, eval(stats::formula(object)[[2L]]))
   }
   
-  # Extract variable names and values
-  xname <- intersect(all.vars(stats::formula(object)[[3L]]), colnames(.data)) 
-  yname <- deparse(stats::formula(object)[[2L]])
+  # Independent variable
+  xname <- intersect(all.vars(stats::formula(object)[[3L]]), colnames(data)) 
   if (length(xname) != 1) {
     stop("Only one independent variable allowed.")
   }
-  if (length(yname) != 1) {
-    stop("Only one dependent variable allowed.")
-  }
-  xvals <- .data[, xname]
-  yvals <- with(.data, eval(stats::formula(object)[[2L]]))
+  xvals <- data[[xname]]
   
-  # Check if logged x-axis is required
+  # Check if user requested a logged x-axis
   dots <- list(...)
   logx <- FALSE
   if ("log" %in% names(dots)) {
@@ -131,7 +278,7 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   
   # Determine x-axis limits
   if (missing(xlim)) {
-    xlim <- range(xvals) # default limits for x-axis
+    xlim <- range(xvals)  # default x-axis limits
   }
   ulim <- if (logx) {
     log(xlim) 
@@ -144,7 +291,7 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   
   # Grid of predictor values
   xgrid <- if (logx) {
-    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
+    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))  # logspace
   } else {
     list(seq(from = ulim[1L], to = ulim[2L], length = n))
   }
@@ -152,631 +299,67 @@ plotFit.default <- function(object, data, ..., extend.range = FALSE,
   
   # Axis labels
   if (missing(xlab)) {
-    xlab <- xname  # default label for x-axis
+    xlab <- xname  # default x-axis label
   }
   if (missing(ylab)) {
-    ylab <- deparse(stats::formula(object)[[2L]])  # default label for y-axis
+    ylab <- if (inherits(object, "glm")) {
+      paste0(deparse(stats::formula(object)[[2L]]), "(", type, " scale)")
+    } else {
+      deparse(stats::formula(object)[[2L]])  # default y-axis label
+    }
   }
   
-  # Vector of predicted mean response values
-  fitvals <- stats::predict(object, newdata = xgrid)
+  # Fitted mean response values
+  if (interval == "none") {
+    fit <- if (inherits(object, "glm")) {
+      unname(stats::predict(object, newdata = xgrid, type = type))
+    } else {
+      predFit(object, newdata = xgrid)
+    }
+  }
+  
+  # Confidence intervals for mean response
+  if (interval == "confidence" || interval == "both") {
+    if (inherits(object, "glm")) {
+      conf <- stats::predict(object, newdata = xgrid, type = "link", 
+                             se.fit = TRUE)
+      conf <- cbind("fit" = conf$fit, 
+                    "lwr" = conf$fit - conf$se.fit * 
+                      stats::qnorm((level+1) / 2), 
+                    "upr" = conf$fit + conf$se.fit * 
+                      stats::qnorm((level+1) / 2))
+    } else {
+      conf <- predFit(object, newdata = xgrid, interval = "confidence", 
+                      level = level, adjust = adjust, k = k)
+    }
+    if (inherits(object, "glm") && type == "response") {
+      conf <- apply(conf, MARGIN = 2, FUN = function(x) {
+        stats::family(object)$linkinv(x)
+      })
+    }
+  }
+  
+  # Prediction intervals for individual response
+  if (interval == "prediction" || interval == "both") {
+    pred <- predFit(object, newdata = xgrid, interval = "prediction", 
+                    level = level, adjust = adjust, k = k)
+  }
   
   # Determine y-axis limits
-  fit.ymin <- min(fitvals)
-  fit.ymax <- max(fitvals)
-  ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-  
-  # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, 
-                 xlim = xlim, ylim = ylim,
-       panel.first = if (hide) {  # draw points last
-         # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL,
-       panel.last = if(!hide) {  # draw points first
-         # Draw fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL, ...)
-  
-}
-
-
-#' @rdname plotFit
-#' @export
-plotFit.lm <- function(object, 
-                       interval = c("none", "both", "confidence", "prediction"), 
-                       level = 0.95, data,
-                       adjust = c("none", "Bonferroni", "Scheffe"), k, ...,
-                       shade = FALSE, extend.range = FALSE, hide = TRUE,
-                       col.conf = if (shade) grDevices::grey(0.7) else "black", 
-                       col.pred = if (shade) grDevices::grey(0.9) else "black",  
-                       border.conf = col.conf, border.pred = col.pred, 
-                       col.fit = "black", lty.conf = if (shade) 1 else 2, 
-                       lty.pred = if (shade) 1 else 3, lty.fit = 1, 
-                       lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                       xlab, ylab, xlim, ylim) {
-  
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
-  } else {
-    .data <- eval(stats::getCall(object)$data, envir = parent.frame())
-  }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
-  }
-  
-  # Extract variable names and values
-  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- deparse(stats::formula(object)[[2L]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  if (length(yname) != 1) stop("Only one dependent variable allowed.")
-  xvals <- .data[, xname]
-  yvals <- with(.data, eval(stats::formula(object)[[2]]))
-  
-  # Check if logged x-axis is required
-  dots <- list(...)
-  logx <- FALSE
-  if ("log" %in% names(dots)) {
-    if (grepl("x", dots$log)) {
-      logx <- TRUE
-    }
-  } 
-  
-  # Determine x-axis limits
-  if (missing(xlim)) {
-    xlim <- range(xvals) # default limits for x-axis
-  }
-  ulim <- if (logx) {
-    log(xlim) 
-  } else {
-    xlim
-  }
-  if (extend.range) {
-    ulim <- grDevices::extendrange(ulim)
-  }
-  
-  # Grid of predictor values
-  xgrid <- if (logx) {
-    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
-  } else {
-    list(seq(from = ulim[1L], to = ulim[2L], length = n))
-  }
-  names(xgrid) <- xname
-  
-  # Axis labels
-  if (missing(xlab)) {
-    xlab <- xname  # default label for x-axis
-  }
-  if (missing(ylab)) {
-    ylab <- deparse(stats::formula(object)[[2L]])  # default label for y-axis
-  }
-  
-  # Maximum and minimum of fitted values
-  interval = match.arg(interval)
-  if (interval == "none") {
-    fitvals <- predFit(object, newdata = xgrid)
-    fit.ymin <- min(fitvals)
-    fit.ymax <- max(fitvals)
-  }
-  
-  # Confidence interval for mean response
-  adjust <- match.arg(adjust)
-  if (interval == "confidence" || interval == "both") {
-    conf <- predFit(object, newdata = xgrid, interval = "confidence", 
-                     level = level, adjust = adjust, k = k)
-    conf.lwr <- conf[, "lwr"]
-    conf.upr <- conf[, "upr"]
-    conf.ymin <- min(conf.lwr)
-    conf.ymax <- max(conf.upr)
-  }
-  
-  # Prediction interval for individual response
-  if (interval == "prediction" || interval == "both") {
-    pred <- predFit(object, newdata = xgrid, interval = "prediction", 
-                     level = level, adjust = adjust, k = k)
-    pred.lwr <- pred[, "lwr"]
-    pred.upr <- pred[, "upr"]
-    pred.ymin <- min(pred.lwr)
-    pred.ymax <- max(pred.upr)
-  }
-  
-  # Automatic limits for y-axis
   if (missing(ylim)) {
-    if(interval == "prediction" || interval == "both") {
-      ylim <- c(min(c(pred.ymin, yvals)), max(c(pred.ymax, yvals)))
-    }
-    if (interval == "confidence") {
-      ylim <- c(min(c(conf.ymin, yvals)), max(c(conf.ymax, yvals)))
-    } 
-    if (interval == "none") {
-      ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-    }
-  }
-  
-  # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
-                 ylim = ylim,
-       panel.first = if (hide) {  # draw points last
-         if (shade) {
-           # Draw (hidden) shaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(pred.lwr, rev(pred.upr)), 
-                     col = col.pred, border = border.pred, lty = lty.pred, 
-                     lwd = lwd.pred)
-           }
-           # Draw (hidden) shaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(conf.lwr, rev(conf.upr)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw (hidden) unshaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-           }
-           # Draw (hidden) unshaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL,
-       panel.last = if(!hide) {  # draw points first
-         if (shade) {
-           # Draw shaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(pred.lwr, rev(pred.upr)), 
-                     col = col.pred, border = border.pred, lty = lty.pred, 
-                     lwd = lwd.pred)
-           }
-           # Draw shaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(conf.lwr, rev(conf.upr)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw unshaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-           }
-           # Draw unshaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)  
-       } else NULL, ...)
-  
-}
-
-
-#' @rdname plotFit
-#' @export
-plotFit.nls <- function(object, 
-                        interval = c("none", "both", "confidence", "prediction"), 
-                        level = 0.95, data,
-                        adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 
-                        shade = FALSE, extend.range = FALSE, hide = TRUE,
-                        col.conf = if (shade) grDevices::grey(0.7) else "black", 
-                        col.pred = if (shade) grDevices::grey(0.9) else "black",  
-                        border.conf = col.conf, border.pred = col.pred, 
-                        col.fit = "black", lty.conf = if (shade) 1 else 2, 
-                        lty.pred = if (shade) 1 else 3, lty.fit = 1, 
-                        lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                        xlab, ylab, xlim, ylim) {
-  
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
-  } else {
-    .data <- eval(stats::getCall(object)$data, envir = parent.frame())
-  }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
-  }
-  
-  # Extract variable names and values
-  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- deparse(stats::formula(object)[[2L]])
-  if (length(xname) != 1) {
-    stop("Only one independent variable allowed.")
-  }
-  if (length(yname) != 1) {
-    stop("Only one dependent variable allowed.")
-  }
-  xvals <- .data[, xname]
-  yvals <- with(.data, eval(stats::formula(object)[[2]]))
-  
-  # Check if logged x-axis is required
-  dots <- list(...)
-  logx <- FALSE
-  if ("log" %in% names(dots)) {
-    if (grepl("x", dots$log)) {
-      logx <- TRUE
-    }
-  } 
-  
-  # Determine x-axis limits
-  if (missing(xlim)) {
-    xlim <- range(xvals) # default limits for x-axis
-  }
-  ulim <- if (logx) {
-    log(xlim) 
-  } else {
-    xlim
-  }
-  if (extend.range) {
-    ulim <- grDevices::extendrange(ulim)
-  }
-  
-  # Grid of predictor values
-  xgrid <- if (logx) {
-    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
-  } else {
-    list(seq(from = ulim[1L], to = ulim[2L], length = n))
-  }
-  names(xgrid) <- xname
-  
-  # Axis labels
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) ylab <- yname  # default label for y-axis
-  
-  # Maximum and minimum of fitted values
-  interval = match.arg(interval)
-  if (interval == "none") {
-    fitvals <- predFit(object, newdata = xgrid)
-    fit.ymin <- min(fitvals)
-    fit.ymax <- max(fitvals)
-  }
-  
-  # Confidence interval for mean response
-  adjust <- match.arg(adjust)
-  if (interval == "confidence" || interval == "both") {
-    conf <- predFit(object, newdata = xgrid, interval = "confidence", 
-                     level = level, adjust = adjust, k = k)
-    conf.lwr <- conf[, "lwr"]
-    conf.upr <- conf[, "upr"]
-    conf.ymin <- min(conf.lwr)
-    conf.ymax <- max(conf.upr)
-  }
-  
-  # Prediction interval for individual response
-  if (interval == "prediction" || interval == "both") {
-    pred <- predFit(object, newdata = xgrid, interval = "prediction", 
-                     level = level, adjust = adjust, k = k)
-    pred.lwr <- pred[, "lwr"]
-    pred.upr <- pred[, "upr"]
-    pred.ymin <- min(pred.lwr)
-    pred.ymax <- max(pred.upr)
-  }
-  
-  # Automatic limits for y-axis
-  if (missing(ylim)) {
-    if(interval == "prediction" || interval == "both") {
-      ylim <- c(min(c(pred.ymin, yvals)), max(c(pred.ymax, yvals)))
-    }
-    if (interval == "confidence") {
-      ylim <- c(min(c(conf.ymin, yvals)), max(c(conf.ymax, yvals)))
-    } 
-    if (interval == "none") {
-      ylim <- c(min(c(fit.ymin, yvals)), max(c(fit.ymax, yvals)))
-    }
-  }
-  
-  # Plot data, mean response, etc.
-  graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
-                 ylim = ylim,
-       panel.first = if (hide) {
-         if (shade) {
-           # Draw (hidden) shaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(pred.lwr, rev(pred.upr)), 
-                     col = col.pred, border = border.pred, lty = lty.pred, 
-                     lwd = lwd.pred)
-           }
-           # Draw (hidden) shaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(conf.lwr, rev(conf.upr)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw (hidden) unshaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-           }
-           # Draw (hidden) unshaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)
-       } else NULL,
-       panel.last = if(!hide) {
-         if (shade) {
-           # Draw shaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(pred.lwr, rev(pred.upr)), 
-                     col = col.pred, border = border.pred, lty = lty.pred, 
-                     lwd = lwd.pred)
-           }
-           # Draw shaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(conf.lwr, rev(conf.upr)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw unshaded prediction band
-           if (interval == "prediction" || interval == "both") {
-             graphics::lines(xgrid[[1]], pred.lwr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-             graphics::lines(xgrid[[1]], pred.upr, col = col.pred, 
-                             lty = lty.pred, 
-                   lwd = lwd.pred)
-           }
-           # Draw unshaded confidence band
-           if (interval == "confidence" || interval == "both") {
-             graphics::lines(xgrid[[1]], conf.lwr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], conf.upr, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw fitted response curve
-         graphics::lines(xgrid[[1]], 
-                         suppressWarnings(stats::predict(object, 
-                                                         newdata = xgrid)), 
-               lty = lty.fit, lwd = lwd.fit, col = col.fit)
-       } else NULL, ...)
-  
-}
-
-
-#' @rdname plotFit
-#' @export
-plotFit.glm <- function(object, type = c("response", "link"),
-                        interval = c("none", "confidence"), level = 0.95,
-                        data, ..., shade = FALSE, extend.range = FALSE, 
-                        hide = TRUE, 
-                        col.conf = if (shade) grDevices::grey(0.9) else "black", 
-                        border.conf = col.conf, col.fit = "black", 
-                        lty.conf = if (shade) 1 else 2, 
-                        lty.fit = 1, lwd.conf = 1, lwd.fit = 1, n = 500, 
-                        xlab, ylab, xlim, ylim) {
-  
-  # Extract data 
-  if (!missing(data)) { 
-    .data <- data 
-  } else {
-    .data <- eval(stats::getCall(object)$data, envir = parent.frame())
-  }
-  if (is.null(.data)) {  # throw error if no data are found
-    stop(paste("No data to plot. If the", class(object), "object does not",
-               "contain a data component then a data frame containing the", 
-               "variables in the model must be supplied through the 'data'", 
-               "argument to plotFit."))
-  }
-  
-  # Extract variable names and values
-  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
-  yname <- all.vars(stats::formula(object)[[2]])
-  if (length(xname) != 1) stop("Only one independent variable allowed.")
-  xvals <- .data[, xname]
-  
-  # NOTE:
-  #
-  # For binomial and quasibinomial families the response can also be 
-  # specified as a factor (when the first level denotes failure and all others 
-  # success) or as a two-column matrix with the columns giving the numbers of 
-  # successes and failures.
-  if (stats::family(object)$family %in% c("binomial", "quasibinomial")) {
-    if (length(yname) == 1) {
-      yvals <- with(.data, eval(stats::formula(object)[[2]]))
+    ylim <- if (interval == "none") {
+      x <- fit
+      c(min(c(min(fit), yvals)), max(c(max(fit), yvals)))
+    } else if (interval == "confidence") {
+      c(min(c(min(conf[, "lwr"]), yvals)), max(c(max(conf[, "upr"]), yvals)))
     } else {
-      ymat <- .data[, yname]
-      yvals <- ymat[, 1] / ymat[, 2]
+      c(min(c(min(pred[, "lwr"]), yvals)), max(c(max(pred[, "upr"]), yvals)))
     }
-  } else {
-    if (length(yname) != 1) stop("Only one dependent variable allowed.")
-    yvals <- with(.data, eval(stats::formula(object)[[2]]))
-  }
-  
-  # FIXME: Produce -Inf/Inf for binomial model for yvals = 0/1
-  type <- match.arg(type)
-  if (type == "link") yvals <- stats::family(object)$linkfun(yvals)
-
-  # Check if logged x-axis is required
-  dots <- list(...)
-  logx <- FALSE
-  if ("log" %in% names(dots)) {
-    if (grepl("x", dots$log)) {
-      logx <- TRUE
-    }
-  } 
-  
-  # Determine x-axis limits
-  if (missing(xlim)) {
-    xlim <- range(xvals) # default limits for x-axis
-  }
-  ulim <- if (logx) {
-    log(xlim) 
-  } else {
-    xlim
-  }
-  if (extend.range) {
-    ulim <- grDevices::extendrange(ulim)
-  }
-  
-  # Grid of predictor values
-  xgrid <- if (logx) {
-    list(exp(seq(from = ulim[1L], to = ulim[2L], length = n)))
-  } else {
-    list(seq(from = ulim[1L], to = ulim[2L], length = n))
-  }
-  names(xgrid) <- xname
-  
-  # Axis labels
-  if (missing(xlab)) xlab <- xname  # default label for x-axis
-  if (missing(ylab)) {
-    ylab <- paste0("Prediction (", type, " scale)")  # default label for y-axis
-  }
-  
-  # Confidence interval for mean response
-  interval = match.arg(interval)
-  if (interval == "confidence") {
-    
-    # Mean response and pointwise confidence intervals
-    conf <- stats::predict(object, newdata = xgrid, type = "link", 
-                           se.fit = TRUE)
-    lwr_link <- conf$fit - conf$se.fit * stats::qnorm((level+1) / 2)
-    upr_link <- conf$fit + conf$se.fit * stats::qnorm((level+1) / 2)
-    
-    if (type == "response") {
-      mean_resp <- stats::family(object)$linkinv(conf$fit)
-      lwr_conf <- stats::family(object)$linkinv(lwr_link)
-      upr_conf <- stats::family(object)$linkinv(upr_link)
-    } else {
-      mean_resp <- conf$fit
-      lwr_conf <- lwr_link
-      upr_conf <- upr_link
-    }
-
-    # Determine default ylim for plot
-    if (missing(ylim)) {
-      ylim <- c(min(c(min(lwr_conf), yvals)), max(c(max(upr_conf), yvals)))
-    }
-    
-  } else {
-    
-    # Mean response
-    mean_resp <- unname(stats::predict(object, newdata = xgrid, type = type))
-    
-    # Determine default ylim for plot
-    if (missing(ylim)) {
-      ylim <- c(min(c(min(mean_resp), yvals)), max(c(max(mean_resp), yvals)))
-    }
-    
   }
   
   # Plot data, mean response, etc.
   graphics::plot(xvals, yvals, xlab = xlab, ylab = ylab, xlim = xlim, 
-                 ylim = ylim,
-       panel.first = if (hide) {
-         if (shade) {
-           # Draw (hidden) shaded confidence band
-           if (interval == "confidence") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(lwr_conf, rev(upr_conf)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw (hidden) unshaded confidence band
-           if (interval == "confidence") {
-             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw (hidden) fitted response curve
-         graphics::lines(xgrid[[1]], mean_resp, lty = lty.fit, lwd = lwd.fit, 
-               col = col.fit)
-       } else NULL,
-       panel.last = if (!hide) {
-         if (shade) {
-           # Draw shaded confidence band
-           if (interval == "confidence") {
-             graphics::polygon(c(xgrid[[1]], rev(xgrid[[1]])), 
-                               c(lwr_conf, rev(upr_conf)), 
-                     col = col.conf, border = border.conf, lty = lty.conf, 
-                     lwd = lwd.conf)
-           }
-         } else {
-           # Draw unshaded confidence band
-           if (interval == "confidence") {
-             graphics::lines(xgrid[[1]], lwr_conf, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-             graphics::lines(xgrid[[1]], upr_conf, col = col.conf, 
-                             lty = lty.conf, 
-                   lwd = lwd.conf)
-           }
-         }
-         # Draw fitted response curve
-         graphics::lines(xgrid[[1]], mean_resp, lty = lty.fit, lwd = lwd.fit, 
-               col = col.fit)
-       } else NULL, ...)
+                 ylim = ylim, panel.first = eval(panel.first),
+                 panel.last = eval(panel.last), ...)
   
 }

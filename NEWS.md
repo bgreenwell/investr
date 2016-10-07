@@ -4,6 +4,8 @@
 
 * Better y-axis limits when x-axis is on log scale (e.g., using log = "x"). Fixes issue #27.
 * Better default y-axis label when using `plotFit` on a model with transformed response. For example, calling `plotFit(fit)` where `fit <- lm(sqrt(dist) ~ speed, data = cars)` will have a default y-axis label of `"sqrt(y)"`.
+* `plotFit` has been completely re-written using much less code.
+* `predFit` (and hence `plotFit`) now works for `"nls"` objcts fit using the Golub-Pereyra algorithm (i.e., `algorithm = "plinear"`); however, confidence/prediction bands are still not available.
 
 ### Changes for version 1.4.0
 

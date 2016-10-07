@@ -2,12 +2,15 @@
 % Please edit documentation in R/predFit.R
 \name{predFit}
 \alias{predFit}
+\alias{predFit.default}
 \alias{predFit.lm}
 \alias{predFit.lme}
 \alias{predFit.nls}
 \title{Predictions from a Fitted Model}
 \usage{
 predFit(object, ...)
+
+\method{predFit}{default}(object, ...)
 
 \method{predFit}{lm}(object, newdata, se.fit = FALSE, interval = c("none",
   "confidence", "prediction"), level = 0.95, adjust = c("none",

@@ -35,16 +35,17 @@ test_that("plotFit works", {
   expect_silent(plotFit(crystal_rlm))  # requires MASS
   expect_silent(plotFit(crystal_lqs))  # requires MASS
   expect_silent(plotFit(crystal_lm))
-  expect_warning(plotFit(crystal_lm, interval = "both"))
-  expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
-  expect_warning(plotFit(crystal_lm, interval = "both", hide = FALSE))
-  expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE, hide = FALSE))
-  
-  expect_silent(plotFit(beetle_glm))
-  expect_silent(plotFit(beetle_glm, interval = "confidence", extend.range = TRUE))
-  expect_silent(plotFit(beetle_glm, interval = "confidence", shade = TRUE))
-  expect_silent(plotFit(beetle_glm, interval = "confidence", hide = FALSE))
-  expect_silent(plotFit(beetle_glm, interval = "confidence", shade = TRUE, hide = FALSE))
+  # expect_warning(plotFit(crystal_lm, interval = "both"))
+  # expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE))
+  # expect_warning(plotFit(crystal_lm, interval = "both", hide = FALSE))
+  # expect_warning(plotFit(crystal_lm, interval = "both", extend.range = TRUE, shade = TRUE, hide = FALSE))
+  # 
+  # expect_silent(plotFit(beetle_glm))
+  # expect_silent(plotFit(beetle_glm, interval = "confidence", extend.range = TRUE))
+  # expect_silent(plotFit(beetle_glm, interval = "confidence", shade = TRUE))
+  # expect_silent(plotFit(beetle_glm, interval = "confidence", hide = FALSE))
+  # expect_silent(plotFit(beetle_glm, interval = "confidence", shade = TRUE, 
+  #                       hide = FALSE))
   
   expect_silent(plotFit(nas_nls))
   expect_silent(plotFit(nas_nls, interval = "both"))

@@ -130,23 +130,23 @@ test_that("predFit matches output from stats::predict", {
 
   # Predictions and confidence intervals
   pred.investr.conf <- predFit(lm1, interval = "confidence")
-  pred.stats.conf <- predict(lm1, interval = "confidence")
+  pred.stats.conf <- suppressWarnings(predict(lm1, interval = "confidence"))
 
   # Predictions and prediction intervals
   pred.investr.pred <- predFit(lm1, interval = "prediction")
-  pred.stats.pred <- predict(lm1, interval = "prediction")
+  pred.stats.pred <- suppressWarnings(predict(lm1, interval = "prediction"))
 
   # Predictions and standard errors
   pred.investr.se <- predFit(lm1, se.fit = TRUE)
-  pred.stats.se <- predict(lm1, se.fit = TRUE)
+  pred.stats.se <- suppressWarnings(predict(lm1, se.fit = TRUE))
 
   # Predictions, confidence intervals, and standard errors
   pred.investr.se.conf <- predFit(lm1, se.fit = TRUE, interval = "confidence")
-  pred.stats.se.conf <- predict(lm1, se.fit = TRUE, interval = "confidence")
+  pred.stats.se.conf <- suppressWarnings(predict(lm1, se.fit = TRUE, interval = "confidence"))
 
   # Predictions, prediction intervals, and standard errors
   pred.investr.se.pred <- predFit(lm1, se.fit = TRUE, interval = "prediction")
-  pred.stats.se.pred <- predict(lm1, se.fit = TRUE, interval = "prediction")
+  pred.stats.se.pred <- suppressWarnings(predict(lm1, se.fit = TRUE, interval = "prediction"))
 
   # Expectations
   expect_equal(pred.investr, pred.stats)
