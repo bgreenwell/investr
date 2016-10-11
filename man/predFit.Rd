@@ -3,6 +3,7 @@
 \name{predFit}
 \alias{predFit}
 \alias{predFit.default}
+\alias{predFit.glm}
 \alias{predFit.lm}
 \alias{predFit.lme}
 \alias{predFit.nls}
@@ -15,6 +16,9 @@ predFit(object, ...)
 \method{predFit}{lm}(object, newdata, se.fit = FALSE, interval = c("none",
   "confidence", "prediction"), level = 0.95, adjust = c("none",
   "Bonferroni", "Scheffe"), k, ...)
+
+\method{predFit}{glm}(object, newdata, type = c("link", "response"),
+  se.fit = FALSE, interval = c("none", "confidence"), level = 0.95, ...)
 
 \method{predFit}{nls}(object, newdata, se.fit = FALSE, interval = c("none",
   "confidence", "prediction"), level = 0.95, adjust = c("none",
@@ -47,10 +51,42 @@ useful for when the calibration curve is to be used multiple, say k, times.
 Default is \code{FALSE}.}
 
 \item{k}{The number times the calibration curve is to be used for computing 
-a confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
+a confidence/prediction interval. Only needed when 
+\code{adjust = "Bonferroni"}.}
 }
 \description{
-Generic prediction method for various types of fitted models. (For internal 
-use only.)
+Generic prediction method for various types of fitted models. \code{predFit} 
+can be used to obtain standard errors of fitted values and 
+adjusted/unadjusted confidence/prediction intervals for objects of class 
+\code{"lm"}, \code{"nls"}, and \code{"glm"}. For \code{"nls"} and 
+\code{"glm"} objects, the standard errors of the fitted values (and hence any 
+confidence/prediction intervals) are approximate and rely on Taylor series
+approximations. For \code{"glm"} objects, only unadjusted (i.e., pointwise)
+confidence intervals for the mean response are available.
+}
+\details{
+Confidence and prediction intervals for linear models (i.e., \code{"lm"} 
+objects) are obtained according to the usual formulas. Nonlinear and 
+generalized linear models (i.e., \code{"nls"} and \code{"glm"} objects), on 
+the other hand, rely on Taylor-series approximations for the standard errors 
+used in forming the intervals. Approximate standard errors for the fitted 
+values in linear mixed-effects models (i.e., \code{"lme"} objects) can also 
+be computed; however, these rely on the approximate variance-covariance 
+matrix of the fixed-effects estimates and often under estimate the true
+standard error. For accurate standard errors can be obtained using the 
+parametric bootstrap; see \link[lme4]{bootMer} in the \code{\link{lme4}} 
+package.
+
+For linear and nonlinear models, it is possible to request \emph{adjusted}
+confidence or prediction intervals using the Bonferroni method 
+(\code{adjust = "Bonferroni"}) or Scheffe's method 
+(\code{adjust = "Scheffe"}).
+}
+\examples{
+# Fit a linear regression model to the cars data frame
+cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
+
+# Pointwise prediction intervals
+predFit(cars.lm, interval = "prediction")
 }
 

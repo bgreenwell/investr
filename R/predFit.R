@@ -1,7 +1,13 @@
 #' Predictions from a Fitted Model
 #'
-#' Generic prediction method for various types of fitted models. (For internal 
-#' use only.)
+#' Generic prediction method for various types of fitted models. \code{predFit} 
+#' can be used to obtain standard errors of fitted values and 
+#' adjusted/unadjusted confidence/prediction intervals for objects of class 
+#' \code{"lm"}, \code{"nls"}, and \code{"glm"}. For \code{"nls"} and 
+#' \code{"glm"} objects, the standard errors of the fitted values (and hence any 
+#' confidence/prediction intervals) are approximate and rely on Taylor series
+#' approximations. For \code{"glm"} objects, only unadjusted (i.e., pointwise)
+#' confidence intervals for the mean response are available.
 #' 
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
 #'               \code{"nls"}, or \code{"lme"}.
@@ -18,10 +24,36 @@
 #'   useful for when the calibration curve is to be used multiple, say k, times.
 #'   Default is \code{FALSE}.
 #' @param k The number times the calibration curve is to be used for computing 
-#'   a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
+#'   a confidence/prediction interval. Only needed when 
+#'   \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'   are used.
+#'   
+#' @details 
+#' Confidence and prediction intervals for linear models (i.e., \code{"lm"} 
+#' objects) are obtained according to the usual formulas. Nonlinear and 
+#' generalized linear models (i.e., \code{"nls"} and \code{"glm"} objects), on 
+#' the other hand, rely on Taylor-series approximations for the standard errors 
+#' used in forming the intervals. Approximate standard errors for the fitted 
+#' values in linear mixed-effects models (i.e., \code{"lme"} objects) can also 
+#' be computed; however, these rely on the approximate variance-covariance 
+#' matrix of the fixed-effects estimates and often under estimate the true
+#' standard error. For accurate standard errors can be obtained using the 
+#' parametric bootstrap; see \link[lme4]{bootMer} in the \code{\link{lme4}} 
+#' package.
+#' 
+#' For linear and nonlinear models, it is possible to request \emph{adjusted}
+#' confidence or prediction intervals using the Bonferroni method 
+#' (\code{adjust = "Bonferroni"}) or Scheffe's method 
+#' (\code{adjust = "Scheffe"}).
+#'   
 #' @export
+#' @examples 
+#' # Fit a linear regression model to the cars data frame
+#' cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
+#' 
+#' # Pointwise prediction intervals
+#' predFit(cars.lm, interval = "prediction")
 predFit <- function(object, ...) {
   UseMethod("predFit")
 } 
@@ -100,6 +132,63 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
     # Store results in a matrix
     res <- cbind("fit" = pred$fit, "lwr" = lwr, "upr" = upr)
     
+  }
+  
+  # If standard errors of fitted values are requested, convert results to a list
+  # and store addional information
+  if (se.fit) {
+    res <- list("fit" = res,
+                "se.fit" = pred$se.fit,
+                "df" = pred$df,
+                "residual.scale" = pred$residual.scale)
+  }
+  
+  # Return results
+  return(res)
+  
+}
+
+
+#' @rdname predFit
+#' @export
+predFit.glm <- function(object, newdata, type = c("link", "response"),
+                        se.fit = FALSE, interval = c("none", "confidence"), 
+                        level = 0.95, ...) {
+  
+  # Match arguments
+  type <- match.arg(type)
+  interval <- match.arg(interval)
+
+  # Make sure se.fit is set to TRUE if intervals are requested
+  if (se.fit || (interval != "none")) {
+    compute.se.fit <- TRUE 
+  } else {
+    compute.se.fit <-  FALSE
+  }
+  
+  # Predicted values and, if requested, standard errors too
+  if (missing(newdata)) {
+    pred <- stats::predict(object, se.fit = compute.se.fit) 
+  } else {
+    # Suppress warning message printed when calling predict.lm with new data
+    suppressWarnings(
+      pred <- stats::predict(object, newdata = as.data.frame(newdata), 
+                             type = type, se.fit = compute.se.fit)
+    )
+  } 
+  
+  # Compute results
+  if (interval == "none") {
+    res <- pred
+  } else { 
+    res <- cbind("fit" = pred$fit, 
+                 "lwr" = pred$fit - pred$se.fit * stats::qnorm((level + 1) / 2), 
+                 "upr" = pred$fit + pred$se.fit * stats::qnorm((level + 1) / 2))
+    if (type == "response") {
+      res <- apply(res, MARGIN = 2, FUN = function(x) {
+        stats::family(object)$linkinv(x)
+      })
+    }
   }
   
   # If standard errors of fitted values are requested, convert results to a list
@@ -261,18 +350,16 @@ predFit.lme <- function(object, newdata, se.fit = FALSE, ...) {
   }  
   
   # Names of independent variables
-  xname <- intersect(all.vars(stats::formula(object)[[3]]), colnames(newdata)) 
+  xname <- intersect(all.vars(stats::formula(object)[[3L]]), colnames(newdata)) 
   
   # Population predicted values
   pred <- stats::predict(object, newdata = newdata, level = 0)
   
-  # Approximate standard error of fitted values
+  # Approximate standard errors of fitted values
   if (se.fit) {
     Xmat <- makeX(object, newdata)  # fixed-effects design matrix
-    #     Xmat <- makeX(object, newdata = makeData(newdata, xname))
-    se_fit <- sqrt(diag(Xmat %*% stats::vcov(object) %*% t(Xmat)))
-    # list(fit = pred, se.fit = se_fit)
-    cbind("fit" = pred, "se.fit" = se_fit)
+    se <- sqrt(diag(Xmat %*% stats::vcov(object) %*% t(Xmat)))
+    cbind("fit" = pred, "se.fit" = se)
   } else {
     pred
   }
