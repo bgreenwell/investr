@@ -53,6 +53,10 @@ Default is \code{FALSE}.}
 \item{k}{The number times the calibration curve is to be used for computing 
 a confidence/prediction interval. Only needed when 
 \code{adjust = "Bonferroni"}.}
+
+\item{type}{Character string specifying the type of prediction. Current 
+options are \code{type = "link"} (the default) and 
+\code{type = "response"}.}
 }
 \description{
 Generic prediction method for various types of fitted models. \code{predFit} 
@@ -73,20 +77,36 @@ used in forming the intervals. Approximate standard errors for the fitted
 values in linear mixed-effects models (i.e., \code{"lme"} objects) can also 
 be computed; however, these rely on the approximate variance-covariance 
 matrix of the fixed-effects estimates and often under estimate the true
-standard error. For accurate standard errors can be obtained using the 
-parametric bootstrap; see \link[lme4]{bootMer} in the \code{\link{lme4}} 
-package.
+standard error. More accurate standard errors can be obtained using the 
+parametric bootstrap; see \link[lme4]{bootMer} for details.
 
 For linear and nonlinear models, it is possible to request \emph{adjusted}
 confidence or prediction intervals using the Bonferroni method 
 (\code{adjust = "Bonferroni"}) or Scheffe's method 
-(\code{adjust = "Scheffe"}).
+(\code{adjust = "Scheffe"}). For the Bonferroni adjustment, you must specify 
+a value for \code{k}, the number of intervals for which the coverage is to 
+hold simultaneously. For the Scheffe adjustment, specifying a value for 
+\code{k} is only required when \code{interval = "prediction"}; if 
+\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
+of regression parameters. For example, calling \code{plotFit} on \code{"lm"}
+objects with \code{interval = "confidence"} and \code{adjust = "Scheffe"} 
+will plot the Working-Hotelling band.
 }
 \examples{
-# Fit a linear regression model to the cars data frame
+# A linear regression example (see ?datasets::cars)
 cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
+predFit(cars.lm, interval = "confidence")
 
-# Pointwise prediction intervals
-predFit(cars.lm, interval = "prediction")
+# A nonlinear least squares example (see ?datasets::Puromycin)
+data(Puromycin, package = "datasets")
+Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
+Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
+                start = c(Vm = 200, K = 0.05))
+conc <- seq(from = 0.02, to = 1.10, length = 101)
+pred <- predFit(Puro.nls, newdata = data.frame(conc), interval = "prediction")
+plot(Puromycin2, ylim = c(min(pred[, "lwr"]), max(pred[, "upr"])))
+lines(conc, pred[, "fit"], lwd = 2)
+lines(conc, pred[, "lwr"], lty = 2)
+lines(conc, pred[, "upr"], lty = 2)
 }
 

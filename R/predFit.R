@@ -10,9 +10,12 @@
 #' confidence intervals for the mean response are available.
 #' 
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
-#'               \code{"nls"}, or \code{"lme"}.
+#'   \code{"nls"}, or \code{"lme"}.
 #' @param newdata An optional data frame in which to look for variables with 
-#'   which to predict. If omitted, the fitted values are used.      
+#'   which to predict. If omitted, the fitted values are used.    
+#' @param type Character string specifying the type of prediction. Current 
+#'   options are \code{type = "link"} (the default) and 
+#'   \code{type = "response"}.
 #' @param se.fit A logical vaue indicating if standard errors are required. 
 #'   Default is \code{FALSE}.
 #' @param interval Type of interval to be calculated. Can be one of "none" 
@@ -38,22 +41,38 @@
 #' values in linear mixed-effects models (i.e., \code{"lme"} objects) can also 
 #' be computed; however, these rely on the approximate variance-covariance 
 #' matrix of the fixed-effects estimates and often under estimate the true
-#' standard error. For accurate standard errors can be obtained using the 
-#' parametric bootstrap; see \link[lme4]{bootMer} in the \code{\link{lme4}} 
-#' package.
+#' standard error. More accurate standard errors can be obtained using the 
+#' parametric bootstrap; see \link[lme4]{bootMer} for details.
 #' 
 #' For linear and nonlinear models, it is possible to request \emph{adjusted}
 #' confidence or prediction intervals using the Bonferroni method 
 #' (\code{adjust = "Bonferroni"}) or Scheffe's method 
-#' (\code{adjust = "Scheffe"}).
+#' (\code{adjust = "Scheffe"}). For the Bonferroni adjustment, you must specify 
+#' a value for \code{k}, the number of intervals for which the coverage is to 
+#' hold simultaneously. For the Scheffe adjustment, specifying a value for 
+#' \code{k} is only required when \code{interval = "prediction"}; if 
+#' \code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
+#' of regression parameters. For example, calling \code{plotFit} on \code{"lm"}
+#' objects with \code{interval = "confidence"} and \code{adjust = "Scheffe"} 
+#' will plot the Working-Hotelling band.
 #'   
 #' @export
 #' @examples 
-#' # Fit a linear regression model to the cars data frame
+#' # A linear regression example (see ?datasets::cars)
 #' cars.lm <- lm(dist ~ speed + I(speed^2), data = cars)
+#' predFit(cars.lm, interval = "confidence")
 #' 
-#' # Pointwise prediction intervals
-#' predFit(cars.lm, interval = "prediction")
+#' # A nonlinear least squares example (see ?datasets::Puromycin)
+#' data(Puromycin, package = "datasets")
+#' Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
+#' Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
+#'                 start = c(Vm = 200, K = 0.05))
+#' conc <- seq(from = 0.02, to = 1.10, length = 101)
+#' pred <- predFit(Puro.nls, newdata = data.frame(conc), interval = "prediction")
+#' plot(Puromycin2, ylim = c(min(pred[, "lwr"]), max(pred[, "upr"])))
+#' lines(conc, pred[, "fit"], lwd = 2)
+#' lines(conc, pred[, "lwr"], lty = 2)
+#' lines(conc, pred[, "upr"], lty = 2)
 predFit <- function(object, ...) {
   UseMethod("predFit")
 } 

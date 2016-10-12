@@ -95,10 +95,10 @@ plotting the fitted mean response from other model fits (e.g., \code{"lqs"}
 and \code{"rlm"} from the \code{MASS} package.
 }
 \note{
-By default, the plotted intervals are pointwise intervals. For simultaneous 
-intervals use \code{adjust = "Bonferroni"} or \code{adjust = "Scheffe"}. For
-the Bonferroni adjustment, you must specify a value for \code{k}, the number
-of intervals for which the coverage is to hold simultaneously. For the 
+By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
+For simultaneous intervals use \code{adjust = "Bonferroni"} or 
+\code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a 
+value for \code{k}, the number of intervals for which the coverage is to hold simultaneously. For the 
 Scheffe adjustment, specifying a value for \code{k} is only required when
 \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
 is set equal to \eqn{p}, the number of regression parameters. For example,
@@ -108,12 +108,11 @@ if \code{object} is a simple linear regression model, then calling
 
 Confidence/prediction bands for nonlinear regression (i.e., objects of class
 \code{nls}) are based on the linear approximation described in Bates & Watts 
-(2007). This funtion was partially inspired by the 
-\code{\link[nlstools]{plotfit}} function
-from the \code{nlstools} package.
+(2007). T
 }
 \examples{
-# A nonlinear least squares example (see ?datasets::Puromycin)
+# A nonlinear least squares example (see ?datasets::Puromycin and 
+# ?investr::predFit)
 data(Puromycin, package = "datasets")
 Puromycin2 <- Puromycin[Puromycin$state == "treated", ][, 1:2]
 Puro.nls <- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
@@ -129,5 +128,8 @@ Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche,
 Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015). 
 A Toolbox for Nonlinear Regression in R: The Package nlstools. 
 \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
+}
+\seealso{
+\link[nlstools]{plotfit}.
 }
 
