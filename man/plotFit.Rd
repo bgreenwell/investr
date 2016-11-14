@@ -86,13 +86,11 @@ is \code{TRUE}.}
 \item{ylim}{The y limits (y1, y2) of the plot.}
 }
 \description{
-\code{plotFit} is a generic function for plotting predictions from the 
-results of various model fitting functions. The function invokes particular 
-methods which depend on the class of the first argument. Currently supports
-objects of class \code{"lm"}, \code{"glm"}, and \code{"nls"}. A default 
-method also exists which may be used for 
-plotting the fitted mean response from other model fits (e.g., \code{"lqs"}
-and \code{"rlm"} from the \code{MASS} package.
+Generic function for plotting predictions from various types of fitted 
+models. \code{plotFit} currently supports objects of class \code{"lm"}, 
+\code{"glm"}, and \code{"nls"}. A default method also exists which may be 
+used for plotting the fitted mean response from other model fits 
+(e.g., \code{"lqs"} and \code{"rlm"} from the \code{MASS} package.
 }
 \note{
 By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.

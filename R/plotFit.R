@@ -98,13 +98,11 @@ panel.last <- quote({
 
 #' Plotting Fitted Models
 #' 
-#' \code{plotFit} is a generic function for plotting predictions from the 
-#' results of various model fitting functions. The function invokes particular 
-#' methods which depend on the class of the first argument. Currently supports
-#' objects of class \code{"lm"}, \code{"glm"}, and \code{"nls"}. A default 
-#' method also exists which may be used for 
-#' plotting the fitted mean response from other model fits (e.g., \code{"lqs"}
-#' and \code{"rlm"} from the \code{MASS} package.
+#' Generic function for plotting predictions from various types of fitted 
+#' models. \code{plotFit} currently supports objects of class \code{"lm"}, 
+#' \code{"glm"}, and \code{"nls"}. A default method also exists which may be 
+#' used for plotting the fitted mean response from other model fits 
+#' (e.g., \code{"lqs"} and \code{"rlm"} from the \code{MASS} package.
 #'
 #' @param object A fitted model object. Typically, an object that inherits from 
 #'   class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).
