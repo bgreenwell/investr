@@ -62,11 +62,7 @@ options are \code{type = "link"} (the default) and
 Generic prediction method for various types of fitted models. \code{predFit} 
 can be used to obtain standard errors of fitted values and 
 adjusted/unadjusted confidence/prediction intervals for objects of class 
-\code{"lm"}, \code{"nls"}, and \code{"glm"}. For \code{"nls"} and 
-\code{"glm"} objects, the standard errors of the fitted values (and hence any 
-confidence/prediction intervals) are approximate and rely on Taylor series
-approximations. For \code{"glm"} objects, only unadjusted (i.e., pointwise)
-confidence intervals for the mean response are available.
+\code{"lm"}, \code{"nls"}, and \code{"glm"}.
 }
 \details{
 Confidence and prediction intervals for linear models (i.e., \code{"lm"} 
@@ -78,7 +74,7 @@ values in linear mixed-effects models (i.e., \code{"lme"} objects) can also
 be computed; however, these rely on the approximate variance-covariance 
 matrix of the fixed-effects estimates and often under estimate the true
 standard error. More accurate standard errors can be obtained using the 
-parametric bootstrap; see \link[lme4]{bootMer} for details.
+parametric bootstrap; see \code{\link[lme4]{bootMer}} for details.
 
 For linear and nonlinear models, it is possible to request \emph{adjusted}
 confidence or prediction intervals using the Bonferroni method 

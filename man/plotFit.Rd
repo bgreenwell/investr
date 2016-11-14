@@ -130,6 +130,6 @@ A Toolbox for Nonlinear Regression in R: The Package nlstools.
 \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
 }
 \seealso{
-\link[nlstools]{plotfit}.
+\code{\link[nlstools]{plotfit}}.
 }
 

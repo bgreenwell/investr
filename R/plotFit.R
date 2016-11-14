@@ -147,7 +147,7 @@ panel.last <- quote({
 #'   is \code{TRUE}.
 #' @param ... Additional optional arguments passed on to \code{plot}.
 #' 
-#' @seealso \link[nlstools]{plotfit}.
+#' @seealso \code{\link[nlstools]{plotfit}}.
 #' @rdname plotFit
 #' @export
 #' 
