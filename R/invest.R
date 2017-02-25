@@ -473,10 +473,10 @@ invest.nls <- function(object, y0,
     
     # Inversion confidence/prediction interval
     computeInvInterval(object, x0.name = x0.name, var.pooled = var.pooled, 
-                       m = m, rat = rat, eta = eta, crit = crit, 
-                       x0.est = x0.est, mean.response = mean.response, 
-                       lower = lower, upper = upper, extendInt = extendInt, 
-                       tol = tol, maxiter = maxiter)
+                       m = m, eta = eta, crit = crit, x0.est = x0.est, 
+                       mean.response = mean.response, lower = lower, 
+                       upper = upper, extendInt = extendInt, tol = tol, 
+                       maxiter = maxiter)
     
   } else if (interval == "Wald") {  
     
@@ -533,9 +533,8 @@ invest.nls <- function(object, y0,
 invest.lme <- function(object, y0, 
                        interval = c("inversion", "Wald", "percentile", "none"),  
                        level = 0.95, mean.response = FALSE, data, lower, upper, 
-                       q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, 
-                       ...) 
-{
+                       q1, q2, extendInt = "no", tol = .Machine$double.eps^0.25, 
+                       maxiter = 1000, ...) {
   
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else object$data
@@ -546,139 +545,69 @@ invest.lme <- function(object, y0,
   if (missing(upper)) upper <- max(.data[, x0.name])  # upper limit default
   
   # Set up for inverse estimation
-#   if(m > 1) stop("Only one response value allowed.")
   m <- length(y0)
-  if(mean.response && m > 1) stop("Only one mean response value allowed.")
+  if(mean.response && m > 1) {
+    stop("Only one mean response value allowed.")
+  }
   eta <- mean(y0)
-  if (m != 1) stop('Only a single unknown allowed for objects of class "lme".')
+  if (m != 1) {
+    stop('Only a single unknown allowed for objects of class "lme".')
+  }
   N <- length(stats::resid(object)) 
   p <- length(nlme::fixef(object))
-#   res.var <- stats::sigma(object)^2  # residual variance
-  
-  # Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
-  if (missing(q1)) q1 <- stats::qnorm((1-level) / 2)
-  if (missing(q2)) q2 <- stats::qnorm((1+level) / 2)
+  # res.var <- stats::sigma(object)^2  # residual variance
   
   # Calculate point estimate by inverting fitted model
-  x0.est <- try(stats::uniroot(function(x) {
-    stats::predict(object, newdata = makeData(x, x0.name), level = 0) - eta
-  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
-  silent = TRUE)
+  x0.est <- computeInvEst(object, x0.name = x0.name, eta = eta, lower = lower, 
+                          upper = upper, extendInt = extendInt, tol = tol, 
+                          maxiter = maxiter)
   
-  # Provide (informative) error message if point estimate is not found
-  if (inherits(x0.est, "try-error")) {
-    stop(paste("Point estimate not found in the search interval (", lower, 
-               ", ", upper, "). ", 
-               "Try tweaking the values of lower and upper.", 
-               sep = ""), 
-         call. = FALSE)
-  }
+  # Match arguments
+  interval <- match.arg(interval)
   
   # Return point estimate only
-  interval <- match.arg(interval)
-  if (interval == "none") return(x0.est)
-  
-  # Stop and print error if user requested bootstrap intervals
-  if (interval == "percentile") {
-    stop("Bootstrap intervals not available for 'lme' objects.", call. = FALSE)
+  if (interval == "none") {
+    return(stats::setNames(x0.est, x0.name))
   }
-
+  
+  # Critical value. Oman (1998. pg. 445) suggests a t(1-alpha/2, N-1) dist.
+  if (missing(q1)) {
+    q1 <- stats::qnorm((1-level) / 2)
+  }
+  if (missing(q2)) {
+    q2 <- stats::qnorm((1+level) / 2)
+  }
+  
   # Estimate variance of new response
-  if (!mean.response) var.y0 <- varY(object, newdata = makeData(x0.est, x0.name))
-  
-  # Inversion interval --------------------------------------------------------
-  if (interval == "inversion") { 
-    
-    # Inversion function
-    inversionFun <- function(x, bound = c("lower", "upper")) {
-      pred <- predFit(object, newdata = makeData(x, x0.name), se.fit = TRUE)
-      denom <- if (mean.response) {
-                 pred[, "se.fit"] 
-               } else {
-                 sqrt(var.y0 + pred[, "se.fit"]^2)
-               }
-      bound <- match.arg(bound)
-      if (bound == "upper") {
-        (eta - pred[, "fit"])/denom - q1
-      } else {
-        (eta - pred[, "fit"])/denom - q2
-      }
-    }
-    
-    # Compute lower and upper confidence limits (i.e., the roots of the 
-    # inversion function)
-    lwr <- try(stats::uniroot(inversionFun, interval = c(lower, x0.est), 
-                       bound = "lower", tol = tol, maxiter = maxiter)$root, 
-               silent = TRUE)
-    upr <- try(stats::uniroot(inversionFun, interval = c(x0.est, upper), 
-                       bound = "upper", tol = tol, maxiter = maxiter)$root, 
-               silent = TRUE)
-    
-    # Provide (informative) error message if confidence limits not found
-    if (inherits(lwr, "try-error")) {
-      stop(paste("Lower confidence limit not found in the search interval (", 
-                 lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper.", 
-                 sep = ""), 
-           call. = FALSE)
-    }
-    if (inherits(upr, "try-error")) {
-      stop(paste("Upper confidence limit not found in the search interval (", 
-                 lower, ", ", upper, 
-                 "). ", "Try tweaking the values of lower and upper.",
-                 sep = ""), 
-           call. = FALSE)
-    }
-    
-    # Store results in a list
-    res <- list("estimate" = x0.est, 
-                "lower" = lwr, 
-                "upper" = upr, 
-                "interval" = interval)
-    
+  if (!mean.response) {
+    var.y0 <- varY(object, newdata = makeData(x0.est, x0.name))
   }
   
-  # Wald interval -------------------------------------------------------------
-  if (interval == "Wald") { 
+  # Calculate confidence limits
+  res <- if (interval == "inversion") {   
     
-    # Function of parameters whose gradient is required
-    dmFun <- function(params) {
-      fun <- function(x) {
-        X <- stats::model.matrix(eval(object$call$fixed)[-2], 
-                          data = makeData(x, x0.name))
-        if (mean.response) {
-          X %*% params - eta
-        } else {
-          X %*% params[-length(params)] - params[length(params)]
-        }
-      }
-      stats::uniroot(fun, lower = lower, upper = upper, tol = tol, 
-              maxiter = maxiter)$root
-    }
+    # Invert approximate confidence interval for the mean response--based on 
+    # exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by Alan 
+    # Agresti.
+    computeInvInterval(object, x0.name = x0.name, m = m, eta = eta, q1 = q1, 
+                       q2 = q2, x0.est = x0.est, mean.response = mean.response, 
+                       var.y0 = var.y0, lower = lower, upper = upper, 
+                       extendInt = extendInt, tol = tol, maxiter = maxiter)
     
-    # Variance-covariance matrix
-    if (mean.response) {
-      params <- nlme::fixef(object)
-      covmat <- stats::vcov(object)
-    } else {
-      params <- c(nlme::fixef(object), eta)
-      covmat <- diag(p + 1)
-      covmat[p + 1, p + 1] <- var.y0
-      covmat[1:p, 1:p] <- stats::vcov(object)
-    }
+  } else if (interval == "Wald") {  
     
-    # Calculate gradient, and return standard error
-    gv <- attr(stats::numericDeriv(quote(dmFun(params)), "params"), "gradient")
-    se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))
+    # Wald-based interval and standard error
+    computeWaldInterval(object, x0.name = x0.name, p = p, eta = eta, q1 = q1, 
+                        q2 = q2, x0.est = x0.est, mean.response = mean.response, 
+                        var.y0 = var.y0, lower = lower, upper = upper, 
+                        extendInt = extendInt, tol = tol, maxiter = maxiter)
     
-    # Store results in a list
-    res <- list("estimate" = x0.est, 
-                "lower" = x0.est - q2 * se, 
-                "upper" = x0.est + q2 * se,
-                "se" = se,
-                "interval" = interval)
+  } else {
     
-  } 
+    # Bootstrapping is currently not available for GLM objects
+    stop("Bootstrap intervals not available for 'glm' objects.", call. = FALSE)
+    
+  }
   
   # Assign class label and return results
   class(res) <- "invest"

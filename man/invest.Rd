@@ -30,7 +30,8 @@ invest(object, ...)
 
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald",
   "percentile", "none"), level = 0.95, mean.response = FALSE, data, lower,
-  upper, q1, q2, tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
+  upper, q1, q2, extendInt = "no", tol = .Machine$double.eps^0.25,
+  maxiter = 1000, ...)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
