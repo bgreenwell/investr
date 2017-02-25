@@ -54,12 +54,6 @@ computeWaldInterval.lm <- function(object, multi, x0.name, var.pooled, m, p,
   gv <- attr(stats::numericDeriv(quote(parFun(params)), "params"), "gradient")
   se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))  # standard formula
   
-  # Calculate approximate standard error using the delta method
-  # se <- getDeltaMethodSE(object, eta = eta, m = m, var.pooled = var.pooled, 
-  #                        multi = multi, x0.name = x0.name, 
-  #                        lower = lower, upper = upper, extendInt = extendInt, 
-  #                        tol = tol, maxiter = maxiter)
-
   # Store results in a list
   res <- list("estimate" = x0.est,           # original point estimate
               "lower" = x0.est - crit * se,  # standard Wald-based interval
@@ -90,7 +84,8 @@ computeWaldInterval.glm <- function(object, multi, x0.name, eta, crit, x0.est,
         makeData(x, x0.name)
       }
       stats::predict(object.copy, newdata = nd, type = "link") - z
-    }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root
+    }, interval = c(lower, upper), extendInt = extendInt, tol = tol, 
+    maxiter = maxiter)$root
   }
   
   # Variance-covariane matrix
@@ -107,5 +102,53 @@ computeWaldInterval.glm <- function(object, multi, x0.name, eta, crit, x0.est,
               "upper" = x0.est + crit * se,  # standard Wald-based interval
               "se" = se,                     # large sample standard error
               "interval" = "Wald")           # type of interval
+
+}
+
+
+#' @keywords internal
+computeWaldInterval.nls <- function(object, x0.name, var.pooled, m, p, eta, 
+                                    crit, x0.est, mean.response, newdata,
+                                    lower, upper, extendInt, tol, maxiter) {
   
+  # Make a copy of the fitted model
+  object.copy <- object # FIXME: Is a copy really needed?
+  
+  # Function of parameters whose gradient is required
+  parFun <- function(params) {
+    if (mean.response) {
+      object.copy$m$setPars(params)
+      z <- eta
+    } else {
+      object.copy$m$setPars(params[-length(params)])
+      z <- params[length(params)]
+    }
+    stats::uniroot(function(x) { 
+      stats::predict(object.copy, newdata = makeData(x, x0.name)) - z
+    }, interval = c(lower, upper), extendInt = extendInt, tol = tol, 
+    maxiter = maxiter)$root
+  }
+  
+  # Variance-covariance matrix
+  if (mean.response) {
+    params <- stats::coef(object)
+    covmat <- stats::vcov(object)
+  } else {
+    params <- c(stats::coef(object), eta)
+    covmat <- diag(p + 1)
+    covmat[p + 1, p + 1] <- var.pooled/m
+    covmat[1:p, 1:p] <- stats::vcov(object)
+  }
+  
+  # Calculate gradient and standard error
+  gv <- attr(stats::numericDeriv(quote(parFun(params)), "params"), "gradient")
+  se <- as.numeric(sqrt(gv %*% covmat %*% t(gv)))  # standard formula
+  
+  # Store results in a list
+  res <- list("estimate" = x0.est,           # original point estimate
+              "lower" = x0.est - crit * se,  # standard Wald-based interval
+              "upper" = x0.est + crit * se,  # standard Wald-based interval
+              "se" = se,                     # large sample standard error
+              "interval" = "Wald")           # type of interval
+
 }

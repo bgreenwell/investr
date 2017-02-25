@@ -75,3 +75,27 @@ computeInvEst.glm <- function(object, multi, x0.name, newdata, eta, lower, upper
   }
   
 }
+
+
+#' @keywords internal
+computeInvEst.nls <- function(object, x0.name, eta, lower, upper, extendInt, 
+                              tol, maxiter) {
+  
+  # Calculate point estimate by inverting fitted model
+  res <- try(stats::uniroot(function(x) {
+    stats::predict(object, newdata = makeData(x, x0.name)) - eta
+  }, interval = c(lower, upper), tol = tol, maxiter = maxiter)$root, 
+  silent = TRUE)
+  
+  # Provide (informative) error message if point estimate is not found
+  if (inherits(res, "try-error")) {
+    stop(paste("Point estimate not found in the search interval (", lower, 
+               ", ", upper, "). ", 
+               "Try tweaking the values of lower and upper. ",
+               "Use plotFit for guidance.", sep = ""), 
+         call. = FALSE)
+  } else {
+    res
+  }
+  
+}
