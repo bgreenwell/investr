@@ -2,10 +2,10 @@
 % Please edit documentation in R/invest.R
 \name{invest}
 \alias{invest}
-\alias{invest.glm}
 \alias{invest.lm}
-\alias{invest.lme}
+\alias{invest.glm}
 \alias{invest.nls}
+\alias{invest.lme}
 \title{Inverse Estimation for Linear, Nonlinear, and Generalized Linear Models.}
 \usage{
 invest(object, ...)
@@ -41,8 +41,9 @@ invest(object, ...)
 are used.}
 
 \item{y0}{The value of the observed response(s) or specified value of the 
-mean response. For \code{"glm"} objects, \code{y0} should be on scale of 
-the response variable.}
+mean response. For \code{"glm"} objects, \code{y0} should be on the scale 
+of the response variable (e.g., a number between 0 and 1 for binomial
+families).}
 
 \item{interval}{The type of interval required.}
 
@@ -51,7 +52,7 @@ for the interval to be calculated.}
 
 \item{mean.response}{Logical indicating whether confidence intervals should
 correspond to an individual response (\code{FALSE}) or a mean response 
-(\code{TRUE}). For \code{glm} objects, this is always \code{TRUE}.}
+(\code{TRUE}). For \code{"glm"} objects, this is always \code{TRUE}.}
 
 \item{x0.name}{For multiple linear regression, a character string giving the
 the name of the predictor variable of interest.}
@@ -87,7 +88,7 @@ produces an error. Can be abbreviated. See the documentation for the
 \code{base} R function \code{uniroot} for details.}
 
 \item{tol}{The desired accuracy passed on to \code{uniroot}. Recommend a 
-minimum of 1e-10.}
+minimum of \code{1e-10}.}
 
 \item{maxiter}{The maximum number of iterations passed on to \code{uniroot}.}
 
@@ -135,6 +136,13 @@ The \code{invest} function provides point and interval estimates for the
 unknown predictor value that corresponds to an observed value of the 
 response (or vector thereof) or specified value of the mean response. See 
 the references listed below for more details.
+
+#' @rdname invest
+#' @export
+invest.default <- function(object, y0, x0.name, newdata, data, lower, upper, 
+                           extendInt = "no", tol = .Machine$double.eps^0.25, 
+                           maxiter = 1000,  ...) {
+}
 }
 \examples{
 #
@@ -196,4 +204,3 @@ doi:10.1093/biomet/85.2.439.
 Seber, G. A. F., and Wild, C. J. (1989)
 \emph{Nonlinear regression}. Wiley.
 }
-

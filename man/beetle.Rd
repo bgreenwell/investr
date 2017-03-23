@@ -21,4 +21,3 @@ to the insecticide carbon disulphide at eight different concentrations.
 }
 }
 \keyword{datasets}
-

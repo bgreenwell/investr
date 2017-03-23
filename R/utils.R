@@ -28,8 +28,7 @@ makeZ <- function(object, newdata) {
 
 #' @keywords internal
 sigma.lme <- function(object, ...) {
-  # Estimated standard deviation of the within-group error
-  object$sigma
+  object$sigma  # estimated standard deviation of the within-group error
 }
 
 

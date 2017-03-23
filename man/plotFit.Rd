@@ -130,4 +130,3 @@ A Toolbox for Nonlinear Regression in R: The Package nlstools.
 \seealso{
 \code{\link[nlstools]{plotfit}}.
 }
-

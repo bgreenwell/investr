@@ -19,4 +19,3 @@ The data give the growing time and final weight of crystals.
 }
 }
 \keyword{datasets}
-

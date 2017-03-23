@@ -16,4 +16,3 @@ are used.}
 This takes a bootstrap calibration object and produces plots for the 
 bootstrap replicates of the inverse estimate.
 }
-

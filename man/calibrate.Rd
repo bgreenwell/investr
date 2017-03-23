@@ -2,10 +2,10 @@
 % Please edit documentation in R/calibrate.R
 \name{calibrate}
 \alias{calibrate}
+\alias{print.calibrate}
 \alias{calibrate.default}
 \alias{calibrate.formula}
 \alias{calibrate.lm}
-\alias{print.calibrate}
 \title{Calibration for the simple linear regression model.}
 \usage{
 calibrate(object, ...)
@@ -125,4 +125,3 @@ Graybill, F. A., and Iyer, H. K. (1994)
 Miller, R. G. (1981)
 \emph{Simultaneous Statistical Inference}. Springer-Verlag.
 }
-

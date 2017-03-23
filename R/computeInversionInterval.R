@@ -1,13 +1,14 @@
 #' @keywords internal
-computeInvInterval <- function(object, ...) {
-  UseMethod("computeInvInterval")
+computeInversionInterval <- function(object, ...) {
+  UseMethod("computeInversionInterval")
 }
 
 
 #' @keywords internal
-computeInvInterval.lm <- function(object, multi, x0.name, var.pooled, m, rat, 
-                                  eta, crit, x0.est, mean.response, newdata,
-                                  lower, upper, extendInt, tol, maxiter) {
+computeInversionInterval.lm <- function(object, multi, x0.name, var.pooled, m, 
+                                        rat, eta, crit, x0.est, mean.response, 
+                                        newdata, lower, upper, extendInt, tol, 
+                                        maxiter) {
   
   # Pivotal quantity for linear model (pg. 95)
   rootfun <- function(x) {
@@ -57,9 +58,9 @@ computeInvInterval.lm <- function(object, multi, x0.name, var.pooled, m, rat,
   
 
 #' @keywords internal
-computeInvInterval.glm <- function(object, multi, x0.name, var.pooled, 
-                                   eta, crit, x0.est, mean.response, newdata,
-                                   lower, upper, extendInt, tol, maxiter) {
+computeInversionInterval.glm <- function(object, multi, x0.name, eta, crit, 
+                                         x0.est, mean.response, newdata, lower, 
+                                         upper, extendInt, tol, maxiter) {
   
   # Pivotal quantity for generalized linear model
   rootfun <- function(x) {
@@ -105,9 +106,10 @@ computeInvInterval.glm <- function(object, multi, x0.name, var.pooled,
 
 
 #' @keywords internal
-computeInvInterval.nls <- function(object, x0.name, var.pooled, m, eta, crit, 
-                                   x0.est, mean.response, newdata,
-                                   lower, upper, extendInt, tol, maxiter) {
+computeInversionInterval.nls <- function(object, x0.name, var.pooled, m, eta, 
+                                         crit, x0.est, mean.response, newdata,
+                                         lower, upper, extendInt, tol, 
+                                         maxiter) {
   
   # Pivotal quantity for linear model (pg. 95)
   rootfun <- function(x) {
@@ -152,9 +154,9 @@ computeInvInterval.nls <- function(object, x0.name, var.pooled, m, eta, crit,
 
 
 #' @keywords internal
-computeInvInterval.lme <- function(object, x0.name, m, eta, q1, q2, x0.est, 
-                                   mean.response, var.y0, lower, upper, 
-                                   extendInt, tol, maxiter) {
+computeInversionInterval.lme <- function(object, x0.name, m, eta, q1, q2, 
+                                         x0.est, mean.response, var.y0, lower, 
+                                         upper, extendInt, tol, maxiter) {
   
   # Inversion function
   rootfun <- function(x, bound = c("lower", "upper")) {

@@ -3,10 +3,10 @@
 \name{predFit}
 \alias{predFit}
 \alias{predFit.default}
-\alias{predFit.glm}
 \alias{predFit.lm}
-\alias{predFit.lme}
+\alias{predFit.glm}
 \alias{predFit.nls}
+\alias{predFit.lme}
 \title{Predictions from a Fitted Model}
 \usage{
 predFit(object, ...)
@@ -105,4 +105,3 @@ lines(conc, pred[, "fit"], lwd = 2)
 lines(conc, pred[, "lwr"], lty = 2)
 lines(conc, pred[, "upr"], lty = 2)
 }
-

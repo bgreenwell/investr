@@ -1,12 +1,12 @@
 #' @keywords internal
-computeInvEst <- function(object, ...) {
-  UseMethod("computeInvEst")
+computeInverseEstimate <- function(object, ...) {
+  UseMethod("computeInverseEstimate")
 }
 
 
 #' @keywords internal
-computeInvEst.lm <- function(object, multi, x0.name, newdata, eta, lower, upper, 
-                             extendInt, tol, maxiter) {
+computeInverseEstimate.lm <- function(object, multi, x0.name, newdata, eta, 
+                                      lower, upper, extendInt, tol, maxiter) {
   
   # The function f(x0; betas) - y0
   rootfun <- function(x, object, multi, newdata, x0.name, eta) {
@@ -41,8 +41,8 @@ computeInvEst.lm <- function(object, multi, x0.name, newdata, eta, lower, upper,
 
 
 #' @keywords internal
-computeInvEst.glm <- function(object, multi, x0.name, newdata, eta, lower, upper, 
-                              extendInt, tol, maxiter) {
+computeInverseEstimate.glm <- function(object, multi, x0.name, newdata, eta, 
+                                       lower, upper, extendInt, tol, maxiter) {
   
   # The function f(x0; betas) - y0
   rootfun <- function(x, object, multi, newdata, x0.name, eta) {
@@ -77,8 +77,8 @@ computeInvEst.glm <- function(object, multi, x0.name, newdata, eta, lower, upper
 
 
 #' @keywords internal
-computeInvEst.nls <- function(object, x0.name, eta, lower, upper, extendInt, 
-                              tol, maxiter) {
+computeInverseEstimate.nls <- function(object, x0.name, eta, lower, upper, 
+                                       extendInt, tol, maxiter) {
   
   # Calculate point estimate by inverting fitted model
   res <- try(stats::uniroot(function(x) {
@@ -101,8 +101,8 @@ computeInvEst.nls <- function(object, x0.name, eta, lower, upper, extendInt,
 
 
 #' @keywords internal
-computeInvEst.lme  <- function(object, x0.name, eta, lower, upper, extendInt, 
-                              tol, maxiter) {
+computeInverseEstimate.lme  <- function(object, x0.name, eta, lower, upper, 
+                                        extendInt, tol, maxiter) {
   
   # Calculate point estimate by inverting fitted model
   res <- try(stats::uniroot(function(x) {

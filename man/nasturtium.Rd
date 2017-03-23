@@ -26,4 +26,3 @@ Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
 S-PLUS and R Examples}. Springer.
 }
 \keyword{datasets}
-

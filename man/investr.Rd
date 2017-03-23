@@ -30,4 +30,3 @@ with objects of class:
     \code{nlme} package)
 }
 }
-

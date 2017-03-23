@@ -8,14 +8,15 @@
 #' @param object An object that inherits from class \code{"lm"}, \code{"glm"},
 #'   \code{"nls"}, or \code{"lme"}.
 #' @param y0 The value of the observed response(s) or specified value of the 
-#'   mean response. For \code{"glm"} objects, \code{y0} should be on scale of 
-#'   the response variable.
+#'   mean response. For \code{"glm"} objects, \code{y0} should be on the scale 
+#'   of the response variable (e.g., a number between 0 and 1 for binomial
+#'   families).
 #' @param interval The type of interval required.
 #' @param level A numeric scalar between 0 and 1 giving the confidence level 
 #'   for the interval to be calculated. 
 #' @param mean.response Logical indicating whether confidence intervals should
 #'   correspond to an individual response (\code{FALSE}) or a mean response 
-#'   (\code{TRUE}). For \code{glm} objects, this is always \code{TRUE}.
+#'   (\code{TRUE}). For \code{"glm"} objects, this is always \code{TRUE}.
 #' @param x0.name For multiple linear regression, a character string giving the
 #'   the name of the predictor variable of interest.
 #' @param newdata For multiple linear regression, a \code{data.frame} giving the
@@ -46,7 +47,7 @@
 #'   Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
 #'   \code{stats::qnorm((1-level)/2)}.
 #' @param tol The desired accuracy passed on to \code{uniroot}. Recommend a 
-#'   minimum of 1e-10.
+#'   minimum of \code{1e-10}.
 #' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
 #' @param adjust A logical value indicating if an adjustment should be made to
 #'   the critical value used in calculating the confidence interval.This is 
@@ -144,6 +145,14 @@ invest <- function(object, ...) {
 } 
 
 
+#' #' @rdname invest
+#' #' @export
+#' invest.default <- function(object, y0, x0.name, newdata, data, lower, upper, 
+#'                            extendInt = "no", tol = .Machine$double.eps^0.25, 
+#'                            maxiter = 1000,  ...) {
+#' }
+
+
 #' @rdname invest
 #' @export
 invest.lm <- function(object, y0, 
@@ -157,8 +166,11 @@ invest.lm <- function(object, y0,
                       k,  ...) {
   
   # Extract data, variable names, etc.
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
+  .data  <- if (!missing(data)) {
+    data 
+  } else {
+    eval(object$call$data, envir = parent.frame())
+  }
   yname <- all.vars(stats::formula(object)[[2]])
   
   # Predictor variable(s)
@@ -219,10 +231,10 @@ invest.lm <- function(object, y0,
   rat <- var.pooled / var1  # right variance?
   
   # Calculate point estimate by inverting fitted model
-  x0.est <- computeInvEst(object, multi = multi, x0.name = x0.name, 
-                          newdata = newdata, eta = eta, lower = lower, 
-                          upper = upper, extendInt = extendInt, tol = tol, 
-                          maxiter = maxiter)
+  x0.est <- computeInverseEstimate(object, multi = multi, x0.name = x0.name, 
+                                   newdata = newdata, eta = eta, lower = lower, 
+                                   upper = upper, extendInt = extendInt, 
+                                   tol = tol, maxiter = maxiter)
 
   # Match arguments
   interval <- match.arg(interval)
@@ -245,12 +257,13 @@ invest.lm <- function(object, y0,
   res <- if (interval == "inversion") {   
     
     # Inversion confidence/prediction interval
-    computeInvInterval(object, multi = multi, x0.name = x0.name, 
-                       var.pooled = var.pooled, m = m, rat = rat, eta = eta, 
-                       crit = crit, x0.est = x0.est, newdata = newdata,
-                       mean.response = mean.response, lower = lower, 
-                       upper = upper, extendInt = extendInt, tol = tol, 
-                       maxiter = maxiter)
+    computeInversionInterval(object, multi = multi, x0.name = x0.name, 
+                             var.pooled = var.pooled, m = m, rat = rat, 
+                             eta = eta, crit = crit, x0.est = x0.est, 
+                             newdata = newdata, mean.response = mean.response, 
+                             lower = lower, upper = upper, 
+                             extendInt = extendInt, tol = tol, 
+                             maxiter = maxiter)
     
   } else if (interval == "Wald") {  
     
@@ -361,10 +374,10 @@ invest.glm <- function(object, y0,
   }
   
   # Calculate point estimate by inverting fitted model
-  x0.est <- computeInvEst(object, multi = multi, x0.name = x0.name, 
-                          newdata = newdata, eta = eta, lower = lower, 
-                          upper = upper, extendInt = extendInt, tol = tol, 
-                          maxiter = maxiter)
+  x0.est <- computeInverseEstimate(object, multi = multi, x0.name = x0.name, 
+                                   newdata = newdata, eta = eta, lower = lower, 
+                                   upper = upper, extendInt = extendInt, 
+                                   tol = tol, maxiter = maxiter)
   
   # Match arguments
   interval <- match.arg(interval)
@@ -383,11 +396,11 @@ invest.glm <- function(object, y0,
     # Invert approximate confidence interval for the mean response--based on 
     # exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by Alan 
     # Agresti.
-    computeInvInterval(object, multi = multi, x0.name = x0.name, 
-                       var.pooled = var.pooled, eta = eta, crit = crit, 
-                       x0.est = x0.est, newdata = newdata,
-                       lower = lower, upper = upper, extendInt = extendInt, 
-                       tol = tol, maxiter = maxiter)
+    computeInversionInterval(object, multi = multi, x0.name = x0.name, 
+                             eta = eta, crit = crit, x0.est = x0.est, 
+                             newdata = newdata, lower = lower, upper = upper, 
+                             extendInt = extendInt, tol = tol, 
+                             maxiter = maxiter)
     
   } else if (interval == "Wald") {  
     
@@ -447,9 +460,10 @@ invest.nls <- function(object, y0,
   var.pooled <- stats::sigma(object)^2  # residual variance
   
   # Calculate point estimate by inverting fitted model
-  x0.est <- computeInvEst(object, x0.name = x0.name, eta = eta, lower = lower, 
-                          upper = upper, extendInt = extendInt, tol = tol, 
-                          maxiter = maxiter)
+  x0.est <- computeInverseEstimate(object, x0.name = x0.name, eta = eta, 
+                                   lower = lower, upper = upper, 
+                                   extendInt = extendInt, tol = tol,
+                                   maxiter = maxiter)
   
   # Match arguments
   interval <- match.arg(interval)
@@ -472,11 +486,11 @@ invest.nls <- function(object, y0,
   res <- if (interval == "inversion") {   
     
     # Inversion confidence/prediction interval
-    computeInvInterval(object, x0.name = x0.name, var.pooled = var.pooled, 
-                       m = m, eta = eta, crit = crit, x0.est = x0.est, 
-                       mean.response = mean.response, lower = lower, 
-                       upper = upper, extendInt = extendInt, tol = tol, 
-                       maxiter = maxiter)
+    computeInversionInterval(object, x0.name = x0.name, var.pooled = var.pooled, 
+                             m = m, eta = eta, crit = crit, x0.est = x0.est, 
+                             mean.response = mean.response, lower = lower, 
+                             upper = upper, extendInt = extendInt, tol = tol, 
+                             maxiter = maxiter)
     
   } else if (interval == "Wald") {  
     
@@ -558,9 +572,10 @@ invest.lme <- function(object, y0,
   # res.var <- stats::sigma(object)^2  # residual variance
   
   # Calculate point estimate by inverting fitted model
-  x0.est <- computeInvEst(object, x0.name = x0.name, eta = eta, lower = lower, 
-                          upper = upper, extendInt = extendInt, tol = tol, 
-                          maxiter = maxiter)
+  x0.est <- computeInverseEstimate(object, x0.name = x0.name, eta = eta, 
+                                   lower = lower, upper = upper, 
+                                   extendInt = extendInt, tol = tol, 
+                                   maxiter = maxiter)
   
   # Match arguments
   interval <- match.arg(interval)
@@ -589,10 +604,12 @@ invest.lme <- function(object, y0,
     # Invert approximate confidence interval for the mean response--based on 
     # exercise 5.31 on pg. 207 of Categorical Data Analysis (2nd ed.) by Alan 
     # Agresti.
-    computeInvInterval(object, x0.name = x0.name, m = m, eta = eta, q1 = q1, 
-                       q2 = q2, x0.est = x0.est, mean.response = mean.response, 
-                       var.y0 = var.y0, lower = lower, upper = upper, 
-                       extendInt = extendInt, tol = tol, maxiter = maxiter)
+    computeInversionInterval(object, x0.name = x0.name, m = m, eta = eta, 
+                             q1 = q1, q2 = q2, x0.est = x0.est, 
+                             mean.response = mean.response,  var.y0 = var.y0, 
+                             lower = lower, upper = upper, 
+                             extendInt = extendInt, tol = tol, 
+                             maxiter = maxiter)
     
   } else if (interval == "Wald") {  
     
