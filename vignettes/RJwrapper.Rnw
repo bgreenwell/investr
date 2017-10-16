@@ -7,7 +7,7 @@
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{\pkg{investr}: An R Package for Inverse Estimation}
-
+  
 %% load any required packages here
 
 \begin{document}

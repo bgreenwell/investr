@@ -3,3 +3,9 @@
 .RData
 investr.Rproj
 inst/doc
+vignettes/*.bbl
+vignettes/*.brf
+vignettes/*.eps
+vignettes/*.gz
+vignettes/*.pdf
+vignettes/*.tex
