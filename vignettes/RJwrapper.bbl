@@ -1,0 +1,137 @@
+\begin{thebibliography}{23}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bates and Watts(1988)]{bates-nonlinear-1988}
+D.~M. Bates and D.~G. Watts.
+\newblock \emph{Nonlinear Regression Analysis and Its Applications}.
+\newblock Wiley series in probability and statistics: Probability and
+  statistics section. John Wiley \& Sons, New York, 1988.
+
+\bibitem[Brown(1993)]{brown-measurement-1993}
+P.~Brown.
+\newblock \emph{Measurement, Regression, and Calibration}.
+\newblock Oxford science publications. Clarendon Press, 1993.
+
+\bibitem[Canty and Ripley(2013)]{canty-boot-2013}
+A.~Canty and B.~Ripley.
+\newblock \emph{boot: Bootstrap R (S-Plus) Functions}, 2013.
+\newblock URL \url{http://cran.r-project.org/web/packages/boot/index.html}.
+\newblock R package version 1.3-9.
+
+\bibitem[Davison and Hinkley(1997)]{hinkley-bootstrap-1997}
+A.~C. Davison and D.~V. Hinkley.
+\newblock \emph{Bootstrap Methods and their Applications}.
+\newblock Cambridge Series in Statistical and Probabilistic Mathematics.
+  Cambridge University Press, Cambridge, 1997.
+
+\bibitem[Dorfman(1938)]{dorfman-note-1938}
+R.~Dorfman.
+\newblock A note on the {$\delta$}-method for finding variance formulae.
+\newblock \emph{The Biometric Bulletinn}, 1:\penalty0 129--137, 1938.
+
+\bibitem[Draper and Smith(1998)]{draper-applied-1998}
+N.~R. Draper and H.~Smith.
+\newblock \emph{Applied Regression Analysis}.
+\newblock Wiley series in probability and mathematical statistics: Applied
+  Probability and Statistics. Wiley, New York, 1998.
+
+\bibitem[Efron(1979)]{efron-another-1979}
+B.~Efron.
+\newblock Bootstrap methods: Another look at the jackknife.
+\newblock \emph{Annals fo Statistics}, 7\penalty0 (1):\penalty0 1--26, 1979.
+
+\bibitem[Eisenhart(1939)]{eisenhart-interpretation-1939}
+C.~Eisenhart.
+\newblock The interpretation of certain regression methods and their use in
+  biological and industrial research.
+\newblock \emph{Annals of Mathematical Statistics}, 10\penalty0 (2):\penalty0
+  162--186, 1939.
+
+\bibitem[Fieller(1954)]{fieller-some-1954}
+E.~C. Fieller.
+\newblock Some problems in interval estimation.
+\newblock \emph{Journal of the Royal Statistical Society: Series B (Statistical
+  Methodology)}, 16:\penalty0 175--185, 1954.
+
+\bibitem[Fox and Weisberg(2011)]{fox-r-2011}
+J.~Fox and S.~Weisberg.
+\newblock \emph{An {R} Companion to Applied Regression}.
+\newblock Sage, Thousand Oaks {CA}, second edition, 2011.
+\newblock URL \url{http://socserv.socsci.mcmaster.ca/jfox/Books/Companion}.
+
+\bibitem[Graybill(1976)]{graybill-theory-1976}
+F.~A. Graybill.
+\newblock \emph{Theory and Application of the Linear Model}.
+\newblock Duxbury classic series. Duxbury, Pacific Grove, CA, 1976.
+
+\bibitem[Graybill and Iyer(1994)]{graybill_regression_1994}
+F.~A. Graybill and H.~K. Iyer.
+\newblock \emph{Regression Analysis: Concepts and Applications}.
+\newblock Duxbury Press, Belmont, CA, 1994.
+
+\bibitem[Huet(2004)]{huet-statistical-2004}
+S.~Huet.
+\newblock \emph{Statistical Tools for Nonlinear Regression: A Practical Guide
+  with S-PLUS and R Examples}.
+\newblock Springer Series in Statistics. Springer, 2004.
+
+\bibitem[Jones and Rocke(1999)]{jones-bootsrapping-1999}
+G.~Jones and D.~M. Rocke.
+\newblock Bootstrapping in controlled calibration experiments.
+\newblock \emph{Technometrics}, 41\penalty0 (3):\penalty0 224--233, 1999.
+
+\bibitem[Miller(1981)]{miller-simultaneous-1981}
+R.~Miller.
+\newblock \emph{Simultaneous Statistical Inference}.
+\newblock Springer Series in Statistics. Springer-Verlag, 1981.
+
+\bibitem[Osborne(1991)]{osborne-statistical-1991}
+C.~Osborne.
+\newblock Calibration: A review.
+\newblock \emph{International Statistical Review}, 59\penalty0 (3):\penalty0
+  309--336, 1991.
+
+\bibitem[Pinheiro et~al.(2013)Pinheiro, Bates, DebRoy, Sarkar, and {R Core
+  Team}]{pinheiro-nlme-2013}
+J.~Pinheiro, D.~Bates, S.~DebRoy, D.~Sarkar, and {R Core Team}.
+\newblock \emph{nlme: Linear and Nonlinear Mixed Effects Models}, 2013.
+\newblock R package version 3.1-110.
+
+\bibitem[Racine-Poon(1988)]{poon-bayesian-1988}
+A.~Racine-Poon.
+\newblock A bayesian approach to nonlinear calibration problems.
+\newblock \emph{Journal of the American Statistical Association}, 83\penalty0
+  (403):\penalty0 650--656, 1988.
+
+\bibitem[Ritz and Streibig(2005)]{ritz-bioassay-2005}
+C.~Ritz and J.~C. Streibig.
+\newblock Bioassay analysis using r.
+\newblock \emph{Journal of Statistical Software}, 12, 2005.
+\newblock URL \url{http://www.bioassay.dk}.
+
+\bibitem[Schwenke and Milliken(1991)]{schwenke-calibration-1991}
+J.~R. Schwenke and G.~A. Milliken.
+\newblock On the calibration problem extended to nonlinear models.
+\newblock \emph{Biometrics}, 47\penalty0 (2):\penalty0 563--574, 1991.
+
+\bibitem[Seber and Lee(2003)]{seber-linear-2003}
+G.~Seber and A.~Lee.
+\newblock \emph{Linear Regression Analysis}.
+\newblock Wiley Series in Probability and Statistics. Wiley, 2003.
+
+\bibitem[Seber and Wild(2003)]{seber-nonlinear-2003}
+G.~Seber and C.~Wild.
+\newblock \emph{Nonlinear Regression}.
+\newblock Wiley Series in Probability and Statistics. Wiley, 2003.
+
+\bibitem[Venables and Ripley(2002)]{venables-modern-2002}
+W.~N. Venables and B.~D. Ripley.
+\newblock \emph{Modern Applied Statistics with S}.
+\newblock Springer, New York, fourth edition, 2002.
+\newblock URL \url{http://www.stats.ox.ac.uk/pub/MASS4}.
+
+\end{thebibliography}
