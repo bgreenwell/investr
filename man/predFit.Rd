@@ -13,16 +13,17 @@ predFit(object, ...)
 
 \method{predFit}{default}(object, ...)
 
-\method{predFit}{lm}(object, newdata, se.fit = FALSE, interval = c("none",
-  "confidence", "prediction"), level = 0.95, adjust = c("none",
-  "Bonferroni", "Scheffe"), k, ...)
+\method{predFit}{lm}(object, newdata, se.fit = FALSE,
+  interval = c("none", "confidence", "prediction"), level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
 
 \method{predFit}{glm}(object, newdata, type = c("link", "response"),
-  se.fit = FALSE, interval = c("none", "confidence"), level = 0.95, ...)
+  se.fit = FALSE, interval = c("none", "confidence"), level = 0.95,
+  ...)
 
-\method{predFit}{nls}(object, newdata, se.fit = FALSE, interval = c("none",
-  "confidence", "prediction"), level = 0.95, adjust = c("none",
-  "Bonferroni", "Scheffe"), k, ...)
+\method{predFit}{nls}(object, newdata, se.fit = FALSE,
+  interval = c("none", "confidence", "prediction"), level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
 
 \method{predFit}{lme}(object, newdata, se.fit = FALSE, ...)
 }

@@ -96,74 +96,107 @@ panel.last <- quote({
 })
 
 
-#' Plotting Fitted Models
+#' Plotting fitted models
 #' 
 #' Generic function for plotting predictions from various types of fitted 
-#' models. \code{plotFit} currently supports objects of class \code{"lm"}, 
-#' \code{"glm"}, and \code{"nls"}. A default method also exists which may be 
-#' used for plotting the fitted mean response from other model fits 
-#' (e.g., \code{"lqs"} and \code{"rlm"} from the \code{MASS} package.
+#' models. \code{plotFit} currently supports objects of class 
+#' \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, and 
+#' \code{\link[stats]{nls}}. A default method also exists which may be used for 
+#' plotting the fitted mean response from other model fits (e.g., 
+#' \code{\link[MASS]{lqs}} and \code{\link[MASS]{rlm}} from the \strong{MASS} 
+#' package).
 #'
 #' @param object A fitted model object. Typically, an object that inherits from 
-#'   class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).
+#' class \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, or 
+#' \code{\link[stats]{nls}} (but others may work too).
+#'   
 #' @param type The type of prediction required. The default is on the scale of 
-#'   the response variable; the alternative \code{"link"} is on the scale of the 
-#'   linear predictor. This option is only used when plotting \code{"glm"} 
-#'   objects.
-#' @param interval A character string indicating if a prediction band, 
-#'   confidence band, both, or none should be plotted.
-#' @param level The desired confidence level.
-#' @param data An optional data frame containing the variables in the model. 
-#' @param adjust A character string indicating the type of adjustment (if any) 
-#'   to make to the confidence/prediction bands.
-#' @param k An integer to be used in computing the critical value for the 
-#'   confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"},
-#'   or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
-#' @param shade A logical value indicating if the band should be shaded.
-#' @param extend.range A logical value indicating if the fitted regression line
-#'   and bands (if any) should extend to the edges of the plot. Default is 
-#' \code{FALSE}.
-#' @param col.conf Shade color for confidence band.
-#' @param col.pred Shade color for prediction band.
-#' @param col.fit The color to use for the fitted line.
-#' @param border.conf The color to use for the confidence band border.
-#' @param border.pred The color to use for the prediction band border. 
-#' @param lty.conf Line type to use for confidence band border.
-#' @param lty.pred Line type to use for prediction band border.
-#' @param lty.fit Line type to use for the fitted regression line.
-#' @param lwd.conf Line width to use for confidence band border.
-#' @param lwd.pred Line width to use for prediction band border.
-#' @param lwd.fit Line width to use for the fitted regression line.
-#' @param n The number of predictor values at which to evaluate the fitted model
-#'   (larger gives a smoother plot).
-#' @param xlab A title for the x axis.
-#' @param ylab A title for the y axis.
-#' @param xlim The x limits (x1, x2) of the plot.
-#' @param ylim The y limits (y1, y2) of the plot. 
-#' @param hide A logical value indicating if the fitted model should be plotted 
-#'   on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default 
-#'   is \code{TRUE}.
-#' @param ... Additional optional arguments passed on to \code{plot}.
+#' the response variable; the alternative \code{"link"} is on the scale of the 
+#' linear predictor. This option is only used when plotting 
+#' \code{\link[stats]{glm}} objects.
 #' 
-#' @seealso \code{\link[nlstools]{plotfit}}.
+#' @param interval A character string indicating if a prediction band, 
+#' confidence band, both, or none should be plotted.
+#' 
+#' @param level The desired confidence level.
+#' 
+#' @param data An optional data frame containing the variables in the model.
+#'  
+#' @param adjust A character string indicating the type of adjustment (if any) 
+#' to make to the confidence/prediction bands.
+#' 
+#' @param k An integer to be used in computing the critical value for the 
+#' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"},
+#' or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
+#' 
+#' @param shade A logical value indicating if the band should be shaded.
+#' 
+#' @param extend.range A logical value indicating if the fitted regression line
+#' and bands (if any) should extend to the edges of the plot. Default is 
+#' \code{FALSE}.
+#' 
+#' @param col.conf Shade color for confidence band.
+#' 
+#' @param col.pred Shade color for prediction band.
+#' 
+#' @param col.fit The color to use for the fitted line.
+#' 
+#' @param border.conf The color to use for the confidence band border.
+#' 
+#' @param border.pred The color to use for the prediction band border.
+#'  
+#' @param lty.conf Line type to use for confidence band border.
+#' 
+#' @param lty.pred Line type to use for prediction band border.
+#' 
+#' @param lty.fit Line type to use for the fitted regression line.
+#' 
+#' @param lwd.conf Line width to use for confidence band border.
+#' 
+#' @param lwd.pred Line width to use for prediction band border.
+#' 
+#' @param lwd.fit Line width to use for the fitted regression line.
+#' 
+#' @param n The number of predictor values at which to evaluate the fitted model
+#' (larger gives a smoother plot).
+#' 
+#' @param xlab A title for the x axis.
+#' 
+#' @param ylab A title for the y axis.
+#' 
+#' @param xlim The x limits (x1, x2) of the plot.
+#' 
+#' @param ylim The y limits (y1, y2) of the plot. 
+#' 
+#' @param hide A logical value indicating if the fitted model should be plotted 
+#' on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is 
+#' \code{TRUE}.
+#' 
+#' @param ... Additional optional arguments passed on to 
+#' \code{\link[graphics]{plot}}.
+#' 
+#' @seealso \code{\link[nlstools]{plotfit}}
+#' 
 #' @rdname plotFit
+#' 
 #' @export
 #' 
 #' @note
 #' By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
-#' For simultaneous intervals use \code{adjust = "Bonferroni"} or 
+#' For simultaneous intervals, use \code{adjust = "Bonferroni"} or 
 #' \code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a 
-#' value for \code{k}, the number of intervals for which the coverage is to hold simultaneously. For the 
-#' Scheffe adjustment, specifying a value for \code{k} is only required when
-#' \code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
-#' is set equal to \eqn{p}, the number of regression parameters. For example,
-#' if \code{object} is a simple linear regression model, then calling 
-#' \code{plotFit} with \code{interval = "confidence"} and 
-#' \code{adjust = "Scheffe"} will plot the Working-Hotelling band.
+#' value for \code{k}, the number of intervals for which the coverage is to hold 
+#' simultaneously. For the Scheffe adjustment, specifying a value for \code{k} 
+#' is only required when \code{interval = "prediction"}; if 
+#' \code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
+#' of regression parameters. For example, if \code{object} is a simple linear 
+#' regression model, then calling \code{plotFit} with 
+#' \code{interval = "confidence"} and \code{adjust = "Scheffe"} will plot the 
+#' \href{https://en.wikipedia.org/wiki/Working-Hotelling_procedure}{Working-Hotelling band}.
 #' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
-#' \code{nls}) are based on the linear approximation described in Bates & Watts 
-#' (2007). T
+#' \code{\link[stats]{nls}}) are based on the linear approximation described in 
+#' Bates & Watts (2007).
 #' 
 #' @references
 #' Bates, D. M., and Watts, D. G. (2007)
@@ -189,19 +222,35 @@ plotFit <- function(object, ...) {
 
 
 #' @rdname plotFit
+#' 
 #' @export
-plotFit.default <- function(object, type = c("response", "link"), 
-                            interval = c("none", "both", "confidence", "prediction"), 
-                            level = 0.95, data,
-                            adjust = c("none", "Bonferroni", "Scheffe"), k, ..., 
-                            shade = FALSE, extend.range = FALSE, hide = TRUE,
-                            col.conf = if (shade) grDevices::grey(0.7) else "black", 
-                            col.pred = if (shade) grDevices::grey(0.9) else "black",  
-                            border.conf = col.conf, border.pred = col.pred, 
-                            col.fit = "black", lty.conf = if (shade) 1 else 2, 
-                            lty.pred = if (shade) 1 else 3, lty.fit = 1, 
-                            lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500, 
-                            xlab, ylab, xlim, ylim) {
+plotFit.default <- function(
+  object, 
+  type = c("response", "link"), 
+  interval = c("none", "both", "confidence", "prediction"),
+  level = 0.95, 
+  data,
+  adjust = c("none", "Bonferroni", "Scheffe"), 
+  k, ..., 
+  shade = FALSE, 
+  extend.range = FALSE, 
+  hide = TRUE,
+  col.conf = if (shade) grDevices::grey(0.7) else "black",
+  col.pred = if (shade) grDevices::grey(0.9) else "black",
+  border.conf = col.conf, 
+  border.pred = col.pred, 
+  col.fit = "black", 
+  lty.conf = if (shade) 1 else 2,
+  lty.pred = if (shade) 1 else 3, lty.fit = 1,
+  lwd.conf = 1, 
+  lwd.pred = 1, 
+  lwd.fit = 1, 
+  n = 500, 
+  xlab, 
+  ylab, 
+  xlim, 
+  ylim
+) {
   
   # Match arguments
   type <- match.arg(type)
@@ -228,7 +277,11 @@ plotFit.default <- function(object, type = c("response", "link"),
     data <- eval(stats::getCall(object)$data)
   }
   if (is.null(data)) {  # throw error if no data are found
-    stop(paste("Could not find data to plot."))
+    # Try searching the current environment
+    all_vars <- all.vars(stats::formula(object))
+    data <- as.data.frame(cbind(get(all_vars[1L]), get(all_vars[2L])))
+    names(data) <- all_vars
+    # stop(paste("Could not find data to plot."))
   }
   
   # Dependent variable

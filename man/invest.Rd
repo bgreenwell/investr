@@ -6,44 +6,46 @@
 \alias{invest.glm}
 \alias{invest.nls}
 \alias{invest.lme}
-\title{Inverse Estimation for Linear, Nonlinear, and Generalized Linear Models.}
+\title{Inverse estimation for linear, nonlinear, and generalized linear models}
 \usage{
-invest(object, ...)
+invest(object, y0, ...)
 
 \method{invest}{lm}(object, y0, interval = c("inversion", "Wald",
   "percentile", "none"), level = 0.95, mean.response = FALSE, x0.name,
-  newdata, data, boot.type = c("parametric", "nonparametric"), nsim = 999,
+  newdata, data, boot.type = c("parametric", "nonparametric"),
+  nsim = 999, seed = NULL, progress = FALSE, lower, upper,
+  extendInt = "no", tol = .Machine$double.eps^0.25, maxiter = 1000,
+  adjust = c("none", "Bonferroni"), k, ...)
+
+\method{invest}{glm}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, lower, upper, x0.name, newdata,
+  data, extendInt = "no", tol = .Machine$double.eps^0.25,
+  maxiter = 1000, ...)
+
+\method{invest}{nls}(object, y0, interval = c("inversion", "Wald",
+  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
+  boot.type = c("parametric", "nonparametric"), nsim = 1,
   seed = NULL, progress = FALSE, lower, upper, extendInt = "no",
   tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
   "Bonferroni"), k, ...)
 
-\method{invest}{glm}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, lower, upper, x0.name, newdata, data,
-  extendInt = "no", tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
-
-\method{invest}{nls}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
-  boot.type = c("parametric", "nonparametric"), nsim = 1, seed = NULL,
-  progress = FALSE, lower, upper, extendInt = "no",
-  tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
-  "Bonferroni"), k, ...)
-
 \method{invest}{lme}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, mean.response = FALSE, data, lower,
-  upper, q1, q2, extendInt = "no", tol = .Machine$double.eps^0.25,
-  maxiter = 1000, ...)
+  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
+  lower, upper, q1, q2, extendInt = "no",
+  tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
 }
 \arguments{
-\item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
-\code{"nls"}, or \code{"lme"}.}
+\item{object}{An object that inherits from class \code{\link[stats]{lm}}, 
+\code{\link[stats]{glm}}, \code{\link[stats]{nls}}, or 
+\code{\link[nlme]{lme}}.}
+
+\item{y0}{The value of the observed response(s) or specified value of the 
+mean response. For \code{\link[stats]{glm}} objects, \code{y0} should be on 
+the scale of the response variable (e.g., a number between 0 and 1 for 
+binomial families).}
 
 \item{...}{Additional optional arguments. At present, no optional arguments 
 are used.}
-
-\item{y0}{The value of the observed response(s) or specified value of the 
-mean response. For \code{"glm"} objects, \code{y0} should be on the scale 
-of the response variable (e.g., a number between 0 and 1 for binomial
-families).}
 
 \item{interval}{The type of interval required.}
 
@@ -52,26 +54,27 @@ for the interval to be calculated.}
 
 \item{mean.response}{Logical indicating whether confidence intervals should
 correspond to an individual response (\code{FALSE}) or a mean response 
-(\code{TRUE}). For \code{"glm"} objects, this is always \code{TRUE}.}
+(\code{TRUE}). For \code{\link[stats]{glm}} objects, this is always 
+\code{TRUE}.}
 
 \item{x0.name}{For multiple linear regression, a character string giving the
-the name of the predictor variable of interest.}
+name of the predictor variable of interest.}
 
 \item{newdata}{For multiple linear regression, a \code{data.frame} giving the
-values of interest for all other predictor variables (i.e., those other 
-than \code{x0.name}).}
+values of interest for all other predictor variables (i.e., those other than 
+\code{x0.name}).}
 
 \item{data}{An optional data frame. This is required if \code{object$data} is 
 \code{NULL}.}
 
-\item{boot.type}{Character string specifying the type of bootstrap to use when 
-\code{interval = "percentile"}. Options are \code{"parametric"} and 
+\item{boot.type}{Character string specifying the type of bootstrap to use 
+when \code{interval = "percentile"}. Options are \code{"parametric"} and 
 \code{"nonparametric"}.}
 
 \item{nsim}{Positive integer specifying the number of bootstrap simulations; 
 the bootstrap B (or R).}
 
-\item{seed}{Optional argument to \code{set.seed}.}
+\item{seed}{Optional argument to \code{\link[base]{set.seed}}.}
 
 \item{progress}{Logical indicating whether to display a text-based progress
 bar during the bootstrap simulation.}
@@ -87,32 +90,31 @@ endpoints. The default, \code{"no"}, keeps the search interval and hence
 produces an error. Can be abbreviated. See the documentation for the 
 \code{base} R function \code{uniroot} for details.}
 
-\item{tol}{The desired accuracy passed on to \code{uniroot}. Recommend a 
-minimum of \code{1e-10}.}
+\item{tol}{The desired accuracy passed on to \code{\link[stats]{uniroot}}. 
+Recommend a minimum of \code{1e-10}.}
 
 \item{maxiter}{The maximum number of iterations passed on to \code{uniroot}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
-the critical value used in calculating the confidence interval.This is 
-useful for when the calibration curve is to be used multiple, say \code{k}, 
-times.}
+the critical value used in calculating the confidence interval.This is useful 
+for when the calibration curve is to be used multiple, say \code{k}, times.}
 
 \item{k}{The number times the calibration curve is to be used for computing 
 a confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
 
 \item{q1}{Optional lower cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
-\code{stats::qnorm((1+level)/2)}.}
+Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
+Defaults to \code{stats::qnorm((1+level)/2)}.}
 
 \item{q2}{Optional upper cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{"lme"}. Defaults to 
-\code{stats::qnorm((1-level)/2)}.}
+Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
+Defaults to \code{stats::qnorm((1-level)/2)}.}
 }
 \value{
-\code{invest} returns an object of class \code{"invest"} or, if
-  \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. 
-  The generic function \code{plot} can be used to plot the output of the 
-  bootstrap simulation when \code{interval = "percentile"}.
+Returns an object of class \code{"invest"} or, if
+\code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The 
+generic function \code{\link[graphics]{plot}} can be used to plot the output 
+of the bootstrap simulation when \code{interval = "percentile"}.
         
   An object of class \code{"invest"} containing the following components:
   \itemize{
@@ -128,21 +130,14 @@ Only used when \code{object} inherits from class \code{"lme"}. Defaults to
     \item \code{nsim} The number of bootstrap replicates (percentile 
                       interval only).
     \item \code{interval} The method used for calculating \code{lower} and 
-          \code{upper} (only used by \code{print} method).
+          \code{upper} (only used by \code{\link[base]{print}} method).
   }
 }
 \description{
-The \code{invest} function provides point and interval estimates for the 
-unknown predictor value that corresponds to an observed value of the 
-response (or vector thereof) or specified value of the mean response. See 
-the references listed below for more details.
-
-#' @rdname invest
-#' @export
-invest.default <- function(object, y0, x0.name, newdata, data, lower, upper, 
-                           extendInt = "no", tol = .Machine$double.eps^0.25, 
-                           maxiter = 1000,  ...) {
-}
+Provides point and interval estimates for the unknown predictor value that 
+corresponds to an observed value of the response (or vector thereof) or 
+specified value of the mean response. See the references listed below for 
+more details.
 }
 \examples{
 #
@@ -181,8 +176,29 @@ boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile",
               nsim = 999, seed = 101)
 boo  # print bootstrap summary
 plot(boo)  # plot results
+
+#
+# Bladder volume example (random coefficient model)
+#
+
+# Load required packages
+library(nlme)
+
+# Plot data
+plot(HD^(3/2) ~ volume, data = bladder, pch = 19,
+       col = adjustcolor("black", alpha.f = 0.5))
+       
+# Fit a random intercept and slope model
+bladder <- na.omit(bladder)
+ris <- lme(HD^(3/2) ~ volume, data = bladder, random = ~volume|subject)
+invest(ris, y0 = 500)
+invest(ris, y0 = 500, interval = "Wald")
 }
 \references{
+Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}. 
+Ph.D. thesis, Air Force Institute of Technology. 
+URL \url{http://www.dtic.mil/docs/citations/ADA598921}
+
 Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
 for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
 URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
@@ -191,7 +207,8 @@ Graybill, F. A., and Iyer, H. K. (1994).
 \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
 
 Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
-\emph{Statistical Tools for Nonlinear Regression: A Practical Guide with S-PLUS and R Examples}. Springer. 
+\emph{Statistical Tools for Nonlinear Regression: A Practical Guide with 
+S-PLUS and R Examples}. Springer. 
 
 Norman, D. R., and Smith H. (2014).
 \emph{Applied Regression Analysis}. John Wiley & Sons.

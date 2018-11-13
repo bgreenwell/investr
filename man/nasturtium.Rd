@@ -4,7 +4,7 @@
 \name{nasturtium}
 \alias{nasturtium}
 \title{Bioassay on Nasturtium}
-\format{A data frame with 42 rows and 2 variables}
+\format{A data frame with 42 rows and 2 columns.}
 \source{
 Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration
 Problems, \emph{Journal of the American Statistical Association}, \bold{83},
@@ -21,7 +21,7 @@ samples versus the weight of the plant after three weeks of growth.
 }
 }
 \references{
-Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
+Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. (2004)
 \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with
 S-PLUS and R Examples}. Springer.
 }

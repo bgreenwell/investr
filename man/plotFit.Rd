@@ -3,30 +3,33 @@
 \name{plotFit}
 \alias{plotFit}
 \alias{plotFit.default}
-\title{Plotting Fitted Models}
+\title{Plotting fitted models}
 \usage{
 plotFit(object, ...)
 
 \method{plotFit}{default}(object, type = c("response", "link"),
-  interval = c("none", "both", "confidence", "prediction"), level = 0.95,
-  data, adjust = c("none", "Bonferroni", "Scheffe"), k, ..., shade = FALSE,
-  extend.range = FALSE, hide = TRUE, col.conf = if (shade)
-  grDevices::grey(0.7) else "black", col.pred = if (shade)
-  grDevices::grey(0.9) else "black", border.conf = col.conf,
-  border.pred = col.pred, col.fit = "black", lty.conf = if (shade) 1 else
-  2, lty.pred = if (shade) 1 else 3, lty.fit = 1, lwd.conf = 1,
-  lwd.pred = 1, lwd.fit = 1, n = 500, xlab, ylab, xlim, ylim)
+  interval = c("none", "both", "confidence", "prediction"),
+  level = 0.95, data, adjust = c("none", "Bonferroni", "Scheffe"), k,
+  ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  col.conf = if (shade) grDevices::grey(0.7) else "black",
+  col.pred = if (shade) grDevices::grey(0.9) else "black",
+  border.conf = col.conf, border.pred = col.pred, col.fit = "black",
+  lty.conf = if (shade) 1 else 2, lty.pred = if (shade) 1 else 3,
+  lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500,
+  xlab, ylab, xlim, ylim)
 }
 \arguments{
 \item{object}{A fitted model object. Typically, an object that inherits from 
-class \code{"lm"}, \code{"glm"}, or \code{"nls"}, but others may work too).}
+class \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, or 
+\code{\link[stats]{nls}} (but others may work too).}
 
-\item{...}{Additional optional arguments passed on to \code{plot}.}
+\item{...}{Additional optional arguments passed on to 
+\code{\link[graphics]{plot}}.}
 
 \item{type}{The type of prediction required. The default is on the scale of 
 the response variable; the alternative \code{"link"} is on the scale of the 
-linear predictor. This option is only used when plotting \code{"glm"} 
-objects.}
+linear predictor. This option is only used when plotting 
+\code{\link[stats]{glm}} objects.}
 
 \item{interval}{A character string indicating if a prediction band, 
 confidence band, both, or none should be plotted.}
@@ -45,12 +48,12 @@ or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.}
 \item{shade}{A logical value indicating if the band should be shaded.}
 
 \item{extend.range}{A logical value indicating if the fitted regression line
-  and bands (if any) should extend to the edges of the plot. Default is 
+and bands (if any) should extend to the edges of the plot. Default is 
 \code{FALSE}.}
 
 \item{hide}{A logical value indicating if the fitted model should be plotted 
-on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default 
-is \code{TRUE}.}
+on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is 
+\code{TRUE}.}
 
 \item{col.conf}{Shade color for confidence band.}
 
@@ -87,26 +90,29 @@ is \code{TRUE}.}
 }
 \description{
 Generic function for plotting predictions from various types of fitted 
-models. \code{plotFit} currently supports objects of class \code{"lm"}, 
-\code{"glm"}, and \code{"nls"}. A default method also exists which may be 
-used for plotting the fitted mean response from other model fits 
-(e.g., \code{"lqs"} and \code{"rlm"} from the \code{MASS} package.
+models. \code{plotFit} currently supports objects of class 
+\code{\link[stats]{lm}}, \code{\link[stats]{glm}}, and 
+\code{\link[stats]{nls}}. A default method also exists which may be used for 
+plotting the fitted mean response from other model fits (e.g., 
+\code{\link[MASS]{lqs}} and \code{\link[MASS]{rlm}} from the \strong{MASS} 
+package).
 }
 \note{
 By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
-For simultaneous intervals use \code{adjust = "Bonferroni"} or 
+For simultaneous intervals, use \code{adjust = "Bonferroni"} or 
 \code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a 
-value for \code{k}, the number of intervals for which the coverage is to hold simultaneously. For the 
-Scheffe adjustment, specifying a value for \code{k} is only required when
-\code{interval = "prediction"}; if \code{interval = "confidence"}, \code{k} 
-is set equal to \eqn{p}, the number of regression parameters. For example,
-if \code{object} is a simple linear regression model, then calling 
-\code{plotFit} with \code{interval = "confidence"} and 
-\code{adjust = "Scheffe"} will plot the Working-Hotelling band.
+value for \code{k}, the number of intervals for which the coverage is to hold 
+simultaneously. For the Scheffe adjustment, specifying a value for \code{k} 
+is only required when \code{interval = "prediction"}; if 
+\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
+of regression parameters. For example, if \code{object} is a simple linear 
+regression model, then calling \code{plotFit} with 
+\code{interval = "confidence"} and \code{adjust = "Scheffe"} will plot the 
+\href{https://en.wikipedia.org/wiki/Working-Hotelling_procedure}{Working-Hotelling band}.
 
 Confidence/prediction bands for nonlinear regression (i.e., objects of class
-\code{nls}) are based on the linear approximation described in Bates & Watts 
-(2007). T
+\code{\link[stats]{nls}}) are based on the linear approximation described in 
+Bates & Watts (2007).
 }
 \examples{
 # A nonlinear least squares example (see ?datasets::Puromycin and 
@@ -128,5 +134,5 @@ A Toolbox for Nonlinear Regression in R: The Package nlstools.
 \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
 }
 \seealso{
-\code{\link[nlstools]{plotfit}}.
+\code{\link[nlstools]{plotfit}}
 }

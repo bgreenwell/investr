@@ -2,7 +2,7 @@
 % Please edit documentation in R/invest.R
 \name{plot.bootCal}
 \alias{plot.bootCal}
-\title{Plots of the Output of a Bootstrap Calibration Simulation}
+\title{Plots method for bootstrap calibration}
 \usage{
 \method{plot}{bootCal}(x, ...)
 }
@@ -13,6 +13,7 @@
 are used.}
 }
 \description{
-This takes a bootstrap calibration object and produces plots for the 
-bootstrap replicates of the inverse estimate.
+The \code{\link[graphics]{plot}} method for \code{"bootCal"} objects. In
+particular, this method takes a \code{"bootCal"} object and produces plots 
+for the bootstrap replicates of the inverse estimate.
 }

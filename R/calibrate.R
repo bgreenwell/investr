@@ -1,4 +1,4 @@
-#' Calibration for the simple linear regression model.
+#' Calibration for the simple linear regression model
 #' 
 #' The function \code{calibrate} computes the maximum likelihood estimate and a
 #' condfidence interval for the unknown predictor value that corresponds to an 
@@ -6,32 +6,43 @@
 #' mean response. See the reference listed below for more details.
 #'  
 #' @param object A matrix, list, data frame, or object that inherits from class 
-#'   \code{"lm"}.
+#' \code{\link[stats]{lm}}.
+#' 
 #' @param formula A formula of the form \code{y ~ x}.
+#' 
 #' @param data an optional data frame, list or environment (or object coercible 
-#'   by \code{as.data.frame} to a data frame) containing the variables in the 
-#'   model. If not found in data, the variables are taken from 
-#' \code{environment(formula)}, typically the environment from which \code{lm}
-#'   is called. 
+#' by \code{as.data.frame} to a data frame) containing the variables in the 
+#' model. If not found in data, the variables are taken from 
+#' \code{environment(formula)}, typically the environment from which 
+#' \code{\link[stats]{lm}} was called. 
+#' 
 #' @param subset An optional vector specifying a subset of observations to be 
-#'   used in the fitting process.
+#' used in the fitting process.
+#' 
 #' @param na.action a function which indicates what should happen when the data 
 #' contain \code{NA}s. 
+#' 
 #' @param y0 The value of the observed response(s) or specified value of the
-#'   mean response.
+#' mean response.
+#' 
 #' @param interval The method to use for forming a confidence interval.
+#' 
 #' @param level A numeric scalar between 0 and 1 giving the confidence level for 
-#'   the interval to be calculated. 
+#' the interval to be calculated. 
+#' 
 #' @param mean.response Logicial indicating whether confidence intervals should 
-#'   correspond to an observed response(s) (\code{FALSE}) or a specified value 
-#'   of the mean response (\code{TRUE}). Default is \code{FALSE}.
+#' correspond to an observed response(s) (\code{FALSE}) or a specified value of 
+#' the mean response (\code{TRUE}). Default is \code{FALSE}.
+#' 
 #' @param adjust A logical value indicating if an adjustment should be made to
-#'   the critical value used in constructing the confidence interval. This 
-#'   useful when the calibration curve is to be used k > 0 times.
+#' the critical value used in constructing the confidence interval. This useful 
+#' when the calibration curve is to be used k > 0 times.
+#' 
 #' @param k The number of times the calibration curve is to be used for 
-#'   computing a confidence interval. Only needed when \code{adjust = TRUE}.
+#' computing a confidence interval. Only needed when \code{adjust = TRUE}.
+#' 
 #' @param ... Additional optional arguments. At present, no optional arguments 
-#'   are used.
+#' are used.
 #'            
 #' @return An object of class \code{"invest"} containing the following 
 #'         components:
@@ -57,10 +68,10 @@
 #' 
 #' @export
 #'
-#' @note The function \code{invest} is more general, but based on numerical
-#' techniques to find the solution. When the underlying model is that of the 
-#' simple linear regression model with normal errors, closed-form expressions
-#' exist which are utilized by the function \code{calibrate}.
+#' @note The \code{\link{invest}} function is more general, but is based on 
+#' numerical techniques to find the solution. When the underlying model is that 
+#' of the simple linear regression model with normal errors, closed-form 
+#' expressions exist which are utilized by the \code{calibrate} function.
 #' 
 #' @examples
 #' #
@@ -100,7 +111,9 @@ calibrate <- function(object, ...) {
 
 
 #' @rdname calibrate
+#' 
 #' @export
+#' 
 #' @method calibrate default
 calibrate.default <- function(object, y0, 
                               interval = c("inversion", "Wald", "none"), 
@@ -221,13 +234,15 @@ calibrate.default <- function(object, y0,
   
   # Assign class label and return results
   class(res) <- "invest"
-  return(res)
+  res
   
 } 
 
 
 #' @rdname calibrate
+#' 
 #' @export
+#' 
 #' @method calibrate formula
 calibrate.formula <- function(formula, data = NULL, ..., subset, 
                               na.action = stats::na.fail) {
@@ -242,14 +257,19 @@ calibrate.formula <- function(formula, data = NULL, ..., subset,
   attr(Terms, "intercept") <- 0
   y <- stats::model.extract(m, "response")
   mm <- stats::model.matrix(Terms, m)
-  if (ncol(mm) > 1) stop("This function only works for the simple linear regression model (i.e., y ~ x).")
+  if (ncol(mm) > 1) {
+    stop("This function only works for the simple ",
+         "linear regression model (i.e., y ~ x).", call. = FALSE)
+  }
   x <- as.numeric(mm)
   calibrate(cbind(x, y), ...)
 } 
 
 
 #' @rdname calibrate
+#' 
 #' @export
+#' 
 #' @method calibrate lm
 calibrate.lm <- function(object, y0, interval = c("inversion", "Wald", "none"), 
                          level = 0.95, mean.response = FALSE, 
@@ -366,6 +386,6 @@ calibrate.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   
   # Assign class label and return results
   class(res) <- "invest"
-  return(res)
+  res
   
 } 
