@@ -4,7 +4,9 @@
 \name{arsenic}
 \alias{arsenic}
 \title{Concentrations of arsenic in water samples}
-\format{A data frame with 32 rows and 2 columns.}
+\format{
+A data frame with 32 rows and 2 columns.
+}
 \source{
 Graybill, F. A., and Iyer, H. K. (1994)
 \emph{Regression analysis: Concepts and Applications}. Duxbury Press.

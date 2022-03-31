@@ -13,17 +13,37 @@ predFit(object, ...)
 
 \method{predFit}{default}(object, ...)
 
-\method{predFit}{lm}(object, newdata, se.fit = FALSE,
-  interval = c("none", "confidence", "prediction"), level = 0.95,
-  adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
+\method{predFit}{lm}(
+  object,
+  newdata,
+  se.fit = FALSE,
+  interval = c("none", "confidence", "prediction"),
+  level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
 
-\method{predFit}{glm}(object, newdata, type = c("link", "response"),
-  se.fit = FALSE, interval = c("none", "confidence"), level = 0.95,
-  ...)
+\method{predFit}{glm}(
+  object,
+  newdata,
+  type = c("link", "response"),
+  se.fit = FALSE,
+  interval = c("none", "confidence"),
+  level = 0.95,
+  ...
+)
 
-\method{predFit}{nls}(object, newdata, se.fit = FALSE,
-  interval = c("none", "confidence", "prediction"), level = 0.95,
-  adjust = c("none", "Bonferroni", "Scheffe"), k, ...)
+\method{predFit}{nls}(
+  object,
+  newdata,
+  se.fit = FALSE,
+  interval = c("none", "confidence", "prediction"),
+  level = 0.95,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
 
 \method{predFit}{lme}(object, newdata, se.fit = FALSE, ...)
 }
@@ -58,6 +78,28 @@ a confidence/prediction interval. Only needed when
 \item{type}{Character string specifying the type of prediction. Current 
 options are \code{type = "link"} (the default) and 
 \code{type = "response"}.}
+}
+\value{
+If \code{se.fit = FALSE}, then \code{predFit()} returns a vector of 
+predictions or a matrix of predictions and bounds with column names 
+\code{fit}, \code{lwr}, and \code{upr} if \code{interval} is not 
+\code{"none"}. (This function is more so meant for internal use.)
+
+If \code{se.fit = TRUE}, then a list with the following components is 
+returned:
+
+\itemize{
+  
+  \item \code{fit} a vector or matrix as described above;
+  
+  \item \code{se.fit} a vector containing the standard errors of the 
+  predicted means;
+  
+  \item \code{residual.scale} the residual standard deviations;
+  
+  \item \code{df} the residual degrees of freedom.
+  
+}
 }
 \description{
 Generic prediction method for various types of fitted models. \code{predFit} 

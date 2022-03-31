@@ -8,11 +8,11 @@ citEntry(entry = "Article",
   volume       = "6",
   number       = "1",
   pages        = "90--100",
-  url          = "http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf",
+  url          = "https://doi.org/10.32614/RJ-2014-009",
 
   textVersion  =
   paste("Brandon M. Greenwell and Christine M. Schubert Kabban (2014).",
         "investr: An R Package for Inverse Estimation.",
         "The R Journal, 6(1), 90-100.",
-        "URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.")
+        "URL https://doi.org/10.32614/RJ-2014-009.")
 )

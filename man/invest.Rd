@@ -10,29 +10,82 @@
 \usage{
 invest(object, y0, ...)
 
-\method{invest}{lm}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, mean.response = FALSE, x0.name,
-  newdata, data, boot.type = c("parametric", "nonparametric"),
-  nsim = 999, seed = NULL, progress = FALSE, lower, upper,
-  extendInt = "no", tol = .Machine$double.eps^0.25, maxiter = 1000,
-  adjust = c("none", "Bonferroni"), k, ...)
+\method{invest}{lm}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "percentile", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  x0.name,
+  newdata,
+  data,
+  boot.type = c("parametric", "nonparametric"),
+  nsim = 999,
+  seed = NULL,
+  progress = FALSE,
+  lower,
+  upper,
+  extendInt = "no",
+  tol = .Machine$double.eps^0.25,
+  maxiter = 1000,
+  adjust = c("none", "Bonferroni"),
+  k,
+  ...
+)
 
-\method{invest}{glm}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, lower, upper, x0.name, newdata,
-  data, extendInt = "no", tol = .Machine$double.eps^0.25,
-  maxiter = 1000, ...)
+\method{invest}{glm}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "percentile", "none"),
+  level = 0.95,
+  lower,
+  upper,
+  x0.name,
+  newdata,
+  data,
+  extendInt = "no",
+  tol = .Machine$double.eps^0.25,
+  maxiter = 1000,
+  ...
+)
 
-\method{invest}{nls}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
-  boot.type = c("parametric", "nonparametric"), nsim = 1,
-  seed = NULL, progress = FALSE, lower, upper, extendInt = "no",
-  tol = .Machine$double.eps^0.25, maxiter = 1000, adjust = c("none",
-  "Bonferroni"), k, ...)
+\method{invest}{nls}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "percentile", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  data,
+  boot.type = c("parametric", "nonparametric"),
+  nsim = 1,
+  seed = NULL,
+  progress = FALSE,
+  lower,
+  upper,
+  extendInt = "no",
+  tol = .Machine$double.eps^0.25,
+  maxiter = 1000,
+  adjust = c("none", "Bonferroni"),
+  k,
+  ...
+)
 
-\method{invest}{lme}(object, y0, interval = c("inversion", "Wald",
-  "percentile", "none"), level = 0.95, mean.response = FALSE, data,
-  lower, upper, q1, q2, extendInt = "no",
-  tol = .Machine$double.eps^0.25, maxiter = 1000, ...)
+\method{invest}{lme}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "percentile", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  data,
+  lower,
+  upper,
+  q1,
+  q2,
+  extendInt = "no",
+  tol = .Machine$double.eps^0.25,
+  maxiter = 1000,
+  ...
+)
 }
 \arguments{
 \item{object}{An object that inherits from class \code{\link[stats]{lm}}, 
@@ -74,7 +127,7 @@ when \code{interval = "percentile"}. Options are \code{"parametric"} and
 \item{nsim}{Positive integer specifying the number of bootstrap simulations; 
 the bootstrap B (or R).}
 
-\item{seed}{Optional argument to \code{\link[base]{set.seed}}.}
+\item{seed}{Optional argument to \code{\link{set.seed}}.}
 
 \item{progress}{Logical indicating whether to display a text-based progress
 bar during the bootstrap simulation.}
@@ -113,7 +166,7 @@ Defaults to \code{stats::qnorm((1-level)/2)}.}
 \value{
 Returns an object of class \code{"invest"} or, if
 \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The 
-generic function \code{\link[graphics]{plot}} can be used to plot the output 
+generic function \code{{plot}} can be used to plot the output 
 of the bootstrap simulation when \code{interval = "percentile"}.
         
   An object of class \code{"invest"} containing the following components:
@@ -130,7 +183,7 @@ of the bootstrap simulation when \code{interval = "percentile"}.
     \item \code{nsim} The number of bootstrap replicates (percentile 
                       interval only).
     \item \code{interval} The method used for calculating \code{lower} and 
-          \code{upper} (only used by \code{\link[base]{print}} method).
+          \code{upper} (only used by \code{{print}} method).
   }
 }
 \description{
@@ -173,7 +226,7 @@ invest(mod, y0 = c(309, 296, 419), interval = "Wald")
 # Bootstrap calibration intervals. In general, nsim should be as large as 
 # reasonably possible (say, nsim = 9999).
 boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
-              nsim = 999, seed = 101)
+              nsim = 300, seed = 101)
 boo  # print bootstrap summary
 plot(boo)  # plot results
 
@@ -197,7 +250,8 @@ invest(ris, y0 = 500, interval = "Wald")
 \references{
 Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}. 
 Ph.D. thesis, Air Force Institute of Technology. 
-URL \url{http://www.dtic.mil/docs/citations/ADA598921}
+URL \url{https://apps.dtic.mil/sti/pdfs/ADA598921.pdf}
+
 
 Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
 for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 

@@ -27,6 +27,27 @@
 #'   \code{adjust = "Bonferroni"}.
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #'   are used.
+#'  
+#' @returns If \code{se.fit = FALSE}, then \code{predFit()} returns a vector of 
+#' predictions or a matrix of predictions and bounds with column names 
+#' \code{fit}, \code{lwr}, and \code{upr} if \code{interval} is not 
+#' \code{"none"}. (This function is more so meant for internal use.)
+#' 
+#' If \code{se.fit = TRUE}, then a list with the following components is 
+#' returned:
+#' 
+#' \itemize{
+#'   
+#'   \item \code{fit} a vector or matrix as described above;
+#'   
+#'   \item \code{se.fit} a vector containing the standard errors of the 
+#'   predicted means;
+#'   
+#'   \item \code{residual.scale} the residual standard deviations;
+#'   
+#'   \item \code{df} the residual degrees of freedom.
+#'   
+#' }
 #'   
 #' @details 
 #' Confidence and prediction intervals for linear models (i.e., \code{"lm"} 
@@ -150,9 +171,9 @@ predFit.lm <- function(object, newdata, se.fit = FALSE,
   }
   
   # If standard errors of fitted values are requested, convert results to a list
-  # and store addional information
+  # and store additional information
   if (se.fit) {
-    res <- list("fit" = res,
+    res <- list("fit" = if (interval != "none") res else pred$fit,
                 "se.fit" = pred$se.fit,
                 "df" = pred$df,
                 "residual.scale" = pred$residual.scale)
@@ -209,7 +230,7 @@ predFit.glm <- function(object, newdata, type = c("link", "response"),
   # If standard errors of fitted values are requested, convert results to a list
   # and store addional information
   if (se.fit) {
-    res <- list("fit" = res,
+    res <- list("fit" = if (interval != "none") res else pred$fit,
                 "se.fit" = pred$se.fit,
                 "df" = pred$df,
                 "residual.scale" = pred$residual.scale)
@@ -339,9 +360,9 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
   }
   
   # If standard errors of fitted values are requested, convert results to a list
-  # and store addional information
+  # and store additional information
   if (se.fit) {
-    res <- list("fit" = res,
+    res <- list("fit" = if (interval != "none") res else pred, #res,
                 "se.fit" = se_fit,
                 "df" = stats::df.residual(object),
                 "residual.scale" = stats::sigma(object))

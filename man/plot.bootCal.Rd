@@ -12,8 +12,11 @@
 \item{...}{Additional optional arguments. At present, no optional arguments 
 are used.}
 }
+\value{
+\code{x} is returned invisibly.
+}
 \description{
-The \code{\link[graphics]{plot}} method for \code{"bootCal"} objects. In
+The \code{\link{plot}} method for \code{"bootCal"} objects. In
 particular, this method takes a \code{"bootCal"} object and produces plots 
 for the bootstrap replicates of the inverse estimate.
 }

@@ -4,7 +4,9 @@
 \name{nasturtium}
 \alias{nasturtium}
 \title{Bioassay on Nasturtium}
-\format{A data frame with 42 rows and 2 columns.}
+\format{
+A data frame with 42 rows and 2 columns.
+}
 \source{
 Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration
 Problems, \emph{Journal of the American Statistical Association}, \bold{83},

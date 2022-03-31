@@ -1,10 +1,12 @@
-# investr 1.4.1.9000
+# investr 1.4.2
+
+* Fixed the output of `predFit()` in situations whenever standard errors and confidence/predictions bands are both requested.
 
 * New data sets `bladder` (a repeated measures data set) and `whisky`.
 
 * Fixed typos in documentation throughout the package.
 
-# investr 1.4.1
+* Updated URLs throughout the package.
 
 * Better y-axis limits when x-axis is on log scale (e.g., using log = "x"). Fixes issue #27.
 
@@ -12,7 +14,7 @@
 
 * `plotFit()` has been completely re-written using much less code.
 
-* `predFit()` (and hence `plotFit`) now works for `"nls"` objects fit using the Golub-Pereyra algorithm (i.e., `algorithm = "plinear"`); however, confidence/prediction bands are still not available.
+* `predFit()` (and hence `plotFit()`) now works for `"nls"` objects fit using the Golub-Pereyra algorithm (i.e., `algorithm = "plinear"`); however, confidence/prediction bands are still not available.
 
 * New introductory vignette.
 

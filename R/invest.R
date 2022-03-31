@@ -41,7 +41,7 @@
 #' when \code{interval = "percentile"}. Options are \code{"parametric"} and 
 #' \code{"nonparametric"}.
 #'   
-#' @param seed Optional argument to \code{\link[base]{set.seed}}.
+#' @param seed Optional argument to \code{\link{set.seed}}.
 #' 
 #' @param progress Logical indicating whether to display a text-based progress
 #' bar during the bootstrap simulation.
@@ -82,7 +82,7 @@
 #'   
 #' @return Returns an object of class \code{"invest"} or, if
 #' \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The 
-#' generic function \code{\link[graphics]{plot}} can be used to plot the output 
+#' generic function \code{{plot}} can be used to plot the output 
 #' of the bootstrap simulation when \code{interval = "percentile"}.
 #'         
 #'   An object of class \code{"invest"} containing the following components:
@@ -99,13 +99,14 @@
 #'     \item \code{nsim} The number of bootstrap replicates (percentile 
 #'                       interval only).
 #'     \item \code{interval} The method used for calculating \code{lower} and 
-#'           \code{upper} (only used by \code{\link[base]{print}} method).
+#'           \code{upper} (only used by \code{{print}} method).
 #'   }
 #'
 #' @references
 #' Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}. 
 #' Ph.D. thesis, Air Force Institute of Technology. 
-#' URL \url{http://www.dtic.mil/docs/citations/ADA598921}
+#' URL \url{https://apps.dtic.mil/sti/pdfs/ADA598921.pdf}
+#'
 #' 
 #' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
 #' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
@@ -167,7 +168,7 @@
 #' # Bootstrap calibration intervals. In general, nsim should be as large as 
 #' # reasonably possible (say, nsim = 9999).
 #' boo <- invest(mod, y0 = c(309, 296, 419), interval = "percentile", 
-#'               nsim = 999, seed = 101)
+#'               nsim = 300, seed = 101)
 #' boo  # print bootstrap summary
 #' plot(boo)  # plot results
 #' 
@@ -698,7 +699,7 @@ print.invest <- function(x, digits = getOption("digits"), ...) {
 
 #' Plots method for bootstrap calibration
 #' 
-#' The \code{\link[graphics]{plot}} method for \code{"bootCal"} objects. In
+#' The \code{\link{plot}} method for \code{"bootCal"} objects. In
 #' particular, this method takes a \code{"bootCal"} object and produces plots 
 #' for the bootstrap replicates of the inverse estimate.
 #' 
@@ -706,6 +707,8 @@ print.invest <- function(x, digits = getOption("digits"), ...) {
 #' 
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #' are used.
+#' 
+#' @returns \code{x} is returned invisibly.
 #'      
 #' @rdname plot.bootCal
 #'                        

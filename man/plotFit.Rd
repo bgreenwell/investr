@@ -7,16 +7,35 @@
 \usage{
 plotFit(object, ...)
 
-\method{plotFit}{default}(object, type = c("response", "link"),
+\method{plotFit}{default}(
+  object,
+  type = c("response", "link"),
   interval = c("none", "both", "confidence", "prediction"),
-  level = 0.95, data, adjust = c("none", "Bonferroni", "Scheffe"), k,
-  ..., shade = FALSE, extend.range = FALSE, hide = TRUE,
+  level = 0.95,
+  data,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...,
+  shade = FALSE,
+  extend.range = FALSE,
+  hide = TRUE,
   col.conf = if (shade) grDevices::grey(0.7) else "black",
   col.pred = if (shade) grDevices::grey(0.9) else "black",
-  border.conf = col.conf, border.pred = col.pred, col.fit = "black",
-  lty.conf = if (shade) 1 else 2, lty.pred = if (shade) 1 else 3,
-  lty.fit = 1, lwd.conf = 1, lwd.pred = 1, lwd.fit = 1, n = 500,
-  xlab, ylab, xlim, ylim)
+  border.conf = col.conf,
+  border.pred = col.pred,
+  col.fit = "black",
+  lty.conf = if (shade) 1 else 2,
+  lty.pred = if (shade) 1 else 3,
+  lty.fit = 1,
+  lwd.conf = 1,
+  lwd.pred = 1,
+  lwd.fit = 1,
+  n = 500,
+  xlab,
+  ylab,
+  xlim,
+  ylim
+)
 }
 \arguments{
 \item{object}{A fitted model object. Typically, an object that inherits from 
@@ -24,7 +43,7 @@ class \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, or
 \code{\link[stats]{nls}} (but others may work too).}
 
 \item{...}{Additional optional arguments passed on to 
-\code{\link[graphics]{plot}}.}
+\code{\link{plot}}.}
 
 \item{type}{The type of prediction required. The default is on the scale of 
 the response variable; the alternative \code{"link"} is on the scale of the 
@@ -87,6 +106,9 @@ on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is
 \item{xlim}{The x limits (x1, x2) of the plot.}
 
 \item{ylim}{The y limits (y1, y2) of the plot.}
+}
+\value{
+No return value (called for side effects).
 }
 \description{
 Generic function for plotting predictions from various types of fitted 

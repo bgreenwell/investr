@@ -4,7 +4,9 @@
 \name{whisky}
 \alias{whisky}
 \title{Whisky data}
-\format{A data frame with 10 rows and 2 columns.}
+\format{
+A data frame with 10 rows and 2 columns.
+}
 \source{
 R. Schoeneman, R. Dyer, and E. Earl. Analytical profile of straight bourbon 
 whiskies. Journal of the Association of Official Analytical Chemists, 

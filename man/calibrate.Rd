@@ -10,16 +10,29 @@
 \usage{
 calibrate(object, ...)
 
-\method{calibrate}{default}(object, y0, interval = c("inversion", "Wald",
-  "none"), level = 0.95, mean.response = FALSE, adjust = c("none",
-  "Bonferroni", "Scheffe"), k, ...)
+\method{calibrate}{default}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
 
-\method{calibrate}{formula}(formula, data = NULL, ..., subset,
-  na.action = stats::na.fail)
+\method{calibrate}{formula}(formula, data = NULL, ..., subset, na.action = stats::na.fail)
 
-\method{calibrate}{lm}(object, y0, interval = c("inversion", "Wald",
-  "none"), level = 0.95, mean.response = FALSE, adjust = c("none",
-  "Bonferroni", "Scheffe"), k, ...)
+\method{calibrate}{lm}(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
 }
 \arguments{
 \item{object}{A matrix, list, data frame, or object that inherits from class 

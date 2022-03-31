@@ -6,9 +6,8 @@
 #' response) to make inference on the corresponding unknown value of the 
 #' explanatory variable. 
 #'
-#' A detailed introduction to investr has been published in The R Journal: 
-#' "investr: An R Package for Inverse Estimation", 
-#' \url{http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf}. You 
+#' A detailed \href{https://journal.r-project.org/archive/2014/RJ-2014-009/index.html}{introduction to investr} has been published in The R Journal: 
+#' "investr: An R Package for Inverse Estimation." You 
 #' can track development at \url{https://github.com/bgreenwell/investr}. To report 
 #' bugs or issues, contact the main author directly or submit them to 
 #' \url{https://github.com/bgreenwell/investr/issues}. 

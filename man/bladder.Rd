@@ -4,7 +4,9 @@
 \name{bladder}
 \alias{bladder}
 \title{Bladder volume data}
-\format{A data frame with 184 rows and 3 columns.}
+\format{
+A data frame with 184 rows and 3 columns.
+}
 \source{
 Brown, P. (1993) \emph{Measurement, Regression, and Calibration}. 
 Oxford University Press.

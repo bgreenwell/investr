@@ -173,7 +173,9 @@ panel.last <- quote({
 #' \code{TRUE}.
 #' 
 #' @param ... Additional optional arguments passed on to 
-#' \code{\link[graphics]{plot}}.
+#' \code{\link{plot}}.
+#' 
+#' @returns No return value (called for side effects).
 #' 
 #' @seealso \code{\link[nlstools]{plotfit}}
 #' 

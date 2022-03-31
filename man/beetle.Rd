@@ -4,7 +4,9 @@
 \name{beetle}
 \alias{beetle}
 \title{Dobson's Beetle Data}
-\format{A data frame with 8 rows and 3 columns.}
+\format{
+A data frame with 8 rows and 3 columns.
+}
 \source{
 Dobson, A. (2002) \emph{An Introduction to Generalized Linear Models}. 
 Chapman & Hall/CRC.

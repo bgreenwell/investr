@@ -10,22 +10,23 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "tools/README-"
+  fig.align = "center",
+  fig.path = "man/figures/README-"
 )
 ```
 
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/investr)](http://cran.r-project.org/package=investr)
-[![Build Status](https://travis-ci.org/bgreenwell/investr.svg?branch=master)](https://travis-ci.org/bgreenwell/investr)
-[![Coverage Status](https://img.shields.io/codecov/c/github/bgreenwell/investr.svg)](https://codecov.io/github/bgreenwell/investr?branch=master)
-[![Downloads](http://cranlogs.r-pkg.org/badges/investr)](http://cranlogs.r-pkg.org/badges/investr)
-[![Total Downloads](http://cranlogs.r-pkg.org/badges/grand-total/investr)](http://cranlogs.r-pkg.org/badges/grand-total/investr)
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/investr)](https://CRAN.R-project.org/package=investr)
+
+[![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/investr)](https://cranlogs.r-pkg.org/badges/grand-total/investr)
+<!-- badges: end -->
 
 
 # investr: Inverse Estimation in R
 
 Inverse estimation, also referred to as the calibration problem, is a classical and well-known problem in regression. In simple terms, it involves the use of an observed value of the response (or specified value of the mean response) to make inference on the corresponding unknown value of an explanatory variable. 
 
-A detailed introduction to investr has been published in The R Journal: "investr: An R Package for Inverse Estimation", http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf. You can track development at https://github.com/bgreenwell/investr. To report bugs or issues, contact the main author directly or submit them to https://github.com/bgreenwell/investr/issues. 
+A detailed introduction to investr has been published in The R Journal: ["investr: An R Package for Inverse Estimation"](https://journal.r-project.org/archive/2014/RJ-2014-009/index.html). You can track development at https://github.com/bgreenwell/investr. To report bugs or issues, contact the main author directly or submit them to https://github.com/bgreenwell/investr/issues. 
 
 As of right now, `investr` supports (univariate) inverse estimation with objects of class:
 
@@ -36,19 +37,19 @@ As of right now, `investr` supports (univariate) inverse estimation with objects
 
 ## Installation
 
-The package is [currently listed on CRAN](http://cran.r-project.org/package=investr) and can easily be installed:
+The package is [currently listed on CRAN](https://cran.r-project.org/package=investr) and can easily be installed:
 ```{r, eval=FALSE}
-  # Install from CRAN
-  install.packages("investr", dep = TRUE)
+# Install from CRAN
+install.packages("investr", dep = TRUE)
   
-  # Alternatively, install the development version from GitHub
-  devtools::install_github("bgreenwell/investr")
+# Alternatively, install the development version from GitHub
+devtools::install_github("bgreenwell/investr")
 ```
-The package is also part of the [ChemPhys task view](http://cran.r-project.org/web/views/ChemPhys.html), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
+The package is also part of the [ChemPhys task view](https://cran.r-project.org/view=ChemPhys), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```{r, eval=FALSE}
-  # Install the ChemPhys task view
-  install.packages("ctv")
-  ctv::install.views("ChemPhys")
+# Install the ChemPhys task view
+install.packages("ctv")
+ctv::install.views("ChemPhys")
 ```
 
 
@@ -57,7 +58,7 @@ The package is also part of the [ChemPhys task view](http://cran.r-project.org/w
 ### Dobson's Beetle Data
 
 In binomial regression, the estimated lethal dose corresponding to a specific probability _p_ of death is often referred to as _LDp_. `invest` obtains an estimate of _LDp_ by inverting the fitted mean response on the link scale. Similarly, a confidence interval for _LDp_ can be obtained by inverting a confidence interval for the mean response on the link scale.
-```{r}
+```{r glm-beetle-invest}
 # Load required packages
 library(investr)
 
@@ -78,7 +79,7 @@ invest(beetle.glm, y0 = 0.99)
 ```
 
 To obtain an estimate of the standard error, we can use the Wald method:
-```{r}
+```{r glm-beetle-invest-se}
 invest(beetle.glm, y0 = 0.5, interval = "Wald")
 
 # The MASS package function dose.p can be used too 
@@ -89,7 +90,7 @@ MASS::dose.p(beetle.glm, p = 0.5)
 
 Multiple predictor variables are allowed for objects of class `lm` and `glm`. 
 For instance, the example from `?MASS::dose.p` can be re-created as follows:
-```{r}
+```{r glm-beetle-investr-vs-MASS}
 # Load required packages
 library(MASS)
 
@@ -117,7 +118,7 @@ invest(budworm.glm, y0 = 1/4,
 
 The data here contain the actual concentrations of an agrochemical present in soil samples versus the weight of the plant after three weeks of growth. These data are stored in the data frame `nasturtium` and are loaded with the package. A simple
 log-logistic model describes the data well:
-```{r}
+```{r nls-nasturtium-fit}
 # Log-logistic model for the nasturtium data
 nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
                start = list(theta1 = 1000, theta2 = -1, theta3 = 1),
@@ -128,7 +129,7 @@ plotFit(nas.nls, lwd.fit = 2)
 ```
 
 Three new replicates of the response (309, 296, 419) at an unknown concentration of interest ($x_0$) are measured. It is desired to estimate $x_0$.
-```{r}  
+```{r nls-nasturtium-invest}  
 # Inversion method
 invest(nas.nls, y0 = c(309, 296, 419), interval = "inversion")
 
@@ -138,7 +139,7 @@ invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")
 ```
 
 The intervals both rely on large sample results and normality. In practice, the bootstrap may be more reliable:
-```{r}
+```{r nls-nasturtium-bootstrap}
 # Bootstrap calibration intervals (may take a few seconds)
 boo <- invest(nas.nls, y0 = c(309, 296, 419), interval = "percentile", 
               nsim = 9999, seed = 101)
