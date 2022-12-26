@@ -276,8 +276,8 @@ calibrate.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
                          adjust = c("none", "Bonferroni", "Scheffe"), k, ...) {
   
   # Check model formula for correctness
-  xname <- all.vars(stats::formula(object)[[3L]])
-  yname <- all.vars(stats::formula(object)[[2L]])
+  xname <- all.vars(object$terms[[3L]])
+  yname <- all.vars(object$terms[[2L]])
   if (length(xname) != 1L) {
     stop("Only one independent variable allowed.")
   }
@@ -288,19 +288,19 @@ calibrate.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
   # Check for intercept using terms object from model fit. Alternatively, this
   # can also be checked by testing if the first column name in model.matrix is 
   # equal to "(Intercept)".
-  if (!attr(stats::terms(object), "intercept")) {
+  if (!attr(object$terms, "intercept")) {
     stop(paste(deparse(substitute(object)), "must contain an intercept."))
   }
   
   # Extract x values and y values from model frame
-  mf <- stats::model.frame(object)
-  if (ncol(mf) != 2) {
+  mf <- object$model
+  if (ncol(mf) != 2 || !is.vector(mf[,2]) ) {
     stop("calibrate only works for the simple linear regression model.")
   } 
-  x <- stats::model.matrix(object)[, 2]
-  y <- stats::model.response(mf)
+  x <- mf[,2]
+  y <- mf[,1]
 
-  # Eta - mean response or mean of observed respone values
+  # Eta - mean response or mean of observed response values
   eta <- mean(y0)  # mean of new observations
   m <- length(y0)  # number of new observations
   if (mean.response && m > 1) stop("Only one mean response value allowed.")

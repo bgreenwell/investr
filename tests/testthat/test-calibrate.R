@@ -172,12 +172,13 @@ test_that("errors get handled apprropriately", {
   # Multiple linear regression
   mlr.fit1 <- lm(weight ~ time + I(time ^ 2), data = crystal)
   mlr.fit2 <- lm(cbind(weight, weight ^ 2) ~ time, data = crystal)
+  mlr.poly <- lm(weight ~ poly(time,2), data = crystal)
   
   # Expectations
   expect_error(calibrate(nls.fit, y0 = c(309, 296, 419)))
   expect_error(calibrate(mlr.fit1, y0 = c(309, 296, 419)))
-  expect_error(calibrate(mlr.fit1, y0 = c(309, 296, 419)))
-  
+  expect_error(calibrate(mlr.fit2, y0 = c(309, 296, 419)))
+  expect_error(calibrate(mlr.poly, y0 = c(309, 296, 419)))
 })
 
 
