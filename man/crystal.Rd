@@ -16,8 +16,8 @@ The data give the growing time and final weight of crystals.
 }
 \details{
 \itemize{
-  \item \code{time} Time taken to grow (hours).
-  \item \code{weight} Final weight of the crystal (grams).
+\item \code{time} Time taken to grow (hours).
+\item \code{weight} Final weight of the crystal (grams).
 }
 }
 \keyword{datasets}

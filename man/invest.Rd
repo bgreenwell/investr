@@ -88,46 +88,46 @@ invest(object, y0, ...)
 )
 }
 \arguments{
-\item{object}{An object that inherits from class \code{\link[stats]{lm}}, 
-\code{\link[stats]{glm}}, \code{\link[stats]{nls}}, or 
-\code{\link[nlme]{lme}}.}
+\item{object}{An object that inherits from class \code{\link[stats:lm]{stats::lm()}},
+\code{\link[stats:glm]{stats::glm()}}, \code{\link[stats:nls]{stats::nls()}}, or
+\code{\link[nlme:lme]{nlme::lme()}}.}
 
-\item{y0}{The value of the observed response(s) or specified value of the 
-mean response. For \code{\link[stats]{glm}} objects, \code{y0} should be on 
-the scale of the response variable (e.g., a number between 0 and 1 for 
+\item{y0}{The value of the observed response(s) or specified value of the
+mean response. For \code{\link[stats:glm]{stats::glm()}} objects, \code{y0} should be on
+the scale of the response variable (e.g., a number between 0 and 1 for
 binomial families).}
 
-\item{...}{Additional optional arguments. At present, no optional arguments 
+\item{...}{Additional optional arguments. At present, no optional arguments
 are used.}
 
 \item{interval}{The type of interval required.}
 
-\item{level}{A numeric scalar between 0 and 1 giving the confidence level 
+\item{level}{A numeric scalar between 0 and 1 giving the confidence level
 for the interval to be calculated.}
 
 \item{mean.response}{Logical indicating whether confidence intervals should
-correspond to an individual response (\code{FALSE}) or a mean response 
-(\code{TRUE}). For \code{\link[stats]{glm}} objects, this is always 
+correspond to an individual response (\code{FALSE}) or a mean response
+(\code{TRUE}). For \code{\link[stats:glm]{stats::glm()}} objects, this is always
 \code{TRUE}.}
 
 \item{x0.name}{For multiple linear regression, a character string giving the
 name of the predictor variable of interest.}
 
 \item{newdata}{For multiple linear regression, a \code{data.frame} giving the
-values of interest for all other predictor variables (i.e., those other than 
+values of interest for all other predictor variables (i.e., those other than
 \code{x0.name}).}
 
-\item{data}{An optional data frame. This is required if \code{object$data} is 
+\item{data}{An optional data frame. This is required if \code{object$data} is
 \code{NULL}.}
 
-\item{boot.type}{Character string specifying the type of bootstrap to use 
-when \code{interval = "percentile"}. Options are \code{"parametric"} and 
+\item{boot.type}{Character string specifying the type of bootstrap to use
+when \code{interval = "percentile"}. Options are \code{"parametric"} and
 \code{"nonparametric"}.}
 
-\item{nsim}{Positive integer specifying the number of bootstrap simulations; 
+\item{nsim}{Positive integer specifying the number of bootstrap simulations;
 the bootstrap B (or R).}
 
-\item{seed}{Optional argument to \code{\link{set.seed}}.}
+\item{seed}{Optional argument to \code{\link[=set.seed]{set.seed()}}.}
 
 \item{progress}{Logical indicating whether to display a text-based progress
 bar during the bootstrap simulation.}
@@ -136,60 +136,60 @@ bar during the bootstrap simulation.}
 
 \item{upper}{The upper endpoint of the interval to be searched.}
 
-\item{extendInt}{Character string specifying if the interval 
+\item{extendInt}{Character string specifying if the interval
 \code{c(lower, upper)} should be extended or directly produce an error when
 the inverse of the prediction function does not have differing signs at the
-endpoints. The default, \code{"no"}, keeps the search interval and hence 
-produces an error. Can be abbreviated. See the documentation for the 
+endpoints. The default, \code{"no"}, keeps the search interval and hence
+produces an error. Can be abbreviated. See the documentation for the
 \code{base} R function \code{uniroot} for details.}
 
-\item{tol}{The desired accuracy passed on to \code{\link[stats]{uniroot}}. 
+\item{tol}{The desired accuracy passed on to \code{\link[stats:uniroot]{stats::uniroot()}}.
 Recommend a minimum of \code{1e-10}.}
 
 \item{maxiter}{The maximum number of iterations passed on to \code{uniroot}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
-the critical value used in calculating the confidence interval.This is useful 
+the critical value used in calculating the confidence interval.This is useful
 for when the calibration curve is to be used multiple, say \code{k}, times.}
 
-\item{k}{The number times the calibration curve is to be used for computing 
+\item{k}{The number times the calibration curve is to be used for computing
 a confidence interval. Only needed when \code{adjust = "Bonferroni"}.}
 
-\item{q1}{Optional lower cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
+\item{q1}{Optional lower cutoff to be used in forming confidence intervals.
+Only used when \code{object} inherits from class \code{\link[nlme:lme]{nlme::lme()}}.
 Defaults to \code{stats::qnorm((1+level)/2)}.}
 
-\item{q2}{Optional upper cutoff to be used in forming confidence intervals. 
-Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
+\item{q2}{Optional upper cutoff to be used in forming confidence intervals.
+Only used when \code{object} inherits from class \code{\link[nlme:lme]{nlme::lme()}}.
 Defaults to \code{stats::qnorm((1-level)/2)}.}
 }
 \value{
 Returns an object of class \code{"invest"} or, if
-\code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The 
-generic function \code{{plot}} can be used to plot the output 
+\code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The
+generic function \code{{plot}} can be used to plot the output
 of the bootstrap simulation when \code{interval = "percentile"}.
-        
-  An object of class \code{"invest"} containing the following components:
-  \itemize{
-    \item \code{estimate} The estimate of x0.
-    \item \code{lwr} The lower confidence limit for x0.
-    \item \code{upr} The upper confidence limit for x0.
-    \item \code{se} An estimate of the standard error (Wald and percentile 
-                    intervals only).
-    \item \code{bias} The bootstrap estimate of bias (percentile interval 
-                      only).
-    \item \code{bootreps} Vector of bootstrap replicates (percentile 
-                          interval only).
-    \item \code{nsim} The number of bootstrap replicates (percentile 
-                      interval only).
-    \item \code{interval} The method used for calculating \code{lower} and 
-          \code{upper} (only used by \code{{print}} method).
-  }
+
+An object of class \code{"invest"} containing the following components:
+\itemize{
+\item \code{estimate} The estimate of x0.
+\item \code{lwr} The lower confidence limit for x0.
+\item \code{upr} The upper confidence limit for x0.
+\item \code{se} An estimate of the standard error (Wald and percentile
+intervals only).
+\item \code{bias} The bootstrap estimate of bias (percentile interval
+only).
+\item \code{bootreps} Vector of bootstrap replicates (percentile
+interval only).
+\item \code{nsim} The number of bootstrap replicates (percentile
+interval only).
+\item \code{interval} The method used for calculating \code{lower} and
+\code{upper} (only used by \code{{print}} method).
+}
 }
 \description{
-Provides point and interval estimates for the unknown predictor value that 
-corresponds to an observed value of the response (or vector thereof) or 
-specified value of the mean response. See the references listed below for 
+Provides point and interval estimates for the unknown predictor value that
+corresponds to an observed value of the response (or vector thereof) or
+specified value of the mean response. See the references listed below for
 more details.
 }
 \examples{
@@ -248,28 +248,27 @@ invest(ris, y0 = 500)
 invest(ris, y0 = 500, interval = "Wald")
 }
 \references{
-Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}. 
-Ph.D. thesis, Air Force Institute of Technology. 
+Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}.
+Ph.D. thesis, Air Force Institute of Technology.
 URL \url{https://apps.dtic.mil/sti/pdfs/ADA598921.pdf}
 
-
-Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
-for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
+Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package
+for Inverse Estimation. \emph{The R Journal}, \strong{6}(1), 90--100.
 URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
 
 Graybill, F. A., and Iyer, H. K. (1994).
-\emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
+\emph{Regression analysis: Concepts and Applications}. Duxbury Press.
 
 Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
-\emph{Statistical Tools for Nonlinear Regression: A Practical Guide with 
-S-PLUS and R Examples}. Springer. 
+\emph{Statistical Tools for Nonlinear Regression: A Practical Guide with
+S-PLUS and R Examples}. Springer.
 
 Norman, D. R., and Smith H. (2014).
 \emph{Applied Regression Analysis}. John Wiley & Sons.
 
 Oman, Samuel D. (1998).
 Calibration with Random Slopes.
-\emph{Biometrics} \bold{85}(2): 439--449.
+\emph{Biometrics} \strong{85}(2): 439--449.
 doi:10.1093/biomet/85.2.439.
 
 Seber, G. A. F., and Wild, C. J. (1989)

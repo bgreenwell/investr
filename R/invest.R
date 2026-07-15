@@ -5,12 +5,12 @@
 #' specified value of the mean response. See the references listed below for 
 #' more details. 
 #' 
-#' @param object An object that inherits from class \code{\link[stats]{lm}}, 
-#' \code{\link[stats]{glm}}, \code{\link[stats]{nls}}, or 
-#' \code{\link[nlme]{lme}}.
+#' @param object An object that inherits from class [stats::lm()], 
+#' [stats::glm()], [stats::nls()], or 
+#' [nlme::lme()].
 #'   
 #' @param y0 The value of the observed response(s) or specified value of the 
-#' mean response. For \code{\link[stats]{glm}} objects, \code{y0} should be on 
+#' mean response. For [stats::glm()] objects, `y0` should be on 
 #' the scale of the response variable (e.g., a number between 0 and 1 for 
 #' binomial families).
 #'   
@@ -20,28 +20,28 @@
 #'   for the interval to be calculated. 
 #'   
 #' @param mean.response Logical indicating whether confidence intervals should
-#' correspond to an individual response (\code{FALSE}) or a mean response 
-#' (\code{TRUE}). For \code{\link[stats]{glm}} objects, this is always 
-#' \code{TRUE}.
+#' correspond to an individual response (`FALSE`) or a mean response 
+#' (`TRUE`). For [stats::glm()] objects, this is always 
+#' `TRUE`.
 #'   
 #' @param x0.name For multiple linear regression, a character string giving the
 #' name of the predictor variable of interest.
 #'   
-#' @param newdata For multiple linear regression, a \code{data.frame} giving the
+#' @param newdata For multiple linear regression, a `data.frame` giving the
 #' values of interest for all other predictor variables (i.e., those other than 
-#' \code{x0.name}).
+#' `x0.name`).
 #'   
-#' @param data An optional data frame. This is required if \code{object$data} is 
-#' \code{NULL}.
+#' @param data An optional data frame. This is required if `object$data` is 
+#' `NULL`.
 #'   
 #' @param nsim Positive integer specifying the number of bootstrap simulations; 
 #' the bootstrap B (or R).
 #'   
 #' @param boot.type Character string specifying the type of bootstrap to use 
-#' when \code{interval = "percentile"}. Options are \code{"parametric"} and 
-#' \code{"nonparametric"}.
+#' when `interval = "percentile"`. Options are `"parametric"` and 
+#' `"nonparametric"`.
 #'   
-#' @param seed Optional argument to \code{\link{set.seed}}.
+#' @param seed Optional argument to [set.seed()].
 #' 
 #' @param progress Logical indicating whether to display a text-based progress
 #' bar during the bootstrap simulation.
@@ -51,84 +51,84 @@
 #' @param upper The upper endpoint of the interval to be searched.
 #' 
 #' @param extendInt Character string specifying if the interval 
-#' \code{c(lower, upper)} should be extended or directly produce an error when
+#' `c(lower, upper)` should be extended or directly produce an error when
 #' the inverse of the prediction function does not have differing signs at the
-#' endpoints. The default, \code{"no"}, keeps the search interval and hence 
+#' endpoints. The default, `"no"`, keeps the search interval and hence 
 #' produces an error. Can be abbreviated. See the documentation for the 
-#' \code{base} R function \code{uniroot} for details.
+#' `base` R function `uniroot` for details.
 #'   
 #' @param q1 Optional lower cutoff to be used in forming confidence intervals. 
-#' Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
-#' Defaults to \code{stats::qnorm((1+level)/2)}.
+#' Only used when `object` inherits from class [nlme::lme()]. 
+#' Defaults to `stats::qnorm((1+level)/2)`.
 #'   
 #' @param q2 Optional upper cutoff to be used in forming confidence intervals. 
-#' Only used when \code{object} inherits from class \code{\link[nlme]{lme}}. 
-#' Defaults to \code{stats::qnorm((1-level)/2)}.
+#' Only used when `object` inherits from class [nlme::lme()]. 
+#' Defaults to `stats::qnorm((1-level)/2)`.
 #'   
-#' @param tol The desired accuracy passed on to \code{\link[stats]{uniroot}}. 
-#' Recommend a minimum of \code{1e-10}.
+#' @param tol The desired accuracy passed on to [stats::uniroot()]. 
+#' Recommend a minimum of `1e-10`.
 #'   
-#' @param maxiter The maximum number of iterations passed on to \code{uniroot}. 
+#' @param maxiter The maximum number of iterations passed on to `uniroot`. 
 #' 
 #' @param adjust A logical value indicating if an adjustment should be made to
 #' the critical value used in calculating the confidence interval.This is useful 
-#' for when the calibration curve is to be used multiple, say \code{k}, times.
+#' for when the calibration curve is to be used multiple, say `k`, times.
 #'   
 #' @param k The number times the calibration curve is to be used for computing 
-#' a confidence interval. Only needed when \code{adjust = "Bonferroni"}.
+#' a confidence interval. Only needed when `adjust = "Bonferroni"`.
 #'   
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #' are used.
 #'   
-#' @return Returns an object of class \code{"invest"} or, if
-#' \code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The 
+#' @return Returns an object of class `"invest"` or, if
+#' `interval = "percentile"`, of class `c("invest", "bootCal")`. The 
 #' generic function \code{{plot}} can be used to plot the output 
-#' of the bootstrap simulation when \code{interval = "percentile"}.
+#' of the bootstrap simulation when `interval = "percentile"`.
 #'         
-#'   An object of class \code{"invest"} containing the following components:
+#'   An object of class `"invest"` containing the following components:
 #'   \itemize{
-#'     \item \code{estimate} The estimate of x0.
-#'     \item \code{lwr} The lower confidence limit for x0.
-#'     \item \code{upr} The upper confidence limit for x0.
-#'     \item \code{se} An estimate of the standard error (Wald and percentile 
+#'     \item `estimate` The estimate of x0.
+#'     \item `lwr` The lower confidence limit for x0.
+#'     \item `upr` The upper confidence limit for x0.
+#'     \item `se` An estimate of the standard error (Wald and percentile 
 #'                     intervals only).
-#'     \item \code{bias} The bootstrap estimate of bias (percentile interval 
+#'     \item `bias` The bootstrap estimate of bias (percentile interval 
 #'                       only).
-#'     \item \code{bootreps} Vector of bootstrap replicates (percentile 
+#'     \item `bootreps` Vector of bootstrap replicates (percentile 
 #'                           interval only).
-#'     \item \code{nsim} The number of bootstrap replicates (percentile 
+#'     \item `nsim` The number of bootstrap replicates (percentile 
 #'                       interval only).
-#'     \item \code{interval} The method used for calculating \code{lower} and 
-#'           \code{upper} (only used by \code{{print}} method).
+#'     \item `interval` The method used for calculating `lower` and 
+#'           `upper` (only used by \code{{print}} method).
 #'   }
 #'
 #' @references
-#' Greenwell, B. M. (2014). \emph{Topics in Statistical Calibration}. 
+#' Greenwell, B. M. (2014). *Topics in Statistical Calibration*. 
 #' Ph.D. thesis, Air Force Institute of Technology. 
-#' URL \url{https://apps.dtic.mil/sti/pdfs/ADA598921.pdf}
+#' URL <https://apps.dtic.mil/sti/pdfs/ADA598921.pdf>
 #'
 #' 
 #' Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R Package 
-#' for Inverse Estimation. \emph{The R Journal}, \bold{6}(1), 90--100. 
+#' for Inverse Estimation. *The R Journal*, **6**(1), 90--100. 
 #' URL http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
 #'
 #' Graybill, F. A., and Iyer, H. K. (1994).
-#' \emph{Regression analysis: Concepts and Applications}. Duxbury Press. 
+#' *Regression analysis: Concepts and Applications*. Duxbury Press. 
 #'
 #' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E.  (2004)
-#' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with 
-#' S-PLUS and R Examples}. Springer. 
+#' *Statistical Tools for Nonlinear Regression: A Practical Guide with 
+#' S-PLUS and R Examples*. Springer. 
 #' 
 #' Norman, D. R., and Smith H. (2014).
-#' \emph{Applied Regression Analysis}. John Wiley & Sons.
+#' *Applied Regression Analysis*. John Wiley & Sons.
 #' 
 #' Oman, Samuel D. (1998).
 #' Calibration with Random Slopes.
-#' \emph{Biometrics} \bold{85}(2): 439--449.
+#' *Biometrics* **85**(2): 439--449.
 #' doi:10.1093/biomet/85.2.439.
 #' 
 #' Seber, G. A. F., and Wild, C. J. (1989)
-#' \emph{Nonlinear regression}. Wiley.
+#' *Nonlinear regression*. Wiley.
 #'
 #' @rdname invest
 #' 
@@ -602,7 +602,13 @@ invest.lme <- function(object, y0,
                        level = 0.95, mean.response = FALSE, data, lower, upper, 
                        q1, q2, extendInt = "no", tol = .Machine$double.eps^0.25, 
                        maxiter = 1000, ...) {
-  
+
+  # "lme" objects require the nlme package to be available
+  if (!requireNamespace("nlme", quietly = TRUE)) {
+    stop("Package \"nlme\" is required for objects of class \"lme\". ",
+         "Please install it.", call. = FALSE)
+  }
+
   # Extract data, variable names, etc.
   .data  <- if (!missing(data)) data else object$data
   x0.name <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
@@ -699,16 +705,16 @@ print.invest <- function(x, digits = getOption("digits"), ...) {
 
 #' Plots method for bootstrap calibration
 #' 
-#' The \code{\link{plot}} method for \code{"bootCal"} objects. In
-#' particular, this method takes a \code{"bootCal"} object and produces plots 
+#' The [plot()] method for `"bootCal"` objects. In
+#' particular, this method takes a `"bootCal"` object and produces plots 
 #' for the bootstrap replicates of the inverse estimate.
 #' 
-#' @param x An object that inherits from class \code{"bootCal"}.
+#' @param x An object that inherits from class `"bootCal"`.
 #' 
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #' are used.
 #' 
-#' @returns \code{x} is returned invisibly.
+#' @returns `x` is returned invisibly.
 #'      
 #' @rdname plot.bootCal
 #'                        

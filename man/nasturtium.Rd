@@ -9,7 +9,7 @@ A data frame with 42 rows and 2 columns.
 }
 \source{
 Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration
-Problems, \emph{Journal of the American Statistical Association}, \bold{83},
+Problems, \emph{Journal of the American Statistical Association}, \strong{83},
 650--656.
 }
 \description{
@@ -18,8 +18,8 @@ samples versus the weight of the plant after three weeks of growth.
 }
 \details{
 \itemize{
-  \item \code{conc} True concentration of agrochemical (g/ha).
-  \item \code{weight} Weight of plant (mg) after 3 weeks' growth.
+\item \code{conc} True concentration of agrochemical (g/ha).
+\item \code{weight} Weight of plant (mg) after 3 weeks' growth.
 }
 }
 \references{

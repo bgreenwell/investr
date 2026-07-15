@@ -1,0 +1,37 @@
+url: https://bgreenwell.github.io/investr/
+
+template:
+  bootstrap: 5
+
+home:
+  title: investr — Inverse Estimation in R
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: Inverse estimation
+  desc: >
+    Point and interval estimates for the unknown predictor value
+    corresponding to an observed (or specified mean) value of the response.
+  contents:
+  - invest
+  - calibrate
+- title: Prediction and plotting
+  desc: >
+    Predictions, standard errors, and confidence/prediction bands for fitted
+    regression models.
+  contents:
+  - predFit
+  - plotFit
+  - plot.bootCal
+- title: Data sets
+  contents:
+  - arsenic
+  - beetle
+  - bladder
+  - crystal
+  - nasturtium
+  - whisky

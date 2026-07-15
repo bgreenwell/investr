@@ -8,19 +8,19 @@
 A data frame with 10 rows and 2 columns.
 }
 \source{
-R. Schoeneman, R. Dyer, and E. Earl. Analytical profile of straight bourbon 
-whiskies. Journal of the Association of Official Analytical Chemists, 
+R. Schoeneman, R. Dyer, and E. Earl. Analytical profile of straight bourbon
+whiskies. Journal of the Association of Official Analytical Chemists,
 54:1247--1261, 1971.
 }
 \description{
-The data give the proof (measured as twice the percentage of alcohol by 
-volume, denoted 2ABV) of whiskey stored in a charred oak barrel against time 
+The data give the proof (measured as twice the percentage of alcohol by
+volume, denoted 2ABV) of whiskey stored in a charred oak barrel against time
 in years.
 }
 \details{
 \itemize{
-  \item \code{age} The age of the whisky (years).
-  \item \code{proof} The proof of the whisky (2ABV).
+\item \code{age} The age of the whisky (years).
+\item \code{proof} The proof of the whisky (2ABV).
 }
 }
 \keyword{datasets}

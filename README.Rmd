@@ -1,7 +1,7 @@
 ---
 output:
   md_document:
-    variant: markdown_github
+    variant: gfm
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -17,7 +17,9 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/investr)](https://CRAN.R-project.org/package=investr)
-
+[![R-CMD-check](https://github.com/bgreenwell/investr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/investr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/bgreenwell/investr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/bgreenwell/investr?branch=main)
+[![r-universe status](https://bgreenwell.r-universe.dev/badges/investr)](https://bgreenwell.r-universe.dev/investr)
 [![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/investr)](https://cranlogs.r-pkg.org/badges/grand-total/investr)
 <!-- badges: end -->
 
@@ -37,13 +39,12 @@ As of right now, `investr` supports (univariate) inverse estimation with objects
 
 ## Installation
 
-The package is [currently listed on CRAN](https://cran.r-project.org/package=investr) and can easily be installed:
 ```{r, eval=FALSE}
-# Install from CRAN
-install.packages("investr", dep = TRUE)
-  
-# Alternatively, install the development version from GitHub
-devtools::install_github("bgreenwell/investr")
+# Install from CRAN (recommended)
+install.packages("investr")
+
+# Latest development version, from r-universe
+install.packages("investr", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 ```
 The package is also part of the [ChemPhys task view](https://cran.r-project.org/view=ChemPhys), a collection of R packages useful for analyzing data from chemistry and physics experiments. These packages can all be installed at once (including `investr`) using the `ctv` package (Zeileis, 2005):
 ```{r, eval=FALSE}
@@ -141,8 +142,12 @@ invest(nas.nls, y0 = c(309, 296, 419), interval = "Wald")
 The intervals both rely on large sample results and normality. In practice, the bootstrap may be more reliable:
 ```{r nls-nasturtium-bootstrap}
 # Bootstrap calibration intervals (may take a few seconds)
-boo <- invest(nas.nls, y0 = c(309, 296, 419), interval = "percentile", 
+boo <- invest(nas.nls, y0 = c(309, 296, 419), interval = "percentile",
               nsim = 9999, seed = 101)
 boo  # print bootstrap summary
 plot(boo)  # plot results
 ```
+
+## Development
+
+Development happens on the [`devel`](https://github.com/bgreenwell/investr/tree/devel) branch (the repository default); `main` holds the stable, CRAN-released version. Please open pull requests against `devel` and report bugs via the [issue tracker](https://github.com/bgreenwell/investr/issues).

@@ -2,7 +2,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^.*\.png$
-^\.travis\.yml$
 ^README\.Rmd$
 ^README\.html$
-^tests/testthat/Rplots\.pdf$
+^AGENTS\.md$
+^CLAUDE\.md$
+^\.claude$
+^_pkgdown\.yml$
+^codecov\.yml$
+^pkgdown$
+^docs$
+^\.github$

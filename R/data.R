@@ -3,8 +3,8 @@
 #' The data give the growing time and final weight of crystals.
 #'
 #' \itemize{
-#'   \item \code{time} Time taken to grow (hours).
-#'   \item \code{weight} Final weight of the crystal (grams).
+#'   \item `time` Time taken to grow (hours).
+#'   \item `weight` Final weight of the crystal (grams).
 #' }
 #' 
 #' @docType data
@@ -17,7 +17,7 @@
 #' 
 #' @source
 #' Graybill, F. A., and Iyer, H. K. (1994)
-#' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+#' *Regression analysis: Concepts and Applications*. Duxbury Press.
 NULL
 
 
@@ -27,8 +27,8 @@ NULL
 #' water samples.
 #'
 #' \itemize{
-#'   \item \code{actual} True amount of arsenic present.
-#'   \item \code{measured} Measured amount of arsenic present.
+#'   \item `actual` True amount of arsenic present.
+#'   \item `measured` Measured amount of arsenic present.
 #' }
 #' 
 #' @docType data
@@ -41,7 +41,7 @@ NULL
 #' 
 #' @source
 #' Graybill, F. A., and Iyer, H. K. (1994)
-#' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+#' *Regression analysis: Concepts and Applications*. Duxbury Press.
 NULL
 
 
@@ -51,8 +51,8 @@ NULL
 #' samples versus the weight of the plant after three weeks of growth.
 #'
 #' \itemize{
-#'   \item \code{conc} True concentration of agrochemical (g/ha).
-#'   \item \code{weight} Weight of plant (mg) after 3 weeks' growth.
+#'   \item `conc` True concentration of agrochemical (g/ha).
+#'   \item `weight` Weight of plant (mg) after 3 weeks' growth.
 #' }
 #' 
 #' @docType data
@@ -65,13 +65,13 @@ NULL
 #' 
 #' @source
 #' Racine-Poon, A. (1988) A Bayesian Approach to Nonlinear Calibration
-#' Problems, \emph{Journal of the American Statistical Association}, \bold{83},
+#' Problems, *Journal of the American Statistical Association*, **83**,
 #' 650--656.
 #' 
 #' @references
 #' Huet, S., Bouvier, A., Poursat, M-A., and Jolivet, E. (2004)
-#' \emph{Statistical Tools for Nonlinear Regression: A Practical Guide with
-#' S-PLUS and R Examples}. Springer.
+#' *Statistical Tools for Nonlinear Regression: A Practical Guide with
+#' S-PLUS and R Examples*. Springer.
 #'
 NULL
 
@@ -82,9 +82,9 @@ NULL
 #' to the insecticide carbon disulphide at eight different concentrations.
 #'
 #' \itemize{
-#'   \item \code{ldose} Log dose of carbon disulphide.
-#'   \item \code{y} Number of beetles subjected to insecticide.
-#'   \item \code{n} Number of beetles killed.
+#'   \item `ldose` Log dose of carbon disulphide.
+#'   \item `y` Number of beetles subjected to insecticide.
+#'   \item `n` Number of beetles killed.
 #' }
 #' 
 #' @docType data
@@ -96,7 +96,7 @@ NULL
 #' @name beetle
 #' 
 #' @source
-#' Dobson, A. (2002) \emph{An Introduction to Generalized Linear Models}. 
+#' Dobson, A. (2002) *An Introduction to Generalized Linear Models*. 
 #' Chapman & Hall/CRC.
 #'
 NULL
@@ -112,9 +112,9 @@ NULL
 #' H × D was taken as a measure of liquid volume.
 #'
 #' \itemize{
-#'   \item \code{subject} The subject ID.
-#'   \item \code{HD} The product H × D (mm^2).
-#'   \item \code{volume} The true volume of sterile water in the bladder (ml).
+#'   \item `subject` The subject ID.
+#'   \item `HD` The product H × D (mm^2).
+#'   \item `volume` The true volume of sterile water in the bladder (ml).
 #' }
 #' 
 #' @docType data
@@ -126,7 +126,7 @@ NULL
 #' @name bladder
 #' 
 #' @source
-#' Brown, P. (1993) \emph{Measurement, Regression, and Calibration}. 
+#' Brown, P. (1993) *Measurement, Regression, and Calibration*. 
 #' Oxford University Press.
 NULL
 
@@ -138,8 +138,8 @@ NULL
 #' in years.
 #'
 #' \itemize{
-#'   \item \code{age} The age of the whisky (years).
-#'   \item \code{proof} The proof of the whisky (2ABV).
+#'   \item `age` The age of the whisky (years).
+#'   \item `proof` The proof of the whisky (2ABV).
 #' }
 #' 
 #' @docType data

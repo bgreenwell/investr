@@ -10,3 +10,4 @@ vignettes/*.gz
 vignettes/*.log
 vignettes/*.tex
 vignettes/introduction.pdf
+docs

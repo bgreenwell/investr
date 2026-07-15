@@ -99,21 +99,21 @@ panel.last <- quote({
 #' Plotting fitted models
 #' 
 #' Generic function for plotting predictions from various types of fitted 
-#' models. \code{plotFit} currently supports objects of class 
-#' \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, and 
-#' \code{\link[stats]{nls}}. A default method also exists which may be used for 
+#' models. `plotFit` currently supports objects of class 
+#' [stats::lm()], [stats::glm()], and 
+#' [stats::nls()]. A default method also exists which may be used for 
 #' plotting the fitted mean response from other model fits (e.g., 
-#' \code{\link[MASS]{lqs}} and \code{\link[MASS]{rlm}} from the \strong{MASS} 
+#' [MASS::lqs()] and [MASS::rlm()] from the **MASS** 
 #' package).
 #'
 #' @param object A fitted model object. Typically, an object that inherits from 
-#' class \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, or 
-#' \code{\link[stats]{nls}} (but others may work too).
+#' class [stats::lm()], [stats::glm()], or 
+#' [stats::nls()] (but others may work too).
 #'   
 #' @param type The type of prediction required. The default is on the scale of 
-#' the response variable; the alternative \code{"link"} is on the scale of the 
+#' the response variable; the alternative `"link"` is on the scale of the 
 #' linear predictor. This option is only used when plotting 
-#' \code{\link[stats]{glm}} objects.
+#' [stats::glm()] objects.
 #' 
 #' @param interval A character string indicating if a prediction band, 
 #' confidence band, both, or none should be plotted.
@@ -126,14 +126,14 @@ panel.last <- quote({
 #' to make to the confidence/prediction bands.
 #' 
 #' @param k An integer to be used in computing the critical value for the 
-#' confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"},
-#' or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.
+#' confidence/prediction bands. Only needed when `adjust = "Bonferroni"`,
+#' or when `adjust = "Scheffe"` and `interval = "prediction"`.
 #' 
 #' @param shade A logical value indicating if the band should be shaded.
 #' 
 #' @param extend.range A logical value indicating if the fitted regression line
 #' and bands (if any) should extend to the edges of the plot. Default is 
-#' \code{FALSE}.
+#' `FALSE`.
 #' 
 #' @param col.conf Shade color for confidence band.
 #' 
@@ -169,15 +169,15 @@ panel.last <- quote({
 #' @param ylim The y limits (y1, y2) of the plot. 
 #' 
 #' @param hide A logical value indicating if the fitted model should be plotted 
-#' on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is 
-#' \code{TRUE}.
+#' on top of the points (`FALSE`) or behind them (`TRUE`). Default is 
+#' `TRUE`.
 #' 
 #' @param ... Additional optional arguments passed on to 
-#' \code{\link{plot}}.
+#' [plot()].
 #' 
 #' @returns No return value (called for side effects).
 #' 
-#' @seealso \code{\link[nlstools]{plotfit}}
+#' @seealso The `plotfit` function in the \pkg{nlstools} package.
 #' 
 #' @rdname plotFit
 #' 
@@ -185,29 +185,29 @@ panel.last <- quote({
 #' 
 #' @note
 #' By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
-#' For simultaneous intervals, use \code{adjust = "Bonferroni"} or 
-#' \code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a 
-#' value for \code{k}, the number of intervals for which the coverage is to hold 
-#' simultaneously. For the Scheffe adjustment, specifying a value for \code{k} 
-#' is only required when \code{interval = "prediction"}; if 
-#' \code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
-#' of regression parameters. For example, if \code{object} is a simple linear 
-#' regression model, then calling \code{plotFit} with 
-#' \code{interval = "confidence"} and \code{adjust = "Scheffe"} will plot the 
-#' \href{https://en.wikipedia.org/wiki/Working-Hotelling_procedure}{Working-Hotelling band}.
+#' For simultaneous intervals, use `adjust = "Bonferroni"` or 
+#' `adjust = "Scheffe"`. For the Bonferroni adjustment, you must specify a 
+#' value for `k`, the number of intervals for which the coverage is to hold 
+#' simultaneously. For the Scheffe adjustment, specifying a value for `k` 
+#' is only required when `interval = "prediction"`; if 
+#' `interval = "confidence"`, `k` is set equal to \eqn{p}, the number 
+#' of regression parameters. For example, if `object` is a simple linear 
+#' regression model, then calling `plotFit` with 
+#' `interval = "confidence"` and `adjust = "Scheffe"` will plot the 
+#' [Working-Hotelling band](https://en.wikipedia.org/wiki/Working-Hotelling_procedure).
 #' 
 #' Confidence/prediction bands for nonlinear regression (i.e., objects of class
-#' \code{\link[stats]{nls}}) are based on the linear approximation described in 
+#' [stats::nls()]) are based on the linear approximation described in 
 #' Bates & Watts (2007).
 #' 
 #' @references
 #' Bates, D. M., and Watts, D. G. (2007)
-#' \emph{Nonlinear Regression Analysis and its Applications}. Wiley.
+#' *Nonlinear Regression Analysis and its Applications*. Wiley.
 #' 
 #' Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche, 
 #' Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015). 
 #' A Toolbox for Nonlinear Regression in R: The Package nlstools. 
-#' \emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
+#' *Journal of Statistical Software*, **66**(5), 1-21.
 #' 
 #' @examples
 #' # A nonlinear least squares example (see ?datasets::Puromycin and 

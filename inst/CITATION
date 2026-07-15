@@ -1,14 +1,18 @@
 citHeader("To cite investr in publications use:")
 
-citEntry(entry = "Article",
-  title        = "investr: An R Package for Inverse Estimation",
-  author       = personList(as.person("Brandon M. Greenwell"), as.person("Christine M. Schubert Kabban")),
+bibentry("Article",
+  title        = "investr: An {R} Package for Inverse Estimation",
+  author       = c(person(c("Brandon", "M."), family = "Greenwell",
+                          email = "greenwell.brandon@gmail.com",
+                          comment = c(ORCID = "0000-0002-8120-0084")),
+                    person(c("Christine", "M."), family = "Schubert Kabban")),
   journal      = "The R Journal",
   year         = "2014",
   volume       = "6",
   number       = "1",
   pages        = "90--100",
   url          = "https://doi.org/10.32614/RJ-2014-009",
+  doi          = "10.32614/RJ-2014-009",
 
   textVersion  =
   paste("Brandon M. Greenwell and Christine M. Schubert Kabban (2014).",

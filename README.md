@@ -1,9 +1,14 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 <!-- badges: start -->
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/investr)](https://CRAN.R-project.org/package=investr)
-
+[![R-CMD-check](https://github.com/bgreenwell/investr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/investr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/bgreenwell/investr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/bgreenwell/investr?branch=main)
+[![r-universe
+status](https://bgreenwell.r-universe.dev/badges/investr)](https://bgreenwell.r-universe.dev/investr)
 [![Total
 Downloads](https://cranlogs.r-pkg.org/badges/grand-total/investr)](https://cranlogs.r-pkg.org/badges/grand-total/investr)
 <!-- badges: end -->
@@ -26,24 +31,20 @@ to <https://github.com/bgreenwell/investr/issues>.
 As of right now, `investr` supports (univariate) inverse estimation with
 objects of class:
 
--   `"lm"` - linear models (multiple predictor variables allowed)
--   `"glm"` - generalized linear models (multiple predictor variables
-    allowed)
--   `"nls"` - nonlinear least-squares models
--   `"lme"` - linear mixed-effects models (fit using the `nlme` package)
+- `"lm"` - linear models (multiple predictor variables allowed)
+- `"glm"` - generalized linear models (multiple predictor variables
+  allowed)
+- `"nls"` - nonlinear least-squares models
+- `"lme"` - linear mixed-effects models (fit using the `nlme` package)
 
 ## Installation
 
-The package is [currently listed on
-CRAN](https://cran.r-project.org/package=investr) and can easily be
-installed:
-
 ``` r
-# Install from CRAN
-install.packages("investr", dep = TRUE)
-  
-# Alternatively, install the development version from GitHub
-devtools::install_github("bgreenwell/investr")
+# Install from CRAN (recommended)
+install.packages("investr")
+
+# Latest development version, from r-universe
+install.packages("investr", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
 The package is also part of the [ChemPhys task
@@ -80,9 +81,10 @@ plotFit(beetle.glm, lwd.fit = 2, cex = 1.2, pch = 21, bg = "lightskyblue",
         lwd = 2, xlab = "Log dose", ylab = "Probability")
 ```
 
-<img src="man/figures/README-glm-beetle-invest-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-glm-beetle-invest-1.png" alt="" style="display: block; margin: auto;" />
 
 ``` r
+
 # Median lethal dose
 invest(beetle.glm, y0 = 0.5)   
 #> estimate    lower    upper 
@@ -164,11 +166,11 @@ nas.nls <- nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
 plotFit(nas.nls, lwd.fit = 2)
 ```
 
-<img src="man/figures/README-nls-nasturtium-fit-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-nls-nasturtium-fit-1.png" alt="" style="display: block; margin: auto;" />
 
 Three new replicates of the response (309, 296, 419) at an unknown
-concentration of interest (*x*<sub>0</sub>) are measured. It is desired
-to estimate *x*<sub>0</sub>.
+concentration of interest ($`x_0`$) are measured. It is desired to
+estimate $`x_0`$.
 
 ``` r
 # Inversion method
@@ -188,7 +190,7 @@ practice, the bootstrap may be more reliable:
 
 ``` r
 # Bootstrap calibration intervals (may take a few seconds)
-boo <- invest(nas.nls, y0 = c(309, 296, 419), interval = "percentile", 
+boo <- invest(nas.nls, y0 = c(309, 296, 419), interval = "percentile",
               nsim = 9999, seed = 101)
 boo  # print bootstrap summary
 #>  estimate     lower     upper        se      bias 
@@ -196,4 +198,12 @@ boo  # print bootstrap summary
 plot(boo)  # plot results
 ```
 
-<img src="man/figures/README-nls-nasturtium-bootstrap-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-nls-nasturtium-bootstrap-1.png" alt="" style="display: block; margin: auto;" />
+
+## Development
+
+Development happens on the
+[`devel`](https://github.com/bgreenwell/investr/tree/devel) branch (the
+repository default); `main` holds the stable, CRAN-released version.
+Please open pull requests against `devel` and report bugs via the [issue
+tracker](https://github.com/bgreenwell/investr/issues).

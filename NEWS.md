@@ -1,3 +1,13 @@
+# investr (development version)
+
+* `nlme` moved from Imports to Suggests; `"lme"`-specific code paths now check for it with `requireNamespace()` (#47).
+
+* Fixed `calibrate.lm()` silently mishandling models with `poly()`-transformed predictors; it now reads the predictor from the model frame and errors informatively instead (#48).
+
+* Fixed the formula for `g` in the inversion-interval vignette, which had been broken by a regression in a prior "typo fix" (#51).
+
+* Fixed `predFit()` with `se.fit = TRUE` failing on `"nls"` models with more than one predictor variable (#53).
+
 # investr 1.4.2
 
 * Fixed the output of `predFit()` in situations whenever standard errors and confidence/predictions bands are both requested.
