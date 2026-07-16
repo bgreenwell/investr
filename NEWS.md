@@ -1,5 +1,9 @@
 # investr (development version)
 
+* New `invest()` methods for `"survfit"` and `"Surv"` objects (from the survival package) estimate the survival time at which a Kaplan-Meier curve reaches a given survival probability (e.g., median survival time), with confidence limits obtained by inverting the curve's pointwise confidence band (#30).
+
+* `invest()` results with `interval = "percentile"` now also inherit from class `"boot"`, so they work directly with functions from the boot package such as `boot::boot.ci()` (#32).
+
 * `nlme` moved from Imports to Suggests; `"lme"`-specific code paths now check for it with `requireNamespace()` (#47).
 
 * Fixed `calibrate.lm()` silently mishandling models with `poly()`-transformed predictors; it now reads the predictor from the model frame and errors informatively instead (#48).

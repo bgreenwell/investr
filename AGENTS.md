@@ -5,10 +5,13 @@
 R package for **inverse estimation** (the calibration problem): given an
 observed value of the response, estimate the corresponding unknown predictor
 value. Exports: `invest()` (numerical/bootstrap-based, supports `lm`, `glm`,
-`nls`, `lme`), `calibrate()` (closed-form solution for simple linear
-regression only), `predFit()` (predictions/standard errors/bands, used
-internally by `plotFit()`), and `plotFit()` (base-graphics plotting of a
-fitted model with confidence/prediction bands).
+`nls`, `lme`, plus `survfit`/`Surv` for inverting Kaplan-Meier curves),
+`calibrate()` (closed-form solution for simple linear regression only),
+`predFit()` (predictions/standard errors/bands, used internally by
+`plotFit()`), and `plotFit()` (base-graphics plotting of a fitted model with
+confidence/prediction bands). Bootstrap (`interval = "percentile"`) results
+are also valid `"boot"` objects (usable with `boot::boot.ci()`), built by
+`make_bootcal()` in `R/utils.R`.
 
 investr is a long-lived CRAN package (on CRAN continuously since 2014) with
 a companion R Journal article (Greenwell & Schubert Kabban, 2014). **Keeping

@@ -24,6 +24,7 @@ Suggests:
     knitr,
     MASS,
     nlme,
+    survival,
     tinytest
 Imports:
     graphics,

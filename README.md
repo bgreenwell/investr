@@ -36,6 +36,8 @@ objects of class:
   allowed)
 - `"nls"` - nonlinear least-squares models
 - `"lme"` - linear mixed-effects models (fit using the `nlme` package)
+- `"survfit"`/`"Surv"` - Kaplan-Meier survival curves (fit using the
+  `survival` package), for example, median survival time
 
 ## Installation
 

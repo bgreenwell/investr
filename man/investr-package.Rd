@@ -27,6 +27,8 @@ with objects of class:
 \item{\code{nls}} --- nonlinear least-squares models
 \item{\code{lme}} --- linear mixed-effects models (fit using the
 \code{nlme} package)
+\item{\code{survfit}/\code{Surv}} --- Kaplan-Meier survival curves (fit using the
+\code{survival} package); see \code{\link[=invest.survfit]{invest.survfit()}}
 }
 }
 \seealso{

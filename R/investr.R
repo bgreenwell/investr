@@ -18,8 +18,10 @@
 #'   \item{`lm`} --- linear models (multiple predictor variables allowed)
 #'   \item{`glm`} --- generalized linear models (multiple predictor variables allowed)
 #'   \item{`nls`} --- nonlinear least-squares models
-#'   \item{`lme`} --- linear mixed-effects models (fit using the 
+#'   \item{`lme`} --- linear mixed-effects models (fit using the
 #'     `nlme` package)
+#'   \item{`survfit`/`Surv`} --- Kaplan-Meier survival curves (fit using the
+#'     `survival` package); see [invest.survfit()]
 #' }
 #' 
 #' @keywords internal
