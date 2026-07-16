@@ -137,6 +137,18 @@ expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
 expect_silent(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
                      newdata = contr, lower = -10))
 
+# The "Use plotFit for guidance" hint on a failed confidence-limit search
+# must not appear for multi-predictor models, since plotFit() doesn't
+# support more than one predictor variable (regression test for issue #35)
+err_msg <- tryCatch(
+  invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
+         newdata = contr, lower = inv.contr$estimate - 0.01,
+         upper = inv.contr$estimate + 0.01),
+  error = function(e) conditionMessage(e)
+)
+expect_true(grepl("confidence limit not found", err_msg))
+expect_false(grepl("plotFit", err_msg))
+
 # Inverse estimation with nonlinear models --------------------------------------
 
 # approximate standard error is correct

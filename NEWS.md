@@ -12,6 +12,8 @@
 
 * `invest()` now validates that `newdata` columns have classes (and, for factors, levels) compatible with the fitted model's training data, rather than failing with a confusing downstream error or silently returning a nonsensical result (#36).
 
+* The "Use plotFit for guidance" hint on a failed confidence-limit search no longer appears for multi-predictor `lm`/`glm` models, since `plotFit()` doesn't support more than one predictor variable (#35).
+
 # investr 1.4.2
 
 * Fixed the output of `predFit()` in situations whenever standard errors and confidence/predictions bands are both requested.
