@@ -5,7 +5,39 @@ makeData <- function(x, label) {
 
 
 #' @keywords internal
-checkNewdataClasses <- function(newdata, data) {
+make_bootcal <- function(x0.est, x0.boot, nsim, level, call) {
+  perc <- unname(stats::quantile(x0.boot,
+                                 probs = c((1 - level) / 2, (1 + level) / 2)))
+  # The first five components are printed positionally by print.invest().
+  # The trailing t0/t/R/sim/call components make the result a valid "boot"
+  # object (issue #32), so it works with, e.g., boot::boot.ci(). Both
+  # boot.type options simulate responses from the fitted model (rather than
+  # resampling cases), which is "parametric" in the boot package's taxonomy;
+  # labeling it as such makes boot.ci() correctly refuse the bca/stud types,
+  # which cannot be computed from model-based replicates.
+  boo <- list("estimate" = x0.est,  # original estimate
+              "lower"    = perc[1L],  # lower percentile
+              "upper"    = perc[2L],  # upper percentile
+              "se"       = stats::sd(x0.boot),  # standard error
+              "bias"     = mean(x0.boot) - x0.est,  # estimated bias
+              "bootreps" = x0.boot,  # bootstrap replicates
+              "nsim"     = nsim,  # number of simulations
+              "level"    = level,  # desired confidence level
+              "interval" = "percentile",  # type of interval requested
+              "t0"       = x0.est,
+              "t"        = matrix(x0.boot, ncol = 1L),
+              "R"        = length(x0.boot),
+              "sim"      = "parametric",
+              "call"     = call)
+
+  # Assign number of failed bootstrap replications as an attribute
+  attr(boo, "bootFail") <- attr(x0.boot, "bootFail")
+  boo
+}
+
+
+#' @keywords internal
+check_newdata_classes <- function(newdata, data) {
   for (nm in intersect(names(newdata), names(data))) {
     old <- data[[nm]]
     new <- newdata[[nm]]

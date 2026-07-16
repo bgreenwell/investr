@@ -92,6 +92,23 @@ expect_inherits(boot.npar, c("invest", "bootCal"))
 expect_inherits(boot.par, c("invest", "bootCal"))
 expect_silent(plot(boot.npar))
 
+# Percentile-interval results are also valid "boot" objects, usable with
+# the boot package (regression tests for issue #32)
+expect_inherits(boot.npar, "boot")
+expect_inherits(boot.par, "boot")
+expect_identical(boot.npar$t0, boot.npar$estimate)
+expect_identical(boot.npar$t, matrix(boot.npar$bootreps, ncol = 1L))
+expect_identical(boot.npar$R, length(boot.npar$bootreps))
+if (requireNamespace("boot", quietly = TRUE)) {
+  boo32 <- invest(crystal_lm, y0 = 5, interval = "percentile", nsim = 199,
+                  seed = 101)
+  ci32 <- boot::boot.ci(boo32, type = c("norm", "basic", "perc"))
+  expect_inherits(ci32, "bootci")
+  # boot.ci's percentile interval uses the (R+1) order-statistic convention
+  # rather than stats::quantile()'s type-7 default, so allow slack
+  expect_equal(ci32$percent[4:5], c(boo32$lower, boo32$upper), tol = 0.1)
+}
+
 # multiple predictor results match output from JMP (v11)
 contr <- data.frame("x1" = mean(x1), "x3" = "Control")
 treat <- data.frame("x1" = mean(x1), "x3" = "Treat")

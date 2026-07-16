@@ -81,25 +81,28 @@
 #' are used.
 #'   
 #' @return Returns an object of class `"invest"` or, if
-#' `interval = "percentile"`, of class `c("invest", "bootCal")`. The 
-#' generic function \code{{plot}} can be used to plot the output 
-#' of the bootstrap simulation when `interval = "percentile"`.
-#'         
+#' `interval = "percentile"`, of class `c("invest", "bootCal", "boot")`. The
+#' generic function [plot()] can be used to plot the output
+#' of the bootstrap simulation when `interval = "percentile"`, and the
+#' result is also a valid `"boot"` object, so it works with functions from
+#' the \pkg{boot} package (e.g., `boot::boot.ci()` with the `"norm"`,
+#' `"basic"`, and `"perc"` interval types).
+#'
 #'   An object of class `"invest"` containing the following components:
 #'   \itemize{
 #'     \item `estimate` The estimate of x0.
 #'     \item `lwr` The lower confidence limit for x0.
 #'     \item `upr` The upper confidence limit for x0.
-#'     \item `se` An estimate of the standard error (Wald and percentile 
+#'     \item `se` An estimate of the standard error (Wald and percentile
 #'                     intervals only).
-#'     \item `bias` The bootstrap estimate of bias (percentile interval 
+#'     \item `bias` The bootstrap estimate of bias (percentile interval
 #'                       only).
-#'     \item `bootreps` Vector of bootstrap replicates (percentile 
+#'     \item `bootreps` Vector of bootstrap replicates (percentile
 #'                           interval only).
-#'     \item `nsim` The number of bootstrap replicates (percentile 
+#'     \item `nsim` The number of bootstrap replicates (percentile
 #'                       interval only).
-#'     \item `interval` The method used for calculating `lower` and 
-#'           `upper` (only used by \code{{print}} method).
+#'     \item `interval` The method used for calculating `lower` and
+#'           `upper` (only used by the [print()] method).
 #'   }
 #'
 #' @references
@@ -256,7 +259,7 @@ invest.lm <- function(object, y0,
                   " used by ", deparse(substitute(object)),
                   " (except ", x0.name, ")"))
     }
-    checkNewdataClasses(newdata, .data)
+    check_newdata_classes(newdata, .data)
   } else {
     x0.name <- xnames
   }
@@ -332,42 +335,27 @@ invest.lm <- function(object, y0,
   } else {
     
     # Calculate bootstrap replicates
-    x0.boot <- computeBootReps(object, nsim = nsim, seed = seed, 
-                               boot.type = boot.type, yname = yname, 
-                               mean.response = mean.response, y0 = y0, 
-                               x0.name = x0.name, lower = lower, upper = upper, 
-                               extendInt = extendInt, tol = tol, 
+    x0.boot <- computeBootReps(object, nsim = nsim, seed = seed,
+                               boot.type = boot.type, yname = yname,
+                               mean.response = mean.response, y0 = y0,
+                               x0.name = x0.name, lower = lower, upper = upper,
+                               extendInt = extendInt, tol = tol,
                                maxiter = maxiter, progress = progress)
-    
-    # Percentiles of bootstrap replicates
-    perc <- unname(stats::quantile(x0.boot, 
-                                   probs = c((1 - level) / 2, (1 + level) / 2)))
-    
-    # Create list of results
-    boo <- list("estimate" = x0.est,  # original estimate
-                "lower"    = perc[1L],  # lower percentile
-                "upper"    = perc[2L],  # upper percentile
-                "se"       = stats::sd(x0.boot),  # standard error
-                "bias"     = mean(x0.boot) - x0.est,  # estimated bias
-                "bootreps" = x0.boot,  # bootstrap replicates
-                "nsim"     = nsim,  # number of simulations
-                "level"    = level,  # desired confidence level
-                "interval" = "percentile")  # type of interval requested
-    
-    # Assign number of failed bootstrap replications as an attribute
-    attr(boo, "bootFail") <- attr(x0.boot, "bootFail")
-    boo
-    
+
+    # Summarize the replicates in a boot-compatible list of results
+    make_bootcal(x0.est, x0.boot, nsim = nsim, level = level,
+                 call = match.call())
+
   }
-  
+
   # Assign class label(s) and return result
   if (interval == "percentile") {
-    class(res) <- c("invest", "bootCal")
+    class(res) <- c("invest", "bootCal", "boot")
   } else {
     class(res) <- "invest"
   }
   res
-  
+
 }
 
 
@@ -419,7 +407,7 @@ invest.glm <- function(object, y0,
                   " used by ", deparse(substitute(object)),
                   " (except ", x0.name, ")"))
     }
-    checkNewdataClasses(newdata, .data)
+    check_newdata_classes(newdata, .data)
   } else {
     x0.name <- xnames
   }
@@ -571,41 +559,26 @@ invest.nls <- function(object, y0,
   } else {
     
     # Calculate bootstrap replicates
-    x0.boot <- computeBootReps(object, nsim = nsim, seed = seed, 
-                               boot.type = boot.type, yname = yname, 
-                               mean.response = mean.response, y0 = y0, 
-                               x0.name = x0.name, lower = lower, upper = upper, 
-                               extendInt = extendInt, tol = tol, 
+    x0.boot <- computeBootReps(object, nsim = nsim, seed = seed,
+                               boot.type = boot.type, yname = yname,
+                               mean.response = mean.response, y0 = y0,
+                               x0.name = x0.name, lower = lower, upper = upper,
+                               extendInt = extendInt, tol = tol,
                                maxiter = maxiter, progress = progress)
-    
-    # Percentiles of bootstrap replicates
-    perc <- unname(stats::quantile(x0.boot, 
-                                   probs = c((1 - level) / 2, (1 + level) / 2)))
-    
-    # Create list of results
-    boo <- list("estimate" = x0.est,  # original estimate
-                "lower"    = perc[1L],  # lower percentile
-                "upper"    = perc[2L],  # upper percentile
-                "se"       = stats::sd(x0.boot),  # standard error
-                "bias"     = mean(x0.boot) - x0.est,  # estimated bias
-                "bootreps" = x0.boot,  # bootstrap replicates
-                "nsim"     = nsim,  # number of simulations
-                "level"    = level,  # desired confidence level
-                "interval" = "percentile")  # type of interval requested
-    
-    # Assign number of failed bootstrap replications as an attribute
-    attr(boo, "bootFail") <- attr(x0.boot, "bootFail")
-    boo
-    
+
+    # Summarize the replicates in a boot-compatible list of results
+    make_bootcal(x0.est, x0.boot, nsim = nsim, level = level,
+                 call = match.call())
+
   }
-  
+
   # Assign class label(s) and return result
   if (interval == "percentile") {
-    class(res) <- c("invest", "bootCal")
+    class(res) <- c("invest", "bootCal", "boot")
   } else {
     class(res) <- "invest"
   }
-  res  
+  res
 }
 
 

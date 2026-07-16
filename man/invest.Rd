@@ -165,9 +165,12 @@ Defaults to \code{stats::qnorm((1-level)/2)}.}
 }
 \value{
 Returns an object of class \code{"invest"} or, if
-\code{interval = "percentile"}, of class \code{c("invest", "bootCal")}. The
-generic function \code{{plot}} can be used to plot the output
-of the bootstrap simulation when \code{interval = "percentile"}.
+\code{interval = "percentile"}, of class \code{c("invest", "bootCal", "boot")}. The
+generic function \code{\link[=plot]{plot()}} can be used to plot the output
+of the bootstrap simulation when \code{interval = "percentile"}, and the
+result is also a valid \code{"boot"} object, so it works with functions from
+the \pkg{boot} package (e.g., \code{boot::boot.ci()} with the \code{"norm"},
+\code{"basic"}, and \code{"perc"} interval types).
 
 An object of class \code{"invest"} containing the following components:
 \itemize{
@@ -183,7 +186,7 @@ interval only).
 \item \code{nsim} The number of bootstrap replicates (percentile
 interval only).
 \item \code{interval} The method used for calculating \code{lower} and
-\code{upper} (only used by \code{{print}} method).
+\code{upper} (only used by the \code{\link[=print]{print()}} method).
 }
 }
 \description{
