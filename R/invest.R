@@ -215,17 +215,20 @@ invest.lm <- function(object, y0,
                       maxiter = 1000, adjust = c("none", "Bonferroni"), 
                       k,  ...) {
   
-  # Extract data, variable names, etc.
+  # Extract data, variable names, etc. Reconstructing via model.frame() (as
+  # opposed to eval()-ing the original call$data in parent.frame()) is
+  # robust to the model having been fit inside a function, and to models
+  # fit without a data= argument at all (issues #41, #42).
   .data  <- if (!missing(data)) {
-    data 
+    data
   } else {
-    eval(object$call$data, envir = parent.frame())
+    stats::model.frame(object)
   }
   yname <- all.vars(stats::formula(object)[[2]])
-  
+
   # Predictor variable(s)
   multi <- FALSE
-  xnames <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
+  xnames <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data))
   if (length(xnames) != 1) {
     multi <- TRUE
     if (missing(x0.name)) {
@@ -249,10 +252,11 @@ invest.lm <- function(object, y0,
       stop("'newdata' must have a single row")
     }
     if (ncol(newdata) != length(xnames) || !all(xnames %in% names(newdata))) {
-      stop(paste0("'newdata' must contain a column for each predictor variable", 
+      stop(paste0("'newdata' must contain a column for each predictor variable",
                   " used by ", deparse(substitute(object)),
                   " (except ", x0.name, ")"))
     }
+    checkNewdataClasses(newdata, .data)
   } else {
     x0.name <- xnames
   }
@@ -379,13 +383,16 @@ invest.glm <- function(object, y0,
   # NOTE: Currently, this function only works for the case 
   #       mean.response = TRUE. 
   
-  # Extract data, variable names, etc.
+  # Extract data, variable names, etc. Reconstructing via model.frame() (as
+  # opposed to eval()-ing the original call$data in parent.frame()) is
+  # robust to the model having been fit inside a function, and to models
+  # fit without a data= argument at all (issues #41, #42).
   .data  <- if (!missing(data)) {
-    data 
+    data
   } else {
-    eval(object$call$data, envir = parent.frame())
+    stats::model.frame(object)
   }
-  
+
   # Calculations should be done on the "link" scale!
   eta <- stats::family(object)$linkfun(y0)
   
@@ -408,10 +415,11 @@ invest.glm <- function(object, y0,
       stop("'newdata' must have a single row")
     }
     if (ncol(newdata) != length(xnames) || !all(xnames %in% names(newdata))) {
-      stop(paste0("'newdata' must contain a column for each predictor variable", 
+      stop(paste0("'newdata' must contain a column for each predictor variable",
                   " used by ", deparse(substitute(object)),
                   " (except ", x0.name, ")"))
     }
+    checkNewdataClasses(newdata, .data)
   } else {
     x0.name <- xnames
   }
@@ -494,10 +502,17 @@ invest.nls <- function(object, y0,
                models is currently not supported."))
   }
   
-  # Extract data, variable names, etc.
-  .data  <- if (!missing(data)) data else eval(object$call$data, 
-                                               envir = parent.frame())
-  x0.name <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data)) 
+  # Extract data, variable names, etc. model.frame() doesn't work directly
+  # for "nls" objects (it also tries to evaluate the parameter names on the
+  # formula's RHS), so fall back to the environment captured by the formula
+  # itself at fit time, rather than parent.frame() here, which is robust to
+  # the model having been fit inside a function (issue #45).
+  .data  <- if (!missing(data)) {
+    data
+  } else {
+    eval(object$call$data, envir = environment(stats::formula(object)))
+  }
+  x0.name <- intersect(all.vars(stats::formula(object)[[3]]), colnames(.data))
   yname <- all.vars(stats::formula(object)[[2]])
   if (length(x0.name) != 1) stop("Only one independent variable allowed.")
   if (missing(lower)) lower <- min(.data[, x0.name])  # lower limit default

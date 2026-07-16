@@ -122,6 +122,21 @@ expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
 expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
                     newdata = setNames(treat, c("y1", "y2")), lower = -10))
 
+# newdata columns must have classes compatible with the fitted model's data
+# (regression tests for issue #36)
+
+expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
+                    newdata = data.frame(x1 = mean(x1), x3 = "Bogus"),
+                    lower = -10))
+expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
+                    newdata = data.frame(x1 = mean(x1), x3 = 1),
+                    lower = -10))
+expect_error(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
+                    newdata = data.frame(x1 = "five", x3 = "Control"),
+                    lower = -10))
+expect_silent(invest(multi_lm, y0 = 20, x0.name = "x2", interval = "inversion",
+                     newdata = contr, lower = -10))
+
 # Inverse estimation with nonlinear models --------------------------------------
 
 # approximate standard error is correct
@@ -277,3 +292,49 @@ expect_equal(res.norm$lower, ci.norm[1], tol = 1e-05)   # lower limit
 expect_equal(res.t$lower, ci.t[1], tol = 1e-05)         # lower limit
 expect_equal(res.norm$upper, ci.norm[2], tol = 1e-05)   # upper limit
 expect_equal(res.t$upper, ci.t[2], tol = 1e-05)         # upper limit
+
+# Models fit inside a function must not require their training data to be
+# reachable from invest()'s caller (regression tests for issues #41, #42,
+# #45: .data was reconstructed via eval(object$call$data, parent.frame()),
+# which fails once the fitting function's local environment is gone)
+
+# #42: glm fit with a data= argument that's a local variable
+fit_glm_in_fun <- function() {
+  dat <- beetle
+  glm(cbind(y, n-y) ~ ldose, data = dat, family = binomial(link = "cloglog"))
+}
+mod42 <- fit_glm_in_fun()
+mod42_ref <- glm(cbind(y, n-y) ~ ldose, data = beetle, family = binomial(link = "cloglog"))
+expect_silent(res42 <- invest(mod42, y0 = 0.5))
+expect_equal(res42$estimate, invest(mod42_ref, y0 = 0.5)$estimate, tol = 1e-05)
+
+# #41: glm fit with no data= argument at all (variables taken from the
+# environment directly)
+fit_glm_no_data <- function() {
+  x1_ <- rep(1:10, each = 3)
+  y1_ <- rbinom(30, 1, plogis(x1_ - 5))
+  glm(y1_ ~ x1_, family = binomial)
+}
+mod41 <- fit_glm_no_data()
+expect_silent(res41 <- invest(mod41, y0 = 0.5, interval = "none"))
+expect_true(is.numeric(res41))
+
+# #45: nls fit with a data= argument that's a local variable
+fit_nls_in_fun <- function() {
+  dat <- nasturtium
+  nls(weight ~ theta1/(1 + exp(theta2 + theta3 * log(conc))),
+      start = list(theta1 = 1000, theta2 = -1, theta3 = 1), data = dat)
+}
+mod45 <- fit_nls_in_fun()
+expect_silent(res45 <- invest(mod45, y0 = c(309, 296, 419), interval = "inversion"))
+expect_equal(res45$estimate, invest(nas_nls, y0 = c(309, 296, 419), interval = "inversion")$estimate,
+             tol = 1e-05)
+
+# lm fit with a data= argument that's a local variable
+fit_lm_in_fun <- function() {
+  dat <- crystal
+  lm(weight ~ time, data = dat)
+}
+mod_lm_local <- fit_lm_in_fun()
+expect_silent(res_lm_local <- invest(mod_lm_local, y0 = 5))
+expect_equal(res_lm_local$estimate, invest(crystal_lm, y0 = 5)$estimate, tol = 1e-05)

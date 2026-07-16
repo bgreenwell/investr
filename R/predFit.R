@@ -271,11 +271,14 @@ predFit.nls <- function(object, newdata, se.fit = FALSE,
     }
   }
 
-  # Prediction data
+  # Prediction data. Use the environment captured by the formula at fit
+  # time, rather than parent.frame() here, which is robust to the model
+  # having been fit inside a function (issue #45).
   newdata <- if (missing(newdata)) {
-    eval(stats::getCall(object)$data, envir = parent.frame()) 
+    eval(stats::getCall(object)$data,
+         envir = environment(stats::formula(object)))
   } else {
-    as.data.frame(newdata) 
+    as.data.frame(newdata)
   }
   if (is.null(newdata)) {
     stop("No data available for predictions.", call. = FALSE)

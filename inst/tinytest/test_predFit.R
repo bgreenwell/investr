@@ -179,3 +179,20 @@ pred53 <- predFit(model53, se.fit = TRUE)
 expect_equal(pred53$fit, unname(predFit(model53)))
 expect_true(all(is.finite(pred53$se.fit)))
 expect_equal(length(pred53$se.fit), nrow(d53))
+
+# predFit() works for an nls model fit inside a function, without requiring
+# the training data to be reachable from predFit()'s caller (regression
+# test for issue #45: newdata was reconstructed via
+# eval(getCall(object)$data, parent.frame()), which fails once the fitting
+# function's local environment is gone)
+
+fit_nls_in_fun45 <- function() {
+  dat <- DNase1
+  nls(density ~ Asym/(1 + exp((xmid - log(conc))/scal)), data = dat,
+      start = list(Asym = 3, xmid = 0, scal = 1))
+}
+mod45 <- fit_nls_in_fun45()
+
+expect_silent(pred45 <- predFit(mod45, se.fit = TRUE, interval = "confidence"))
+expect_equal(pred45$fit, DNase1.conf$fit, tol = 1e-06)
+expect_equal(pred45$se.fit, DNase1.conf$se.fit, tol = 1e-06)

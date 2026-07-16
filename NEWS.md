@@ -8,6 +8,10 @@
 
 * Fixed `predFit()` with `se.fit = TRUE` failing on `"nls"` models with more than one predictor variable (#53).
 
+* Fixed `invest()` and `predFit()` failing when the fitted model was created inside a function, or with no `data` argument at all; training/prediction data is now reconstructed via `model.frame()` or the environment captured by the model's formula, instead of evaluating `object$call$data` in the caller's frame (#41, #42, #45).
+
+* `invest()` now validates that `newdata` columns have classes (and, for factors, levels) compatible with the fitted model's training data, rather than failing with a confusing downstream error or silently returning a nonsensical result (#36).
+
 # investr 1.4.2
 
 * Fixed the output of `predFit()` in situations whenever standard errors and confidence/predictions bands are both requested.
