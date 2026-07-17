@@ -1,6 +1,6 @@
 # Changelog
 
-## investr (development version)
+## investr 1.5.0
 
 - New
   [`invest()`](https://bgreenwell.github.io/investr/reference/invest.md)

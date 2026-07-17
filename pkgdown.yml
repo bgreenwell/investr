@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   articles/introduction: introduction.html
-last_built: 2026-07-17T17:37Z
+last_built: 2026-07-17T18:01Z
 urls:
   reference: https://bgreenwell.github.io/investr/reference
   article: https://bgreenwell.github.io/investr/articles

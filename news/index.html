@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">investr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="investr-development-version">investr (development version)<a class="anchor" aria-label="anchor" href="#investr-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.5.0" id="investr-150">investr 1.5.0<a class="anchor" aria-label="anchor" href="#investr-150"></a></h2>
 <ul><li><p>New <code><a href="../reference/invest.html">invest()</a></code> methods for <code>"survfit"</code> and <code>"Surv"</code> objects (from the survival package) estimate the survival time at which a Kaplan-Meier curve reaches a given survival probability (e.g., median survival time), with confidence limits obtained by inverting the curve’s pointwise confidence band (<a href="https://github.com/bgreenwell/investr/issues/30" class="external-link">#30</a>).</p></li>
 <li><p><code><a href="../reference/invest.html">invest()</a></code> results with <code>interval = "percentile"</code> now also inherit from class <code>"boot"</code>, so they work directly with functions from the boot package such as <code><a href="https://rdrr.io/pkg/boot/man/boot.ci.html" class="external-link">boot::boot.ci()</a></code> (<a href="https://github.com/bgreenwell/investr/issues/32" class="external-link">#32</a>).</p></li>
 <li><p><code>nlme</code> moved from Imports to Suggests; <code>"lme"</code>-specific code paths now check for it with <code><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace()</a></code> (<a href="https://github.com/bgreenwell/investr/issues/47" class="external-link">#47</a>).</p></li>
