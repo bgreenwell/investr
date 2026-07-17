@@ -5,11 +5,20 @@ template:
 
 home:
   title: investr — Inverse Estimation in R
+  links:
+  - text: R Journal article (the package vignette)
+    href: https://journal.r-project.org/archive/2014/RJ-2014-009/index.html
 
 navbar:
   structure:
     left: [intro, reference, articles, news]
     right: [search, github]
+
+articles:
+- title: Vignettes
+  navbar: ~
+  contents:
+  - articles/introduction
 
 reference:
 - title: Inverse estimation

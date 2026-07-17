@@ -12,3 +12,5 @@
 ^pkgdown$
 ^docs$
 ^\.github$
+^vignettes/articles$
+^vignettes/.*-concordance\.tex$

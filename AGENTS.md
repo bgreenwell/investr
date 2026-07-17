@@ -104,4 +104,11 @@ GitHub Actions (r-lib/actions v2): R-CMD-check + test-coverage on pushes/PRs
 to main and devel; pkgdown builds from **main only** and deploys to
 `gh-pages` (served at https://bgreenwell.github.io/investr/). The vignette
 (`vignettes/introduction.Rnw`) is a legacy Sweave/LaTeX document tied to the
-2014 R Journal article — it is intentionally not being converted to Rmd.
+2014 R Journal article — it is intentionally not being converted to Rmd, so
+R-CMD-check installs TinyTeX to rebuild it. pkgdown can't render .Rnw
+vignettes, so the site gets it via a committed static asset: the compiled
+PDF lives at `pkgdown/assets/articles/introduction.pdf` and
+`vignettes/articles/introduction.Rmd` (a pkgdown-only article, excluded
+from the package tarball via .Rbuildignore) embeds and links it. If the
+.Rnw ever changes, rebuild the PDF (`tools::buildVignette()` with the
+vignettes/ .sty/.bib/figure files alongside) and recommit the asset.
