@@ -1,7 +1,7 @@
 Package: investr
 Type: Package
 Title: Inverse Estimation/Calibration Functions
-Version: 1.4.2.9000
+Version: 1.5.0
 Authors@R: person(c("Brandon", "M."), family = "Greenwell",
     email = "greenwell.brandon@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-8120-0084"))

@@ -1,4 +1,4 @@
-# investr (development version)
+# investr 1.5.0
 
 * New `invest()` methods for `"survfit"` and `"Surv"` objects (from the survival package) estimate the survival time at which a Kaplan-Meier curve reaches a given survival probability (e.g., median survival time), with confidence limits obtained by inverting the curve's pointwise confidence band (#30).
 
