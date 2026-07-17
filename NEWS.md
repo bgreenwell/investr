@@ -1,3 +1,23 @@
+# investr (development version)
+
+* New `invest()` methods for `"survfit"` and `"Surv"` objects (from the survival package) estimate the survival time at which a Kaplan-Meier curve reaches a given survival probability (e.g., median survival time), with confidence limits obtained by inverting the curve's pointwise confidence band (#30).
+
+* `invest()` results with `interval = "percentile"` now also inherit from class `"boot"`, so they work directly with functions from the boot package such as `boot::boot.ci()` (#32).
+
+* `nlme` moved from Imports to Suggests; `"lme"`-specific code paths now check for it with `requireNamespace()` (#47).
+
+* Fixed `calibrate.lm()` silently mishandling models with `poly()`-transformed predictors; it now reads the predictor from the model frame and errors informatively instead (#48).
+
+* Fixed the formula for `g` in the inversion-interval vignette, which had been broken by a regression in a prior "typo fix" (#51).
+
+* Fixed `predFit()` with `se.fit = TRUE` failing on `"nls"` models with more than one predictor variable (#53).
+
+* Fixed `invest()` and `predFit()` failing when the fitted model was created inside a function, or with no `data` argument at all; training/prediction data is now reconstructed via `model.frame()` or the environment captured by the model's formula, instead of evaluating `object$call$data` in the caller's frame (#41, #42, #45).
+
+* `invest()` now validates that `newdata` columns have classes (and, for factors, levels) compatible with the fitted model's training data, rather than failing with a confusing downstream error or silently returning a nonsensical result (#36).
+
+* The "Use plotFit for guidance" hint on a failed confidence-limit search no longer appears for multi-predictor `lm`/`glm` models, since `plotFit()` doesn't support more than one predictor variable (#35).
+
 # investr 1.4.2
 
 * Fixed the output of `predFit()` in situations whenever standard errors and confidence/predictions bands are both requested.

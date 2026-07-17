@@ -51,84 +51,85 @@ predFit(object, ...)
 \item{object}{An object that inherits from class \code{"lm"}, \code{"glm"},
 \code{"nls"}, or \code{"lme"}.}
 
-\item{...}{Additional optional arguments. At present, no optional arguments 
+\item{...}{Additional optional arguments. At present, no optional arguments
 are used.}
 
-\item{newdata}{An optional data frame in which to look for variables with 
+\item{newdata}{An optional data frame in which to look for variables with
 which to predict. If omitted, the fitted values are used.}
 
-\item{se.fit}{A logical vaue indicating if standard errors are required. 
+\item{se.fit}{A logical vaue indicating if standard errors are required.
 Default is \code{FALSE}.}
 
-\item{interval}{Type of interval to be calculated. Can be one of "none" 
+\item{interval}{Type of interval to be calculated. Can be one of "none"
 (default), "confidence", or "prediction". Default is \code{"none"}.}
 
-\item{level}{A numeric scalar between 0 and 1 giving the confidence level for 
+\item{level}{A numeric scalar between 0 and 1 giving the confidence level for
 the intervals (if any) to be calculated. Default is \code{0.95}.}
 
 \item{adjust}{A logical value indicating if an adjustment should be made to
-the critical value used in calculating the confidence interval. This is 
+the critical value used in calculating the confidence interval. This is
 useful for when the calibration curve is to be used multiple, say k, times.
 Default is \code{FALSE}.}
 
-\item{k}{The number times the calibration curve is to be used for computing 
-a confidence/prediction interval. Only needed when 
+\item{k}{The number times the calibration curve is to be used for computing
+a confidence/prediction interval. Only needed when
 \code{adjust = "Bonferroni"}.}
 
-\item{type}{Character string specifying the type of prediction. Current 
-options are \code{type = "link"} (the default) and 
+\item{type}{Character string specifying the type of prediction. Current
+options are \code{type = "link"} (the default) and
 \code{type = "response"}.}
 }
 \value{
-If \code{se.fit = FALSE}, then \code{predFit()} returns a vector of 
-predictions or a matrix of predictions and bounds with column names 
-\code{fit}, \code{lwr}, and \code{upr} if \code{interval} is not 
+If \code{se.fit = FALSE}, then \code{predFit()} returns a vector of
+predictions or a matrix of predictions and bounds with column names
+\code{fit}, \code{lwr}, and \code{upr} if \code{interval} is not
 \code{"none"}. (This function is more so meant for internal use.)
 
-If \code{se.fit = TRUE}, then a list with the following components is 
+If \code{se.fit = TRUE}, then a list with the following components is
 returned:
 
 \itemize{
-  
-  \item \code{fit} a vector or matrix as described above;
-  
-  \item \code{se.fit} a vector containing the standard errors of the 
-  predicted means;
-  
-  \item \code{residual.scale} the residual standard deviations;
-  
-  \item \code{df} the residual degrees of freedom.
-  
+
+\item \code{fit} a vector or matrix as described above;
+
+\item \code{se.fit} a vector containing the standard errors of the
+predicted means;
+
+\item \code{residual.scale} the residual standard deviations;
+
+\item \code{df} the residual degrees of freedom.
+
 }
 }
 \description{
-Generic prediction method for various types of fitted models. \code{predFit} 
-can be used to obtain standard errors of fitted values and 
-adjusted/unadjusted confidence/prediction intervals for objects of class 
+Generic prediction method for various types of fitted models. \code{predFit}
+can be used to obtain standard errors of fitted values and
+adjusted/unadjusted confidence/prediction intervals for objects of class
 \code{"lm"}, \code{"nls"}, and \code{"glm"}.
 }
 \details{
-Confidence and prediction intervals for linear models (i.e., \code{"lm"} 
-objects) are obtained according to the usual formulas. Nonlinear and 
-generalized linear models (i.e., \code{"nls"} and \code{"glm"} objects), on 
-the other hand, rely on Taylor-series approximations for the standard errors 
-used in forming the intervals. Approximate standard errors for the fitted 
-values in linear mixed-effects models (i.e., \code{"lme"} objects) can also 
-be computed; however, these rely on the approximate variance-covariance 
+Confidence and prediction intervals for linear models (i.e., \code{"lm"}
+objects) are obtained according to the usual formulas. Nonlinear and
+generalized linear models (i.e., \code{"nls"} and \code{"glm"} objects), on
+the other hand, rely on Taylor-series approximations for the standard errors
+used in forming the intervals. Approximate standard errors for the fitted
+values in linear mixed-effects models (i.e., \code{"lme"} objects) can also
+be computed; however, these rely on the approximate variance-covariance
 matrix of the fixed-effects estimates and often under estimate the true
-standard error. More accurate standard errors can be obtained using the 
-parametric bootstrap; see \code{\link[lme4]{bootMer}} for details.
+standard error. More accurate standard errors can be obtained using the
+parametric bootstrap; see the \code{bootMer} function in the \pkg{lme4} package
+for details.
 
 For linear and nonlinear models, it is possible to request \emph{adjusted}
-confidence or prediction intervals using the Bonferroni method 
-(\code{adjust = "Bonferroni"}) or Scheffe's method 
-(\code{adjust = "Scheffe"}). For the Bonferroni adjustment, you must specify 
-a value for \code{k}, the number of intervals for which the coverage is to 
-hold simultaneously. For the Scheffe adjustment, specifying a value for 
-\code{k} is only required when \code{interval = "prediction"}; if 
-\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
+confidence or prediction intervals using the Bonferroni method
+(\code{adjust = "Bonferroni"}) or Scheffe's method
+(\code{adjust = "Scheffe"}). For the Bonferroni adjustment, you must specify
+a value for \code{k}, the number of intervals for which the coverage is to
+hold simultaneously. For the Scheffe adjustment, specifying a value for
+\code{k} is only required when \code{interval = "prediction"}; if
+\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number
 of regression parameters. For example, calling \code{plotFit} on \code{"lm"}
-objects with \code{interval = "confidence"} and \code{adjust = "Scheffe"} 
+objects with \code{interval = "confidence"} and \code{adjust = "Scheffe"}
 will plot the Working-Hotelling band.
 }
 \examples{

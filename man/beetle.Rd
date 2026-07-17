@@ -8,7 +8,7 @@
 A data frame with 8 rows and 3 columns.
 }
 \source{
-Dobson, A. (2002) \emph{An Introduction to Generalized Linear Models}. 
+Dobson, A. (2002) \emph{An Introduction to Generalized Linear Models}.
 Chapman & Hall/CRC.
 }
 \description{
@@ -17,9 +17,9 @@ to the insecticide carbon disulphide at eight different concentrations.
 }
 \details{
 \itemize{
-  \item \code{ldose} Log dose of carbon disulphide.
-  \item \code{y} Number of beetles subjected to insecticide.
-  \item \code{n} Number of beetles killed.
+\item \code{ldose} Log dose of carbon disulphide.
+\item \code{y} Number of beetles subjected to insecticide.
+\item \code{n} Number of beetles killed.
 }
 }
 \keyword{datasets}

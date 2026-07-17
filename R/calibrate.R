@@ -1,26 +1,26 @@
 #' Calibration for the simple linear regression model
 #' 
-#' The function \code{calibrate} computes the maximum likelihood estimate and a
+#' The function `calibrate` computes the maximum likelihood estimate and a
 #' condfidence interval for the unknown predictor value that corresponds to an 
 #' observed value of the response (or vector thereof) or specified value of the 
 #' mean response. See the reference listed below for more details.
 #'  
 #' @param object A matrix, list, data frame, or object that inherits from class 
-#' \code{\link[stats]{lm}}.
+#' [stats::lm()].
 #' 
-#' @param formula A formula of the form \code{y ~ x}.
+#' @param formula A formula of the form `y ~ x`.
 #' 
 #' @param data an optional data frame, list or environment (or object coercible 
-#' by \code{as.data.frame} to a data frame) containing the variables in the 
+#' by `as.data.frame` to a data frame) containing the variables in the 
 #' model. If not found in data, the variables are taken from 
-#' \code{environment(formula)}, typically the environment from which 
-#' \code{\link[stats]{lm}} was called. 
+#' `environment(formula)`, typically the environment from which 
+#' [stats::lm()] was called. 
 #' 
 #' @param subset An optional vector specifying a subset of observations to be 
 #' used in the fitting process.
 #' 
 #' @param na.action a function which indicates what should happen when the data 
-#' contain \code{NA}s. 
+#' contain `NA`s. 
 #' 
 #' @param y0 The value of the observed response(s) or specified value of the
 #' mean response.
@@ -31,36 +31,36 @@
 #' the interval to be calculated. 
 #' 
 #' @param mean.response Logicial indicating whether confidence intervals should 
-#' correspond to an observed response(s) (\code{FALSE}) or a specified value of 
-#' the mean response (\code{TRUE}). Default is \code{FALSE}.
+#' correspond to an observed response(s) (`FALSE`) or a specified value of 
+#' the mean response (`TRUE`). Default is `FALSE`.
 #' 
 #' @param adjust A logical value indicating if an adjustment should be made to
 #' the critical value used in constructing the confidence interval. This useful 
 #' when the calibration curve is to be used k > 0 times.
 #' 
 #' @param k The number of times the calibration curve is to be used for 
-#' computing a confidence interval. Only needed when \code{adjust = TRUE}.
+#' computing a confidence interval. Only needed when `adjust = TRUE`.
 #' 
 #' @param ... Additional optional arguments. At present, no optional arguments 
 #' are used.
 #'            
-#' @return An object of class \code{"invest"} containing the following 
+#' @return An object of class `"invest"` containing the following 
 #'         components:
 #' \itemize{
-#'   \item \code{estimate} The estimate of x0.
-#'   \item \code{lwr} The lower confidence limit for x0.
-#'   \item \code{upr} The upper confidence limit for x0.
-#'   \item \code{se} An estimate of the standard error (Wald interval only).
-#'   \item \code{interval} The method used for calculating \code{lower} and 
-#'                   \code{upper} (only used by \code{print} method).
+#'   \item `estimate` The estimate of x0.
+#'   \item `lwr` The lower confidence limit for x0.
+#'   \item `upr` The upper confidence limit for x0.
+#'   \item `se` An estimate of the standard error (Wald interval only).
+#'   \item `interval` The method used for calculating `lower` and 
+#'                   `upper` (only used by `print` method).
 #' }
 #' 
 #' @references 
 #' Graybill, F. A., and Iyer, H. K. (1994)
-#' \emph{Regression analysis: Concepts and Applications}. Duxbury Press.
+#' *Regression analysis: Concepts and Applications*. Duxbury Press.
 #' 
 #' Miller, R. G. (1981)
-#' \emph{Simultaneous Statistical Inference}. Springer-Verlag.
+#' *Simultaneous Statistical Inference*. Springer-Verlag.
 #' 
 #' @rdname calibrate
 #' 
@@ -68,10 +68,10 @@
 #' 
 #' @export
 #'
-#' @note The \code{\link{invest}} function is more general, but is based on 
+#' @note The [invest()] function is more general, but is based on 
 #' numerical techniques to find the solution. When the underlying model is that 
 #' of the simple linear regression model with normal errors, closed-form 
-#' expressions exist which are utilized by the \code{calibrate} function.
+#' expressions exist which are utilized by the `calibrate` function.
 #' 
 #' @examples
 #' #
@@ -292,13 +292,17 @@ calibrate.lm <- function(object, y0, interval = c("inversion", "Wald", "none"),
     stop(paste(deparse(substitute(object)), "must contain an intercept."))
   }
   
-  # Extract x values and y values from model frame
+  # Extract x values and y values from model frame. Read x directly from the
+  # model frame rather than model.matrix(), which expands terms like
+  # poly(x, degree) into multiple (orthogonal polynomial) columns; a
+  # non-vector column here means the predictor isn't a simple untransformed
+  # term, which calibrate() doesn't support (issue #48).
   mf <- stats::model.frame(object)
-  if (ncol(mf) != 2) {
+  if (ncol(mf) != 2 || !is.vector(mf[, 2L])) {
     stop("calibrate only works for the simple linear regression model.")
-  } 
-  x <- stats::model.matrix(object)[, 2]
-  y <- stats::model.response(mf)
+  }
+  x <- mf[, 2L]
+  y <- mf[, 1L]
 
   # Eta - mean response or mean of observed respone values
   eta <- mean(y0)  # mean of new observations

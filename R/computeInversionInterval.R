@@ -34,31 +34,32 @@ computeInversionInterval.lm <- function(object, multi, x0.name, var.pooled, m,
                             extendInt = extendInt, tol = tol, 
                             maxiter = maxiter)$root, silent = TRUE)
   
-  # Provide (informative) error message if confidence limits not found
+  # Provide (informative) error message if confidence limits not found.
+  # plotFit() only supports a single predictor variable, so suggesting it
+  # for guidance is misleading once there's more than one (issue #35).
+  hint <- if (multi) "" else " Use plotFit for guidance."
   if (inherits(lwr, "try-error")) {
-    stop(paste("Lower confidence limit not found in the search interval (", 
-               lower, ", ", upper, 
-               "). ", "Try tweaking the values of lower and upper. ", 
-               "Use plotFit for guidance.", sep = ""), 
+    stop(paste0("Lower confidence limit not found in the search interval (",
+                lower, ", ", upper,
+                "). Try tweaking the values of lower and upper.", hint),
          call. = FALSE)
   }
   if (inherits(upr, "try-error")) {
-    stop(paste("Upper confidence limit not found in the search interval (", 
-               lower, ", ", upper, 
-               "). ", "Try tweaking the values of lower and upper. ", 
-               "Use plotFit for guidance.", sep = ""), 
+    stop(paste0("Upper confidence limit not found in the search interval (",
+                lower, ", ", upper,
+                "). Try tweaking the values of lower and upper.", hint),
          call. = FALSE)
   }
-  
+
   # Return list of results
-  list("estimate" = x0.est, "lower" = lwr, "upper" = upr, 
+  list("estimate" = x0.est, "lower" = lwr, "upper" = upr,
        "interval" = "inversion")
-  
+
 }
-  
+
 
 #' @keywords internal
-computeInversionInterval.glm <- function(object, multi, x0.name, eta, crit, 
+computeInversionInterval.glm <- function(object, multi, x0.name, eta, crit,
                                          x0.est, mean.response, newdata, lower, 
                                          upper, extendInt, tol, maxiter) {
   
@@ -82,26 +83,27 @@ computeInversionInterval.glm <- function(object, multi, x0.name, eta, crit,
                             extendInt = extendInt, tol = tol, 
                             maxiter = maxiter)$root, silent = TRUE)
   
-  # Provide (informative) error message if confidence limits not found
+  # Provide (informative) error message if confidence limits not found.
+  # plotFit() only supports a single predictor variable, so suggesting it
+  # for guidance is misleading once there's more than one (issue #35).
+  hint <- if (multi) "" else " Use plotFit for guidance."
   if (inherits(lwr, "try-error")) {
-    stop(paste("Lower confidence limit not found in the search interval (", 
-               lower, ", ", upper, 
-               "). ", "Try tweaking the values of lower and upper. ", 
-               "Use plotFit for guidance.", sep = ""), 
+    stop(paste0("Lower confidence limit not found in the search interval (",
+                lower, ", ", upper,
+                "). Try tweaking the values of lower and upper.", hint),
          call. = FALSE)
   }
   if (inherits(upr, "try-error")) {
-    stop(paste("Upper confidence limit not found in the search interval (", 
-               lower, ", ", upper, 
-               "). ", "Try tweaking the values of lower and upper. ", 
-               "Use plotFit for guidance.", sep = ""), 
+    stop(paste0("Upper confidence limit not found in the search interval (",
+                lower, ", ", upper,
+                "). Try tweaking the values of lower and upper.", hint),
          call. = FALSE)
   }
-  
+
   # Store results in a list
-  res <- list("estimate" = x0.est, "lower" = lwr, "upper" = upr, 
+  res <- list("estimate" = x0.est, "lower" = lwr, "upper" = upr,
               "interval" = "inversion")
-  
+
 }
 
 

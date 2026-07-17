@@ -38,40 +38,40 @@ plotFit(object, ...)
 )
 }
 \arguments{
-\item{object}{A fitted model object. Typically, an object that inherits from 
-class \code{\link[stats]{lm}}, \code{\link[stats]{glm}}, or 
-\code{\link[stats]{nls}} (but others may work too).}
+\item{object}{A fitted model object. Typically, an object that inherits from
+class \code{\link[stats:lm]{stats::lm()}}, \code{\link[stats:glm]{stats::glm()}}, or
+\code{\link[stats:nls]{stats::nls()}} (but others may work too).}
 
-\item{...}{Additional optional arguments passed on to 
-\code{\link{plot}}.}
+\item{...}{Additional optional arguments passed on to
+\code{\link[=plot]{plot()}}.}
 
-\item{type}{The type of prediction required. The default is on the scale of 
-the response variable; the alternative \code{"link"} is on the scale of the 
-linear predictor. This option is only used when plotting 
-\code{\link[stats]{glm}} objects.}
+\item{type}{The type of prediction required. The default is on the scale of
+the response variable; the alternative \code{"link"} is on the scale of the
+linear predictor. This option is only used when plotting
+\code{\link[stats:glm]{stats::glm()}} objects.}
 
-\item{interval}{A character string indicating if a prediction band, 
+\item{interval}{A character string indicating if a prediction band,
 confidence band, both, or none should be plotted.}
 
 \item{level}{The desired confidence level.}
 
 \item{data}{An optional data frame containing the variables in the model.}
 
-\item{adjust}{A character string indicating the type of adjustment (if any) 
+\item{adjust}{A character string indicating the type of adjustment (if any)
 to make to the confidence/prediction bands.}
 
-\item{k}{An integer to be used in computing the critical value for the 
+\item{k}{An integer to be used in computing the critical value for the
 confidence/prediction bands. Only needed when \code{adjust = "Bonferroni"},
 or when \code{adjust = "Scheffe"} and \code{interval = "prediction"}.}
 
 \item{shade}{A logical value indicating if the band should be shaded.}
 
 \item{extend.range}{A logical value indicating if the fitted regression line
-and bands (if any) should extend to the edges of the plot. Default is 
+and bands (if any) should extend to the edges of the plot. Default is
 \code{FALSE}.}
 
-\item{hide}{A logical value indicating if the fitted model should be plotted 
-on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is 
+\item{hide}{A logical value indicating if the fitted model should be plotted
+on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is
 \code{TRUE}.}
 
 \item{col.conf}{Shade color for confidence band.}
@@ -111,29 +111,29 @@ on top of the points (\code{FALSE}) or behind them (\code{TRUE}). Default is
 No return value (called for side effects).
 }
 \description{
-Generic function for plotting predictions from various types of fitted 
-models. \code{plotFit} currently supports objects of class 
-\code{\link[stats]{lm}}, \code{\link[stats]{glm}}, and 
-\code{\link[stats]{nls}}. A default method also exists which may be used for 
-plotting the fitted mean response from other model fits (e.g., 
-\code{\link[MASS]{lqs}} and \code{\link[MASS]{rlm}} from the \strong{MASS} 
+Generic function for plotting predictions from various types of fitted
+models. \code{plotFit} currently supports objects of class
+\code{\link[stats:lm]{stats::lm()}}, \code{\link[stats:glm]{stats::glm()}}, and
+\code{\link[stats:nls]{stats::nls()}}. A default method also exists which may be used for
+plotting the fitted mean response from other model fits (e.g.,
+\code{\link[MASS:lqs]{MASS::lqs()}} and \code{\link[MASS:rlm]{MASS::rlm()}} from the \strong{MASS}
 package).
 }
 \note{
 By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
-For simultaneous intervals, use \code{adjust = "Bonferroni"} or 
-\code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a 
-value for \code{k}, the number of intervals for which the coverage is to hold 
-simultaneously. For the Scheffe adjustment, specifying a value for \code{k} 
-is only required when \code{interval = "prediction"}; if 
-\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number 
-of regression parameters. For example, if \code{object} is a simple linear 
-regression model, then calling \code{plotFit} with 
-\code{interval = "confidence"} and \code{adjust = "Scheffe"} will plot the 
+For simultaneous intervals, use \code{adjust = "Bonferroni"} or
+\code{adjust = "Scheffe"}. For the Bonferroni adjustment, you must specify a
+value for \code{k}, the number of intervals for which the coverage is to hold
+simultaneously. For the Scheffe adjustment, specifying a value for \code{k}
+is only required when \code{interval = "prediction"}; if
+\code{interval = "confidence"}, \code{k} is set equal to \eqn{p}, the number
+of regression parameters. For example, if \code{object} is a simple linear
+regression model, then calling \code{plotFit} with
+\code{interval = "confidence"} and \code{adjust = "Scheffe"} will plot the
 \href{https://en.wikipedia.org/wiki/Working-Hotelling_procedure}{Working-Hotelling band}.
 
 Confidence/prediction bands for nonlinear regression (i.e., objects of class
-\code{\link[stats]{nls}}) are based on the linear approximation described in 
+\code{\link[stats:nls]{stats::nls()}}) are based on the linear approximation described in
 Bates & Watts (2007).
 }
 \examples{
@@ -150,11 +150,11 @@ plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE,
 Bates, D. M., and Watts, D. G. (2007)
 \emph{Nonlinear Regression Analysis and its Applications}. Wiley.
 
-Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche, 
-Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015). 
-A Toolbox for Nonlinear Regression in R: The Package nlstools. 
-\emph{Journal of Statistical Software}, \bold{66}(5), 1-21.
+Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche,
+Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015).
+A Toolbox for Nonlinear Regression in R: The Package nlstools.
+\emph{Journal of Statistical Software}, \strong{66}(5), 1-21.
 }
 \seealso{
-\code{\link[nlstools]{plotfit}}
+The \code{plotfit} function in the \pkg{nlstools} package.
 }

@@ -17,8 +17,8 @@ water samples.
 }
 \details{
 \itemize{
-  \item \code{actual} True amount of arsenic present.
-  \item \code{measured} Measured amount of arsenic present.
+\item \code{actual} True amount of arsenic present.
+\item \code{measured} Measured amount of arsenic present.
 }
 }
 \keyword{datasets}
