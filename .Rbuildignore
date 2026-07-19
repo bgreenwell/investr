@@ -14,3 +14,5 @@
 ^\.github$
 ^vignettes/articles$
 ^vignettes/.*-concordance\.tex$
+^revdep$
+^cran-comments\.md$
