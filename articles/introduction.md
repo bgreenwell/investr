@@ -7,7 +7,7 @@ package in its original PDF form. It is embedded below; you can also
 [download the PDF
 directly](https://bgreenwell.github.io/investr/articles/introduction.pdf)
 or read the [published
-version](https://journal.r-project.org/archive/2014/RJ-2014-009/index.html)
+version](https://journal.r-project.org/articles/RJ-2014-009/index.html)
 on the R Journal website. In R, use
 `vignette("introduction", package = "investr")`.
 

@@ -9,7 +9,7 @@ unknown value of the explanatory variable.
 ## Details
 
 A detailed [introduction to
-investr](https://journal.r-project.org/archive/2014/RJ-2014-009/index.html)
+investr](https://journal.r-project.org/articles/RJ-2014-009/index.html)
 has been published in The R Journal: "investr: An R Package for Inverse
 Estimation." You can track development at
 <https://github.com/bgreenwell/investr>. To report bugs or issues,

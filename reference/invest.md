@@ -258,7 +258,7 @@ thesis, Air Force Institute of Technology. URL
 
 Greenwell, B. M., and Schubert Kabban, C. M. (2014). investr: An R
 Package for Inverse Estimation. *The R Journal*, **6**(1), 90–100. URL
-http://journal.r-project.org/archive/2014-1/greenwell-kabban.pdf.
+<https://doi.org/10.32614/RJ-2014-009>.
 
 Graybill, F. A., and Iyer, H. K. (1994). *Regression analysis: Concepts
 and Applications*. Duxbury Press.

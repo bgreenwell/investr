@@ -2,6 +2,13 @@
 
 ## investr 1.5.0
 
+- Fixed several non-canonical/moved URLs flagged by CRAN’s incoming
+  checks: the vignette’s `\CRANpkg` macro generated
+  `http://CRAN.R-project.org/...` links instead of `https://`, a few
+  references had moved to new URLs, and the vignette and package docs
+  still referenced a stale GitHub username. Also excluded a stray
+  top-level `.git` from the built package.
+
 - New
   [`invest()`](https://bgreenwell.github.io/investr/reference/invest.md)
   methods for `"survfit"` and `"Surv"` objects (from the survival

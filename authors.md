@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/bgreenwell/investr/blob/v1.5.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/bgreenwell/investr/blob/main/inst/CITATION)
 
 Brandon M. Greenwell and Christine M. Schubert Kabban (2014). investr:
 An R Package for Inverse Estimation. The R Journal, 6(1), 90-100. URL
