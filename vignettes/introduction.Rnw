@@ -41,12 +41,12 @@ There are three main functions available in the \pkg{investr} package:
   \item \code{invest};
   \item \code{plotFit}.
 \end{itemize}
-\code{calibrate} operates on objects of class \code{lm} and can only be used when the expectation function has the form $f(x_i; \boldsymbol{\beta}) = \beta_0 + \beta_1 x_i$ (i.e., the simple linear regression model), where closed-form solutions are available for calculating confidence intervals for $x_0$. For more complicated models (e.g., polynomial and nonlinear regression), closed-form expressions are usually not available and iterative techniques will be required. This is the purpose of the  function \code{invest}, which calculates the point estimate and confidence intervals for $x_0$ by calling the function \code{uniroot} from the \pkg{stats} package. The function \code{plotFit} produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). It can be used with single-predictor objects of class \code{lm} or \code{nls}; however, for objects of class \code{nls}, confidence/prediction bands are based on the linear approximation and can be misleading \citep[pg. 65]{bates-nonlinear-1988}. The development version of \pkg{investr} can be found on GitHub at \url{https://github.com/w108bmg/investr}.  To report bugs or issues, contact the main author or submit them to \url{https://github.com/w108bmg/investr/issues}.
+\code{calibrate} operates on objects of class \code{lm} and can only be used when the expectation function has the form $f(x_i; \boldsymbol{\beta}) = \beta_0 + \beta_1 x_i$ (i.e., the simple linear regression model), where closed-form solutions are available for calculating confidence intervals for $x_0$. For more complicated models (e.g., polynomial and nonlinear regression), closed-form expressions are usually not available and iterative techniques will be required. This is the purpose of the  function \code{invest}, which calculates the point estimate and confidence intervals for $x_0$ by calling the function \code{uniroot} from the \pkg{stats} package. The function \code{plotFit} produces a scatterplot of the data with fitted regression curve and the option to add confidence/prediction bands for the response (pointwise or adjusted). It can be used with single-predictor objects of class \code{lm} or \code{nls}; however, for objects of class \code{nls}, confidence/prediction bands are based on the linear approximation and can be misleading \citep[pg. 65]{bates-nonlinear-1988}. The development version of \pkg{investr} can be found on GitHub at \url{https://github.com/bgreenwell/investr}.  To report bugs or issues, contact the main author or submit them to \url{https://github.com/bgreenwell/investr/issues}.
 % and can easily be installed using the the \pkg{devtools} package \citep{hadley-devtools-2013}:
 %\begin{example}
 %  ## Install development version from GitHub
 %  install.packages("devtools")
-%  devtools::install_github(repo = "w108bmg/investr")
+%  devtools::install_github(repo = "bgreenwell/investr")
 %\end{example}
 %
 
@@ -287,7 +287,7 @@ The code for obtaining the standard error used in the Wald interval is slightly 
   ## Calculate standard error
   (se <- sqrt(grad %*% covmat %*% t(grad)))
 \end{example*}
-%The interested reader can easily view the package source code at the \href{https://github.com/w108bmg/investr}{GitHub development site} described earlier.
+%The interested reader can easily view the package source code at the \href{https://github.com/bgreenwell/investr}{GitHub development site} described earlier.
 
 \begin{figure}[htbp]
   \centering

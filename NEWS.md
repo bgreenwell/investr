@@ -1,4 +1,8 @@
+# investr (development version)
+
 # investr 1.5.0
+
+* Fixed several non-canonical/moved URLs flagged by CRAN's incoming checks: the vignette's `\CRANpkg` macro generated `http://CRAN.R-project.org/...` links instead of `https://`, a few references had moved to new URLs, and the vignette and package docs still referenced a stale GitHub username. Also excluded a stray top-level `.git` from the built package.
 
 * New `invest()` methods for `"survfit"` and `"Surv"` objects (from the survival package) estimate the survival time at which a Kaplan-Meier curve reaches a given survival probability (e.g., median survival time), with confidence limits obtained by inverting the curve's pointwise confidence band (#30).
 
