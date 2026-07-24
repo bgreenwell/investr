@@ -16,3 +16,4 @@
 ^vignettes/.*-concordance\.tex$
 ^revdep$
 ^cran-comments\.md$
+^\.git$
